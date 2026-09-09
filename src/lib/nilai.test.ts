@@ -116,9 +116,9 @@ describe('resc', () => {
     expect(resc(73, 0, 92, 80, 100)).toBeCloseTo(95.869565217391312, 10)
   })
 
-  it('mengembalikan batas atas band saat rentang sumber nol (workbook: #DIV/0!)', () => {
-    expect(resc(5, 3, 3, 80, 100)).toBe(100)
-    expect(resc(0, 0, 0, 78, 98)).toBe(98)
+  it('mengembalikan batas BAWAH band saat rentang sumber nol (workbook: #DIV/0!)', () => {
+    expect(resc(5, 3, 3, 80, 100)).toBe(80)
+    expect(resc(0, 0, 0, 78, 98)).toBe(78)
   })
 })
 
@@ -164,14 +164,14 @@ describe('rantai penuh terhadap lembar DafNil S 1', () => {
 
   it('menghitung min/maks kolom sama dengan baris kaki blok', () => {
     // Forf S 1 baris 36/37 untuk VIII A: maks 10 / 95 / 92, min 0 / 0 / 0
-    expect(peta.formatif[1]).toEqual([0, 10])
-    expect(peta.formatif[2]).toEqual([0, 95])
-    expect(peta.formatif[3]).toEqual([0, 92])
+    expect(peta.f0).toEqual([0, 10])
+    expect(peta.f1).toEqual([0, 95])
+    expect(peta.f2).toEqual([0, 92])
     // Sums S 1 baris 36/37: maks 100 / 100 / 85 / 10
-    expect(peta.lingkup[1]).toEqual([0, 100])
-    expect(peta.lingkup[2]).toEqual([0, 100])
-    expect(peta.lingkup[3]).toEqual([0, 85])
-    expect(peta.lingkup[4]).toEqual([0, 10])
+    expect(peta.lm0).toEqual([0, 100])
+    expect(peta.lm1).toEqual([0, 100])
+    expect(peta.lm2).toEqual([0, 85])
+    expect(peta.lm3).toEqual([0, 10])
   })
 
   it.each(fixture.siswa.map((s, i) => [i, s.nama] as const))(
@@ -321,16 +321,58 @@ describe('sub-formatif', () => {
   it('menghitung min/maks sekelas atas nilai turunan, bukan skor sub', () => {
     const kelas = denganSub(2, (i) => (i === 0 ? 80 : 40))
     // Rerata siswa 0 = 80, sisanya 40 -> rentang kolom F1 adalah 40..80.
-    expect(hitungBounds(kelas).formatif[1]).toEqual([40, 80])
+    expect(hitungBounds(kelas).f0).toEqual([40, 80])
+  })
+
+  /*
+   * Sub bernomor 1..n DI DALAM induknya dan mewarisi `jenis`-nya, jadi F1.2 dan
+   * F2 sama-sama ('formatif', 2). Pemuat data hanya mengurutkan dengan
+   * `order('urutan')`, sehingga baris yang seri bisa datang dalam urutan mana
+   * saja — dan versi lama bounds() memilih yang pertama ketemu. Bila yang
+   * kejemput sub yang masih kosong, rentang F2 jadi 0..0 dan SELURUH siswa
+   * terbaca di batas band, walau skor mentahnya jelas berbeda-beda.
+   */
+  it('tidak tertukar dengan sub yang urutannya bertabrakan', () => {
+    for (const subDiDepan of [false, true]) {
+      const kelas = denganSub(2, () => 0)
+      if (subDiDepan) {
+        kelas.komponen = [
+          ...kelas.komponen.filter((k) => k.indukId !== null),
+          ...kelas.komponen.filter((k) => k.indukId === null),
+        ]
+      }
+
+      // F2 (id f1, urutan 2) berisi skor yang berbeda-beda; F1.2 (urutan 2) kosong.
+      const peta = hitungBounds(kelas)
+      expect(peta.f1).toEqual([0, 95])
+
+      const konversi = hitungKelas(kelas).baris.map((b) => b.formatif[1].konversi)
+      expect(new Set(konversi).size).toBeGreaterThan(1)
+    }
+  })
+
+  it('memberi batas BAWAH band, bukan 100, untuk kolom yang belum diisi', () => {
+    const kelas = bangunKelas()
+    for (const s of kelas.siswa) kelas.skorKomponen[s.id].f0 = 0
+
+    const f1 = kelas.komponen.find((k) => k.id === 'f0')!
+    expect(hitungBounds(kelas).f0).toEqual([0, 0])
+    expect(hitungKelas(kelas).baris.map((b) => b.formatif[0].konversi)).toEqual(
+      kelas.siswa.map(() => f1.bandMin),
+    )
   })
 
   it('mengubah satu sub milik siswa lain menggeser konversi siswa ini', () => {
-    const kelas = denganSub(2, () => 50)
+    // Siswa 0 harus berdiri di puncak rentang, bukan di rentang nol: kolom yang
+    // seluruh siswanya bernilai sama sudah jatuh ke batas bawah band, jadi ia
+    // tidak bisa membuktikan apa pun soal pergeseran.
+    const kelas = denganSub(2, (i) => (i === 0 ? 80 : 50))
     const sebelum = hitungKelas(kelas).baris[0].formatif[0].konversi
 
     kelas.skorKomponen[kelas.siswa[2].id]['f0.1'] = 200
 
     const sesudah = hitungKelas(kelas).baris[0].formatif[0].konversi
+    expect(sebelum).toBe(100)
     expect(sesudah).toBeLessThan(sebelum)
   })
 

@@ -180,7 +180,7 @@ export default function TabelPadat({
           <KepalaBeku duaBaris />
 
           {grup.map((g) => {
-            const bd = hasil.bounds[jenis][g.kolom.urutan] ?? [0, 0];
+            const bd = hasil.bounds[g.kolom.id] ?? [0, 0];
             const bersub = g.anak.length > 0;
             return (
               <div
@@ -389,7 +389,7 @@ export default function TabelPadat({
             MAKS / MIN {kelas.sumberMinMaks === "kelas" ? "KELAS" : "ANGKATAN"}
           </div>
           {grup.map((g) => {
-            const bd = hasil.bounds[jenis][g.kolom.urutan] ?? [0, 0];
+            const bd = hasil.bounds[g.kolom.id] ?? [0, 0];
             return (
               <div
                 key={g.kolom.id}

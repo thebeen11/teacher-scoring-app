@@ -87,11 +87,16 @@ export type Rentang = readonly [number, number]
  *   (NA - NA MIN) x (NK MAX - NK MIN) : (NA MAX - NA MIN) + NK MIN
  *
  * Bila rentang sumber nol (semua siswa bernilai sama) pembagian menjadi nol.
- * Workbook menghasilkan #DIV/0! di situ; desain memilih mengembalikan batas
- * atas band, dan perilaku itu dipertahankan di sini.
+ * Workbook menghasilkan #DIV/0! di situ; di sini jatuhnya ke BATAS BAWAH band.
+ *
+ * Batas atas pernah dipakai dan itu keliru: kolom yang belum diisi sama sekali
+ * berentang 0..0, jadi seluruh siswa terbaca sempurna — RT F dan NA ikut
+ * terangkat oleh kolom yang bahkan belum dinilai, dan mengubah band minimum
+ * tidak mengubah apa pun karena hanya batas atas yang terpakai. Batas bawah
+ * membaca keadaan itu apa adanya: belum ada yang dibuktikan siapa pun.
  */
 export function resc(v: number, mn: number, mx: number, a: number, b: number): number {
-  if (mx === mn) return b
+  if (mx === mn) return a
   return ((v - mn) * (b - a)) / (mx - mn) + a
 }
 
@@ -155,19 +160,26 @@ export function butirMentah(kelas: Kelas, siswaId: string, asesmenId: string): B
  * `sumberMinMaks = 'sekolah'` -> seluruh kelas dalam grup (mapel + semester
  *                                sama), supaya nilai antar kelas sebanding.
  *
- * Kolom antar kelas dicocokkan berdasarkan (jenis, urutan), bukan id.
+ * Kolomnya diberikan langsung, bukan dicari: `urutan` TIDAK unik sekelas —
+ * sub bernomor 1..n di dalam induknya dan mewarisi `jenis`-nya, jadi F1.2 dan
+ * F2 sama-sama ('formatif', 2). Mencari dengan pasangan itu bisa mendarat di
+ * sub yang masih kosong, rentangnya jadi 0..0, dan seluruh kolom terbaca rata.
+ *
+ * Hanya kelas LAIN dalam grup yang masih perlu dicocokkan — di situ id memang
+ * berbeda — dan pencocokannya wajib menyaring kolom tingkat atas saja.
  */
-export function bounds(
-  kelas: Kelas,
-  jenis: JenisKomponen,
-  urutan: number,
-  grup: Kelas[] = [kelas],
-): Rentang {
+export function bounds(kelas: Kelas, kolom: Komponen, grup: Kelas[] = [kelas]): Rentang {
   const cakupan = kelas.sumberMinMaks === 'sekolah' ? grup : [kelas]
   const nilai: number[] = []
 
   for (const k of cakupan) {
-    const kol = k.komponen.find((c) => c.jenis === jenis && c.urutan === urutan)
+    const kol =
+      k.id === kelas.id
+        ? kolom
+        : k.komponen.find(
+            (c) =>
+              c.jenis === kolom.jenis && c.indukId === null && c.urutan === kolom.urutan,
+          )
     if (!kol) continue
     for (const s of k.siswa) nilai.push(skorKolom(k, s.id, kol))
   }
@@ -176,14 +188,20 @@ export function bounds(
   return [Math.min(...nilai), Math.max(...nilai)]
 }
 
-/** Peta bounds untuk semua kolom sekaligus — dihitung sekali per render. */
-export type PetaBounds = Record<JenisKomponen, Record<number, Rentang>>
+/**
+ * Peta bounds untuk semua kolom sekaligus — dihitung sekali per render.
+ *
+ * Dikunci id komponen. `urutan` tidak layak jadi kunci: ia hanya unik di antara
+ * kolom tingkat atas sejenis, jadi sebuah sub akan menempati entri milik kolom
+ * lain.
+ */
+export type PetaBounds = Record<string, Rentang>
 
 export function hitungBounds(kelas: Kelas, grup: Kelas[] = [kelas]): PetaBounds {
-  const peta: PetaBounds = { formatif: {}, lingkup: {} }
+  const peta: PetaBounds = {}
   for (const jenis of ['formatif', 'lingkup'] as const) {
     for (const kol of komponenOf(kelas, jenis)) {
-      peta[jenis][kol.urutan] = bounds(kelas, jenis, kol.urutan, grup)
+      peta[kol.id] = bounds(kelas, kol, grup)
     }
   }
   return peta
@@ -228,7 +246,7 @@ export function hitungAsesmen(butir: ButirAsesmen, a: Asesmen): HasilAsesmen {
 export function hitungSiswa(kelas: Kelas, siswa: Siswa, peta: PetaBounds): HasilSiswa {
   const kolom = (jenis: JenisKomponen): HasilKolom[] =>
     komponenOf(kelas, jenis).map((k) => {
-      const bd = peta[jenis][k.urutan] ?? ([0, 0] as const)
+      const bd = peta[k.id] ?? ([0, 0] as const)
       const mentah = skorKolom(kelas, siswa.id, k)
       return {
         komponen: k,

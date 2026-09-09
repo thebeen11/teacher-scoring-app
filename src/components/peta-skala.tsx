@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useKelas } from '@/lib/store'
-import { hitungSiswa, komponenOf, skorKolom, type Rentang } from '@/lib/nilai'
+import { hitungSiswa, komponenOf, resc, skorKolom, type Rentang } from '@/lib/nilai'
 import { n, nAuto } from '@/lib/format'
 import { InputBand } from './kendali'
 
@@ -53,7 +53,7 @@ export default function PetaSkala() {
     if (!kol) return null
     // Kolom bersub digambar dari nilai turunannya, sama seperti bounds-nya.
     nilai = kelas.siswa.map((s) => skorKolom(kelas, s.id, kol))
-    bd = hasil.bounds[kol.jenis][kol.urutan] ?? [0, 0]
+    bd = hasil.bounds[kol.id] ?? [0, 0]
     band = [kol.bandMin, kol.bandMax]
     judul = `${kol.jenis === 'formatif' ? 'Formatif' : 'Lingkup Materi'} ${namai(kol)}`
     simpanBand = (mn, mx) => setBand(kol.id, mn, mx)
@@ -61,12 +61,15 @@ export default function PetaSkala() {
 
   const rentangSumber = bd[1] - bd[0] || 1
   const jepit = (x: number) => Math.max(0, Math.min(100, x))
-  const resc1 = (v: number) =>
-    bd[1] === bd[0] ? band[1] : ((v - bd[0]) * (band[1] - band[0])) / (bd[1] - bd[0]) + band[0]
+
+  // Rescale-nya dipinjam dari inti, tidak ditulis ulang: peta yang memegang
+  // aturan rentang-nol sendiri akan menggambar sesuatu yang tidak sama dengan
+  // angka di tabel entri.
+  const konversi = (v: number) => resc(v, bd[0], bd[1], band[0], band[1])
 
   const ruas = nilai.map((v) => ({
     a: jepit(((v - bd[0]) / rentangSumber) * 100),
-    b: jepit(((resc1(v) - SUMBU_MIN) / (SUMBU_MAKS - SUMBU_MIN)) * 100),
+    b: jepit(((konversi(v) - SUMBU_MIN) / (SUMBU_MAKS - SUMBU_MIN)) * 100),
   }))
 
   const lebarBand = band[1] - band[0]
