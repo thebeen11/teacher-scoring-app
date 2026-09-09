@@ -1,26 +1,684 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Token diambil dari papan referensi "Serenity" (uupm.cc/demo/health-wellness).
+   Tampilan ini disengaja: kertas abu terang, tinta batu tulis, sudut membulat,
+   bayangan lembut dua arah (neumorfis), dan aksen hijau. Kartu menggantikan
+   garis: tiap baris tabel berdiri sendiri sebagai kartu, bukan baris bergaris.
+
+   Nama token tetap berbahasa Indonesia karena dirujuk dari puluhan `style`
+   sebaris di seluruh komponen — yang berganti hanya nilainya.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-kertas: #f5f5f5;
+  --color-papan: #ffffff;
+  --color-kepala: #edf2f7;
+  --color-tinta: #2d3748;
+  --color-tinta-terang: #4a5568;
+  --color-redup: #718096;
+  --color-samar: #a0aec0;
+  --color-garis: #e2e8f0;
+  --color-keping: #edf2f7;
+  /* Belang baris genap pada tabel padat — sedikit lebih gelap dari kertas,
+     cukup untuk menuntun mata sepanjang baris tanpa jadi garis. */
+  --color-belang: #fafbfc;
+  --color-abu: #a0aec0;
+
+  /* Aksi utama — hijau, dipakai untuk tombol dan keadaan aktif. */
+  --color-aksen: #22c55e;
+  --color-aksen-gelap: #16a34a;
+
+  /* Identitas: langit ke daun, dipakai untuk gradien dan bilah progres. */
+  --color-langit: #87ceeb;
+  --color-langit-gelap: #5dade2;
+  --color-daun: #90ee90;
+
+  --color-bahaya: #e53e3e;
+  --color-bahaya-pekat: #9b2c2c;
+  --color-basuh: #fee2e2;
+  --color-sorot: #f0fdf4;
+
+  --radius-none: 0px;
+
+  /* Lebar bingkai isi. Satu-satunya sumber kebenaran untuk lebar halaman;
+     dipakai lewat komponen `Halaman` dan kolom isi di `Cangkang`. */
+  --container-halaman: 1440px;   /* bingkai baku: tabel & dasbor */
+  --container-sempit: 1020px;    /* pengaturan & formulir panjang */
+  --container-fokus: 720px;      /* satu kartu tunggal */
+  --container-otentikasi: 420px; /* kartu masuk/daftar */
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  /* Bayangan — satu tempat, supaya blok cetak bisa mematikannya sekaligus. */
+  --bayang-neu: 8px 8px 16px rgba(174, 174, 192, 0.4),
+    -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --bayang-neu-kecil: 4px 4px 8px rgba(174, 174, 192, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.8);
+  --bayang-neu-dalam: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+  --bayang-lembut: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --bayang-naik: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --bayang-cta: 0 4px 14px rgba(34, 197, 94, 0.3);
+  --bayang-cta-naik: 0 6px 20px rgba(34, 197, 94, 0.4);
+
+  --r-kartu: 1.5rem;
+  --r-kendali: 1rem;
+  --r-kecil: 0.75rem;
+
+  /* Skala jarak. Sudut 24px butuh isi yang menjauh dari tepi: angka 10px yang
+     dulu pas untuk sel bergaris rata terbaca sebagai "tanpa padding" di kartu
+     membulat.
+
+     Bingkai luar — rail, kepala, dan tepi tiap halaman — seragam 24px. Dulu
+     angka itu ditulis ulang sebagai `p-6` di tiap halaman dan pelan-pelan
+     melenceng (`px-8 py-10`, `px-6 py-7`, enam lebar maksimum berbeda, tanpa
+     `mx-auto` sama sekali). Sekarang bingkai itu tinggal di satu tempat:
+     komponen `Halaman` (src/components/halaman.tsx), yang memakai token
+     `--container-*` di atas. Halaman baru membungkus isinya dengan `Halaman`,
+     bukan menulis sendiri padding dan lebarnya. Jarak antarblok di dalam satu
+     halaman — judul, kartu ringkas, tabel — tetap 28px (`mb-7`). */
+  --ruang-kartu: 28px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-kertas);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--color-kertas);
+  color: var(--color-tinta);
+  font-family: var(--font-raleway), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-lora), Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: var(--color-aksen-gelap);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-aksen);
+  text-decoration: underline;
+}
+
+/* Tautan yang tidak tampil sebagai tautan: tombol, kartu kelas, butir navigasi.
+   Dua aturan di atas tidak berlapis, sedangkan utilitas Tailwind ada di
+   `@layer utilities` — dan gaya tanpa lapis selalu menang atas gaya berlapis.
+   Jadi `no-underline` maupun `text-…` pada sebuah <a> tidak berpengaruh tanpa
+   pengecualian eksplisit di lapisan yang sama. */
+a.no-underline,
+a.no-underline:hover {
+  text-decoration: none;
+}
+a.tombol,
+a.tombol:hover {
+  color: #fff;
+}
+a.tombol-garis,
+a.tombol-neu,
+a.papan,
+a.papan-neu {
+  color: var(--color-tinta);
+}
+a.tombol-garis:hover {
+  color: var(--color-langit-gelap);
+}
+a.tombol-neu:hover,
+a.papan:hover,
+a.papan-neu:hover {
+  color: var(--color-tinta);
+}
+
+input:focus-visible,
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-aksen);
+  outline-offset: 2px;
+}
+
+/* Angka selalu rata kolom — Archivo dipertahankan khusus untuk ini. */
+.angka {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+@layer components {
+  /* Label mikro huruf besar — dipakai di kepala tabel dan kepala kartu. */
+  .mikro {
+    font-weight: 700;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    color: var(--color-redup);
+    font-variant-numeric: tabular-nums;
+  }
+  .mikro-lebar {
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--color-redup);
+  }
+
+  /* Papan: kartu putih bersudut, dasar semua panel.
+     Padding dibawa kelasnya sendiri, bukan diserahkan ke pemanggil — itu yang
+     dulu membuat enam kartu tampil tanpa jarak sama sekali. Utilitas Tailwind
+     ada di @layer utilities yang menang atas @layer components, jadi pemanggil
+     yang menulis `p-6` atau `px-6 py-5` tetap berlaku. Kartu yang isinya harus
+     rata tepi (tabel penuh, rail navigasi) menyatakan `p-0`. */
+  .papan {
+    background: var(--color-papan);
+    border-radius: var(--r-kartu);
+    box-shadow: var(--bayang-lembut);
+    padding: var(--ruang-kartu);
+  }
+
+  /* Varian neumorfis — sewarna kertas, timbul oleh bayangan dua arah. */
+  .papan-neu {
+    background: var(--color-kertas);
+    border-radius: var(--r-kartu);
+    box-shadow: var(--bayang-neu);
+    padding: var(--ruang-kartu);
+  }
+
+  /* Varian cekung, untuk blok yang harus terbaca "tenggelam". */
+  .papan-dalam {
+    background: var(--color-kertas);
+    border-radius: var(--r-kendali);
+    box-shadow: var(--bayang-neu-dalam);
+    padding: 16px 20px;
+  }
+
+  .papan-angkat {
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .papan-angkat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bayang-naik);
+  }
+
+  /* ------------------------------------------------------- tabel padat --
+
+     Varian rapat untuk layar entri: satu kartu membungkus SELURUH tabel, dan
+     tiap siswa jadi baris bergaris di dalamnya — bukan kartu sendiri-sendiri.
+     Kartu per baris terbaca lega tapi hanya memuat enam siswa per layar;
+     satu kelas tiga puluhan siswa harus terlihat sekaligus.
+
+     Lebar kolom tidak ditulis di sini. Header, tiap baris, dan kaki sama-sama
+     membaca `--kolom` yang dipasang komponen di elemen `.tabel-padat`, jadi
+     ketiganya mustahil melenceng — itu satu-satunya cara melipat kolom tanpa
+     menghitung ulang lebar di tiga tempat.
+  */
+  .tabel-padat {
+    background: var(--color-papan);
+    /* Siku, bukan membulat. Sudut membulat adalah bahasa KARTU, dan tabel ini
+       justru berhenti jadi tumpukan kartu: ia satu kisi. Sudut bulat juga
+       memotong ujung baris pertama dan terakhir, dan tepi kanan berganti
+       bentuk tergantung kolom mana yang sedang terbuka — kadang membulat saat
+       semua muat, terpotong lurus begitu satu kolom bersub dibuka. */
+    border-radius: 0;
+    box-shadow: var(--bayang-lembut);
+    /* Sengaja TANPA overflow:hidden — itu akan menjadikan kartu ini sebuah
+       scrollport, dan kepala lengket di dalamnya tidak akan pernah menempel
+       ke tepi atas layar. Sudutnya dibulatkan lewat baris pertama/terakhir. */
+  }
+
+  .kepala-padat {
+    display: grid;
+    grid-template-columns: var(--kolom);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--color-kepala);
+    border-bottom: 1px solid var(--color-garis);
+  }
+
+  /* Kaki maks/min. Ia HARUS ikut `--kolom` juga: memberi `display:grid` saja
+     membuat selnya jatuh ke kolom implisit selebar isinya, dan kaki melenceng
+     dari tabel di atasnya. */
+  .kaki-padat {
+    display: grid;
+    grid-template-columns: var(--kolom);
+    border-radius: 0;
+  }
+
+  .baris-padat {
+    display: grid;
+    grid-template-columns: var(--kolom);
+    align-items: center;
+    /* Latar wajib pekat, bukan transparan: sel beku di bawah mewarisinya, dan
+       latar tembus akan membuat kolom lain terlihat menembus saat digulir. */
+    background: var(--color-papan);
+    border-bottom: 1px solid var(--color-garis);
+  }
+  .baris-padat:nth-child(even) {
+    background: var(--color-belang);
+  }
+  .baris-padat:hover {
+    background: var(--color-sorot);
+  }
+  .baris-padat:last-child {
+    border-bottom: 0;
+  }
+
+  .sel-padat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 28px;
+    padding: 3px 8px;
+  }
+
+  /* Kolom yang tetap terlihat saat tabel digulir mendatar: nomor dan nama.
+     `background: inherit` memaksa nilai terhitung latar barisnya ikut — jadi
+     belang dan sorotan tetesan tetikus tetap menyambung ke sel beku. */
+  .beku {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: inherit;
+  }
+  .kepala-padat .beku {
+    z-index: 4;
+  }
+  /* Garis batas beku, digambar sendiri supaya tidak ikut hilang saat sel
+     bergeser di atas kolom lain. */
+  /* JANGAN memberi `position` di sini: aturan ini datang setelah `.beku` di
+     lapisan yang sama, jadi `position: relative` akan MENIMPA `sticky` dan
+     `left` yang dipakai untuk membekukan kolom malah menggeser selnya. Sel
+     beku sudah berposisi, jadi ::after tetap berjangkar padanya. */
+  .beku-tepi::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-garis);
+  }
+
+  /* Kotak ketik versi rapat — tinggi baris 28px tidak memuat `.sel-input`. */
+  .sel-input-padat {
+    width: 100%;
+    border: 1px solid var(--color-garis);
+    border-radius: 0.5rem;
+    background: #fff;
+    padding: 2px 6px;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .sel-input-padat:hover {
+    border-color: var(--color-langit);
+  }
+  .sel-input-padat:focus {
+    border-color: var(--color-aksen);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  }
+
+  /* Sel induk yang sedang terlipat: satu tombol selebar sel. */
+  .sel-lipat {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+  }
+  .sel-lipat:hover {
+    background: rgba(135, 206, 235, 0.16);
+  }
+
+  /* Lebar kolom tak bisa ditransisikan — jumlah trek grid-nya sendiri berubah.
+     Yang diberi gerak adalah isinya, supaya kolom yang baru terbuka terbaca
+     sebagai mekar ke kanan, bukan sebagai tabel yang tiba-tiba lain. */
+  @keyframes mekar-kanan {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+  }
+  .mekar {
+    animation: mekar-kanan 0.18s ease-out;
+  }
+
+  /* Garis kolom. Tanpa ini tabel hanya tumpukan baris: mata bisa menyusuri
+     satu siswa, tapi tidak menyusuri satu kolom. Ditulis SETELAH `.sel-lipat`
+     supaya `border: 0` di sana tidak menghapusnya lagi dari sel terlipat.
+
+     Batas antar kolom tingkat atas tegas; batas antar sub di dalam satu kolom
+     yang sedang terbuka jauh lebih tipis, supaya sub tetap terbaca sebagai
+     bagian dari induknya, bukan sebagai empat kolom sederajat. */
+  .sekat-padat {
+    border-right: 1px solid var(--color-garis);
+  }
+  .sekat-sub {
+    border-right: 1px solid rgba(45, 55, 72, 0.06);
+  }
+
+  /* Dulu garis pemisah kolom. Di tata letak kartu tidak ada lagi garis: batas
+     kolom sudah dibawa oleh tepi kartu dan lebar kolom yang tetap. Kelasnya
+     dipertahankan karena dipakai di puluhan sel — dan blok cetak
+     menghidupkannya lagi, karena di kertas tabelnya memang bergaris. */
+  .sekat {
+    border-right: 0;
+  }
+
+  /* Tampilan cetak daftar nilai: rapat dan bergaris, tanpa kartu. Dipakai di
+     layar pratinjau /daftar/cetak juga, jadi garisnya harus enak dilihat di
+     keduanya — blok @media print di bawah menghitamkannya. */
+  .kepala-cetak {
+    display: flex;
+    background: var(--color-kepala);
+    border-top: 1px solid var(--color-tinta);
+    border-bottom: 1px solid var(--color-tinta);
+  }
+  .baris-cetak {
+    display: flex;
+    border-bottom: 1px solid var(--color-garis);
+  }
+
+  /* Input skor mentah di dalam sel tabel. */
+  .sel-input {
+    border: 1px solid var(--color-garis);
+    border-radius: var(--r-kecil);
+    background: #fff;
+    padding: 6px 8px;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .sel-input:hover {
+    border-color: var(--color-langit);
+  }
+  .sel-input:focus {
+    border-color: var(--color-aksen);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  }
+
+  /* Input band tujuan di kepala kolom. */
+  .band-input {
+    width: 54px;
+    border: 1px solid var(--color-garis);
+    border-radius: 0.5rem;
+    background: #fff;
+    padding: 4px 6px;
+    font-weight: 600;
+    font-size: 11px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .band-input:focus {
+    border-color: var(--color-aksen);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  }
+  /* Versi sempit untuk kepala tabel padat. */
+  .band-input-padat {
+    width: 48px;
+    padding: 2px 5px;
+  }
+
+  /* Kolom teks biasa — nama siswa, tahun ajaran, roster. */
+  .isian {
+    border: 1px solid var(--color-garis);
+    border-radius: var(--r-kendali);
+    background: #fff;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-tinta);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .isian:focus {
+    border-color: var(--color-aksen);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  }
+
+  .tombol {
+    border: 0;
+    border-radius: var(--r-kendali);
+    padding: 11px 22px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    background: var(--color-aksen);
+    color: #fff;
+    box-shadow: var(--bayang-cta);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .tombol:hover {
+    background: var(--color-aksen-gelap);
+    transform: translateY(-2px);
+    box-shadow: var(--bayang-cta-naik);
+  }
+  .tombol:disabled {
+    background: var(--color-keping);
+    color: var(--color-redup);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  .tombol-garis {
+    border: 2px solid var(--color-garis);
+    border-radius: var(--r-kendali);
+    background: #fff;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--color-tinta);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .tombol-garis:hover {
+    border-color: var(--color-langit);
+    color: var(--color-langit-gelap);
+  }
+
+  /* Tombol neumorfis — sewarna kertas, tertekan saat diklik. */
+  .tombol-neu {
+    border: 0;
+    border-radius: var(--r-kendali);
+    background: var(--color-kertas);
+    color: var(--color-tinta);
+    padding: 10px 18px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: var(--bayang-neu-kecil);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: box-shadow 0.15s;
+  }
+  .tombol-neu:hover {
+    box-shadow: 2px 2px 4px rgba(174, 174, 192, 0.4),
+      -2px -2px 4px rgba(255, 255, 255, 0.8);
+  }
+  .tombol-neu:active {
+    box-shadow: var(--bayang-neu-dalam);
+  }
+
+  /* Kelompok tombol segmented, satu kapsul membulat. */
+  .segmen {
+    display: flex;
+    border: 1px solid var(--color-garis);
+    border-radius: var(--r-kendali);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: var(--bayang-lembut);
+  }
+  .segmen > button {
+    border: 0;
+    padding: 10px 18px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .segmen > button + button {
+    border-left: 1px solid var(--color-garis);
+  }
+
+  .judul {
+    font-family: var(--font-lora), Georgia, serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .keterangan {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--color-redup);
+    text-wrap: pretty;
+  }
+
+  /* Teks bergradien langit → daun, untuk kata kunci pada judul. */
+  /* Langit → hijau. Referensinya memakai langit → daun, tapi itu hanya terbaca
+     pada judul raksasa; di sini judulnya 20–34px, jadi ujungnya digelapkan. */
+  .teks-gradien {
+    background: linear-gradient(135deg, var(--color-langit-gelap), var(--color-aksen));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Ubin ikon/inisial bersudut, isi diwarnai lewat `style` sebaris. */
+  .kotak-ikon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-kendali);
+    flex: none;
+  }
+
+  .tag {
+    display: inline-block;
+    border-radius: 9999px;
+    padding: 4px 11px;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Bilah progres membulat, isi bergradien. */
+  .bilah {
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--color-keping);
+    overflow: hidden;
+  }
+  .bilah > span {
+    display: block;
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      var(--color-langit),
+      var(--color-daun)
+    );
+  }
+}
+
+/* Hormati preferensi gerak minimal — sekarang banyak hover yang menggeser. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .papan-angkat:hover,
+  .tombol:hover {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------- cetak --- */
+
+/* Kertas tidak mengenal bayangan maupun sudut membulat: seluruh tampilan
+   lembut dimatikan, kembali ke garis hitam rapat seperti daftar nilai cetak. */
+@media print {
+  .tanpa-cetak {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff;
+  }
+  * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transform: none !important;
+  }
+  .papan,
+  .papan-neu,
+  .papan-dalam {
+    background: #fff;
+    border: 1px solid #000;
+  }
+  .baris-cetak {
+    border-bottom: 1px solid #000;
+  }
+  /* Kertas tidak bisa digulir: kepala lengket dan kolom beku jadi sel biasa. */
+  .kepala-padat,
+  .baris-padat,
+  .beku {
+    position: static;
+  }
+  .kepala-padat {
+    background: #fff;
+    border-bottom: 1.5px solid #000;
+  }
+  .baris-padat,
+  .baris-padat:nth-child(even),
+  .baris-padat:last-child {
+    background: #fff;
+    border-bottom: 1px solid #000;
+  }
+  .kepala-cetak {
+    background: #fff;
+    border-top: 1.5px solid #000;
+    border-bottom: 1.5px solid #000;
+  }
+  .sekat {
+    border-right: 1px solid #000;
+  }
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
 }

@@ -1,0 +1,914 @@
+{
+ "catatan": "Diekstrak dari OLAH NILAI.xlsx (lembar Forf S 1, Sums S 1, ASTS 1, ASAS 1, DafNil S 1) — kelas VIII A, IPA, semester 1. `harapan` adalah nilai yang benar-benar dihitung spreadsheet.",
+ "kelas": "VIII A",
+ "bandFormatif": [
+  [
+   80,
+   100
+  ],
+  [
+   80,
+   100
+  ],
+  [
+   80,
+   100
+  ]
+ ],
+ "bandLingkup": [
+  [
+   80,
+   96
+  ],
+  [
+   78,
+   98
+  ],
+  [
+   78,
+   98
+  ],
+  [
+   80,
+   100
+  ]
+ ],
+ "naBand": [
+  79,
+  91
+ ],
+ "kktp": 80,
+ "bobot": 60,
+ "siswa": [
+  {
+   "nama": "ABDUL GHOFAR",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    9.0,
+    5.0,
+    15.0
+   ],
+   "ASAS": [
+    12.0,
+    8.0,
+    10.0
+   ],
+   "harapan": {
+    "na": 75.6,
+    "raportMentah": 83.13193490899529,
+    "raport": 83.0
+   }
+  },
+  {
+   "nama": "ADINDA SYIFA KHAERUNNISA",
+   "formatif": [
+    10.0,
+    83.0,
+    73.0
+   ],
+   "lingkup": [
+    100.0,
+    85.0,
+    60.0,
+    9.0
+   ],
+   "ASTS": [
+    11.0,
+    1.0,
+    19.0
+   ],
+   "ASAS": [
+    12.0,
+    5.0,
+    14.0
+   ],
+   "harapan": {
+    "na": 84.01814847220353,
+    "raportMentah": 88.03098301341828,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "AKHMAD MUBAROK",
+   "formatif": [
+    6.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    7.0,
+    1.0,
+    17.0
+   ],
+   "ASAS": [
+    10.0,
+    8.0,
+    11.0
+   ],
+   "harapan": {
+    "na": 73.9,
+    "raportMentah": 82.14259838148938,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "ALFIN IBRAHIM SAPUTRA",
+   "formatif": [
+    4.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    6.0,
+    2.0,
+    16.0
+   ],
+   "ASAS": [
+    9.0,
+    8.0,
+    11.0
+   ],
+   "harapan": {
+    "na": 73.2,
+    "raportMentah": 81.73522451722224,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "ALMIRA OKTA SOFIANA",
+   "formatif": [
+    6.0,
+    88.0,
+    73.0
+   ],
+   "lingkup": [
+    45.0,
+    55.0,
+    50.0,
+    9.0
+   ],
+   "ASTS": [
+    9.0,
+    3.0,
+    14.0
+   ],
+   "ASAS": [
+    11.0,
+    8.0,
+    18.0
+   ],
+   "harapan": {
+    "na": 82.33694104186296,
+    "raportMentah": 87.05258305980045,
+    "raport": 87.0
+   }
+  },
+  {
+   "nama": "ALYA KHOIRUNNISA",
+   "formatif": [
+    10.0,
+    95.0,
+    50.0
+   ],
+   "lingkup": [
+    82.0,
+    55.0,
+    65.0,
+    9.0
+   ],
+   "ASTS": [
+    6.0,
+    0,
+    16.0
+   ],
+   "ASAS": [
+    6.0,
+    6.0,
+    16.0
+   ],
+   "harapan": {
+    "na": 80.89301534526855,
+    "raportMentah": 86.21227221589147,
+    "raport": 86.0
+   }
+  },
+  {
+   "nama": "ANISA NUR SEPTIANI",
+   "formatif": [
+    8.0,
+    95.0,
+    92.0
+   ],
+   "lingkup": [
+    98.0,
+    80.0,
+    60.0,
+    9.0
+   ],
+   "ASTS": [
+    14.0,
+    6.0,
+    24.0
+   ],
+   "ASAS": [
+    14.0,
+    8.0,
+    23.0
+   ],
+   "harapan": {
+    "na": 88.18482352941177,
+    "raportMentah": 90.45583232656175,
+    "raport": 90.0
+   }
+  },
+  {
+   "nama": "ARDA WILI SAPUTRA",
+   "formatif": [
+    4.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    0,
+    0,
+    0
+   ],
+   "ASAS": [
+    7.0,
+    7.0,
+    11.0
+   ],
+   "harapan": {
+    "na": 69.4,
+    "raportMentah": 79.5237663969149,
+    "raport": 80.0
+   }
+  },
+  {
+   "nama": "FAESAL KHODIQ",
+   "formatif": [
+    0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    3.0,
+    1.0,
+    10.0
+   ],
+   "ASAS": [
+    4.0,
+    1.0,
+    10.0
+   ],
+   "harapan": {
+    "na": 68.5,
+    "raportMentah": 79.0,
+    "raport": 79.0
+   }
+  },
+  {
+   "nama": "FAIZ PRATAMA",
+   "formatif": [
+    0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    9.0,
+    3.0,
+    13.0
+   ],
+   "ASAS": [
+    9.0,
+    0,
+    9.0
+   ],
+   "harapan": {
+    "na": 71.1,
+    "raportMentah": 80.0,
+    "raport": 80.0
+   }
+  },
+  {
+   "nama": "FEBRIANA YULIANTI",
+   "formatif": [
+    10.0,
+    95.0,
+    70.0
+   ],
+   "lingkup": [
+    91.0,
+    55.0,
+    35.0,
+    7.0
+   ],
+   "ASTS": [
+    10.0,
+    4.0,
+    20.0
+   ],
+   "ASAS": [
+    17.0,
+    6.0,
+    19.0
+   ],
+   "harapan": {
+    "na": 85.1063861892583,
+    "raportMentah": 88.66429673347236,
+    "raport": 89.0
+   }
+  },
+  {
+   "nama": "HILDA NUR AZIZAH",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    31.0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    5.0,
+    2.0,
+    12.0
+   ],
+   "ASAS": [
+    8.0,
+    1.0,
+    16.0
+   ],
+   "harapan": {
+    "na": 72.672,
+    "raportMentah": 81.42794823103216,
+    "raport": 81.0
+   }
+  },
+  {
+   "nama": "INGGIT TRIANA ARUM",
+   "formatif": [
+    8.0,
+    95.0,
+    83.0
+   ],
+   "lingkup": [
+    76.0,
+    85.0,
+    65.0,
+    10.0
+   ],
+   "ASTS": [
+    9.0,
+    6.0,
+    19.0
+   ],
+   "ASAS": [
+    16.0,
+    6.0,
+    24.0
+   ],
+   "harapan": {
+    "na": 86.63840664961637,
+    "raportMentah": 89.55587544071862,
+    "raport": 90.0
+   }
+  },
+  {
+   "nama": "KARINA SIPUTRI",
+   "formatif": [
+    8.0,
+    90.0,
+    65.0
+   ],
+   "lingkup": [
+    79.0,
+    95.0,
+    85.0,
+    7.0
+   ],
+   "ASTS": [
+    9.0,
+    4.0,
+    19.0
+   ],
+   "ASAS": [
+    10.0,
+    5.0,
+    23.0
+   ],
+   "harapan": {
+    "na": 84.33078032036615,
+    "raportMentah": 88.21292307638825,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "KHANSA PUTRI PAMBAJENG",
+   "formatif": [
+    8.0,
+    95.0,
+    73.0
+   ],
+   "lingkup": [
+    90.0,
+    70.0,
+    30.0,
+    9.0
+   ],
+   "ASTS": [
+    11.0,
+    6.0,
+    18.0
+   ],
+   "ASAS": [
+    14.0,
+    8.0,
+    17.0
+   ],
+   "harapan": {
+    "na": 85.19636828644501,
+    "raportMentah": 88.71666295439493,
+    "raport": 89.0
+   }
+  },
+  {
+   "nama": "KIREINA PUTRI HAGOESTA",
+   "formatif": [
+    8.0,
+    85.0,
+    68.0
+   ],
+   "lingkup": [
+    100.0,
+    100.0,
+    80.0,
+    10.0
+   ],
+   "ASTS": [
+    8.0,
+    4.0,
+    15.0
+   ],
+   "ASAS": [
+    15.0,
+    4.0,
+    13.0
+   ],
+   "harapan": {
+    "na": 84.1794992596581,
+    "raportMentah": 88.12488314740101,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "MIKHO FEBRIAN MAULIED",
+   "formatif": [
+    10.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    5.0,
+    2.0,
+    10.0
+   ],
+   "ASAS": [
+    8.0,
+    2.0,
+    13.0
+   ],
+   "harapan": {
+    "na": 72.4,
+    "raportMentah": 81.26965438663122,
+    "raport": 81.0
+   }
+  },
+  {
+   "nama": "MOHAMMAD ZIDAN AZKA MU'MININ",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    9.0,
+    1.0,
+    10.0
+   ],
+   "ASAS": [
+    11.0,
+    5.0,
+    14.0
+   ],
+   "harapan": {
+    "na": 73.89999999999999,
+    "raportMentah": 82.14259838148938,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "MUHAMAD ANGGA ALFIANSYAH",
+   "formatif": [
+    6.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    5.0,
+    0,
+    8.0
+   ],
+   "ASAS": [
+    8.0,
+    2.0,
+    11.0
+   ],
+   "harapan": {
+    "na": 70.8,
+    "raportMentah": 79.0,
+    "raport": 79.0
+   }
+  },
+  {
+   "nama": "MUHAMMAD ALFIN SETIAWAN",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    4.0,
+    3.0,
+    14.0
+   ],
+   "ASAS": [
+    10.0,
+    7.0,
+    13.0
+   ],
+   "harapan": {
+    "na": 73.8,
+    "raportMentah": 82.0844021151655,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "MUHAMMAD FATKHURROZZAQ",
+   "formatif": [
+    8.0,
+    95.0,
+    70.0
+   ],
+   "lingkup": [
+    56.0,
+    60.0,
+    35.0,
+    5.0
+   ],
+   "ASTS": [
+    8.0,
+    2.0,
+    21.0
+   ],
+   "ASAS": [
+    16.0,
+    7.0,
+    21.0
+   ],
+   "harapan": {
+    "na": 83.56138618925831,
+    "raportMentah": 87.76516441876845,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "MUHAMMAD SHAKTY  ISNANDHIKA",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    9.0,
+    1.0,
+    8.0
+   ],
+   "ASAS": [
+    16.0,
+    3.0,
+    13.0
+   ],
+   "harapan": {
+    "na": 74.19999999999999,
+    "raportMentah": 82.317187180461,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "MUHAMMAD UDZA ARROFIQ",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    4.0,
+    1.0,
+    8.0
+   ],
+   "ASAS": [
+    8.0,
+    1.0,
+    13.0
+   ],
+   "harapan": {
+    "na": 71.19999999999999,
+    "raportMentah": 80.57129919074468,
+    "raport": 81.0
+   }
+  },
+  {
+   "nama": "SARA PERTIWI",
+   "formatif": [
+    6.0,
+    95.0,
+    81.0
+   ],
+   "lingkup": [
+    51.0,
+    75.0,
+    65.0,
+    10.0
+   ],
+   "ASTS": [
+    9.0,
+    4.0,
+    16.0
+   ],
+   "ASAS": [
+    10.0,
+    8.0,
+    14.0
+   ],
+   "harapan": {
+    "na": 83.2449283887468,
+    "raportMentah": 87.58099779438008,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "SEFIRA KHODIAN",
+   "formatif": [
+    8.0,
+    85.0,
+    61.0
+   ],
+   "lingkup": [
+    90.0,
+    85.0,
+    75.0,
+    10.0
+   ],
+   "ASTS": [
+    9.0,
+    4.0,
+    16.0
+   ],
+   "ASAS": [
+    13.0,
+    4.0,
+    15.0
+   ],
+   "harapan": {
+    "na": 83.69409005249697,
+    "raportMentah": 87.8423931124409,
+    "raport": 88.0
+   }
+  },
+  {
+   "nama": "SITI FATIKHATUS SYA'BANI",
+   "formatif": [
+    4.0,
+    85.0,
+    65.0
+   ],
+   "lingkup": [
+    80.0,
+    80.0,
+    55.0,
+    9.0
+   ],
+   "ASTS": [
+    13.0,
+    5.0,
+    22.0
+   ],
+   "ASAS": [
+    13.0,
+    7.0,
+    23.0
+   ],
+   "harapan": {
+    "na": 85.2831053977655,
+    "raportMentah": 88.76714071470064,
+    "raport": 89.0
+   }
+  },
+  {
+   "nama": "SYERLI ANJANI",
+   "formatif": [
+    8.0,
+    0,
+    0
+   ],
+   "lingkup": [
+    45.0,
+    0,
+    0,
+    0
+   ],
+   "ASTS": [
+    8.0,
+    1.0,
+    12.0
+   ],
+   "ASAS": [
+    11.0,
+    4.0,
+    15.0
+   ],
+   "harapan": {
+    "na": 74.34,
+    "raportMentah": 82.39866195331444,
+    "raport": 82.0
+   }
+  },
+  {
+   "nama": "TRI YANDRA SYAHPUTRA",
+   "formatif": [
+    8.0,
+    65.0,
+    38.0
+   ],
+   "lingkup": [
+    0,
+    40.0,
+    10.0,
+    7.0
+   ],
+   "ASTS": [
+    6.0,
+    2.0,
+    10.0
+   ],
+   "ASAS": [
+    9.0,
+    4.0,
+    12.0
+   ],
+   "harapan": {
+    "na": 76.72097859738861,
+    "raportMentah": 83.78430259896523,
+    "raport": 84.0
+   }
+  },
+  {
+   "nama": "YOLLA MARCH VIOLETA",
+   "formatif": [
+    0,
+    60.0,
+    50.0
+   ],
+   "lingkup": [
+    10.0,
+    42.0,
+    45.0,
+    1.0
+   ],
+   "ASTS": [
+    6.0,
+    1.0,
+    11.0
+   ],
+   "ASAS": [
+    8.0,
+    6.0,
+    10.0
+   ],
+   "harapan": {
+    "na": 75.0442320635348,
+    "raportMentah": 82.80849872054729,
+    "raport": 83.0
+   }
+  },
+  {
+   "nama": "ZAHRA KHAERUNISA",
+   "formatif": [
+    8.0,
+    95.0,
+    80.0
+   ],
+   "lingkup": [
+    45.0,
+    67.0,
+    40.0,
+    6.0
+   ],
+   "ASTS": [
+    6.0,
+    3.0,
+    21.0
+   ],
+   "ASAS": [
+    14.0,
+    8.0,
+    17.0
+   ],
+   "harapan": {
+    "na": 83.19001278772379,
+    "raportMentah": 87.54903896495537,
+    "raport": 88.0
+   }
+  }
+ ]
+}
