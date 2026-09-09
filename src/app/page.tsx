@@ -1,69 +1,101 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { daftarKelas } from '@/lib/data'
+import { penggunaSaatIni } from '@/lib/supabase/server'
+import { supabaseSiap } from '@/lib/env'
+import { keluar } from './(auth)/actions'
+import Penyiapan from '@/components/penyiapan'
+import Halaman from '@/components/halaman'
 
-export default function Home() {
+export default async function Beranda() {
+  if (!supabaseSiap) return <Penyiapan />
+
+  const [kelas, pengguna] = await Promise.all([daftarKelas(), penggunaSaatIni()])
+  const meta = (pengguna?.user_metadata ?? {}) as { nama?: string; sekolah?: string }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen">
+      <div className="w-full max-w-halaman mx-auto">
+        <header className="flex items-center gap-5 mx-6 mt-6 px-6 py-5 papan">
+          <div className="flex items-center gap-2.5">
+            <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
+              <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
+            </span>
+            <span>
+              <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)]">
+                Olah Nilai
+              </span>
+              <span className="block mikro mt-1.5">
+                {meta.sekolah?.toUpperCase() || 'PAPAN NILAI GURU'}
+              </span>
+            </span>
+          </div>
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-[12px] text-[color:var(--color-redup)]">
+              {meta.nama || pengguna?.email}
+            </span>
+            <form action={keluar}>
+              <button type="submit" className="tombol-garis">
+                Keluar
+              </button>
+            </form>
+          </div>
+        </header>
+
+        <main>
+          <Halaman>
+            <div className="flex items-end gap-4 mb-7">
+              <div>
+                <h1 className="judul">Semua <span className="teks-gradien">Kelas</span></h1>
+                <p className="keterangan mt-1.5">
+                  Setiap kelas membawa kolom nilai, band skala, dan KKTP-nya sendiri.
+                </p>
+              </div>
+              <Link href="/kelas/baru" className="tombol ml-auto no-underline">
+                Kelas baru
+              </Link>
+            </div>
+
+            {kelas.length === 0 ? (
+              <div className="papan p-8">
+                <div className="mikro">BELUM ADA KELAS</div>
+                <p className="keterangan mt-3 max-w-[560px]">
+                  Mulai dengan membuat satu kelas: isi mata pelajaran, nama kelas, dan tempelkan
+                  daftar nama siswa. Kolom formatif F1–F4, lingkup materi LM1–LM4, serta ASTS dan
+                  ASAS akan dibuatkan otomatis dengan band bawaan — semuanya bisa diubah nanti di
+                  layar Skala &amp; KKTP.
+                </p>
+                <Link
+                  href="/kelas/baru"
+                  className="tombol inline-flex mt-5 no-underline"
+                >
+                  Buat kelas pertama
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7">
+                {kelas.map((k) => (
+                  <Link
+                    key={k.id}
+                    href={`/kelas/${k.id}/dasbor`}
+                    className="papan papan-angkat p-6 no-underline"
+                  >
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-lora)]">
+                        {k.nama}
+                      </div>
+                      <div className="mikro angka">{k.jumlahSiswa} SISWA</div>
+                    </div>
+                    <div className="text-[12px] text-[color:var(--color-redup)] mt-3">{k.mapel}</div>
+                    <div className="mikro mt-1.5">
+                      SEMESTER {k.semester} · {k.tahunAjaran}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Halaman>
+        </main>
+      </div>
     </div>
-  );
+  )
 }
