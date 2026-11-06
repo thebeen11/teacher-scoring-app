@@ -28,7 +28,7 @@ const NAV: ItemNav[] = [
     ],
   },
   { label: "Daftar Nilai", ruas: "daftar", kelompok: "HASIL" },
-  { label: "Rincian Siswa", ruas: "siswa" },
+  // { label: "Rincian Siswa", ruas: "siswa" },
   { label: "Skala & KKTP", ruas: "skala" },
 ];
 
@@ -290,7 +290,7 @@ function KakiPanel({
         onClick={() => setBuka((b) => !b)}
         aria-haspopup="menu"
         aria-expanded={buka}
-        className="tombol-neu w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
+        className=" w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
       >
         <span
           aria-hidden
@@ -453,7 +453,7 @@ export default function Cangkang({
   return (
     <div className="flex h-dvh overflow-hidden bg-[color:var(--color-kertas)]">
       {/* ------------------------------------------------ rail (lg ke atas) -- */}
-      <aside className="hidden lg:flex w-[244px] flex-none m-6 mr-0 flex-col papan-neu p-0 overflow-hidden tanpa-cetak">
+      <aside className="hidden lg:flex w-[244px] flex-none m-6 mr-0 flex-col papan-neu bg-white p-0 overflow-hidden tanpa-cetak">
         <PanelNav {...panel} />
       </aside>
 
@@ -470,7 +470,7 @@ export default function Cangkang({
             onClick={() => setLaci(false)}
             className="absolute inset-0 w-full h-full border-0 bg-[rgba(45,55,72,0.35)] cursor-pointer"
           />
-          <aside className="laci absolute left-3 top-3 bottom-3 w-[272px] max-w-[calc(100vw-24px)] flex flex-col papan-neu p-0 overflow-hidden">
+          <aside className="laci absolute left-3 top-3 bottom-3 w-[272px] max-w-[calc(100vw-24px)] flex flex-col papan-neu bg-white p-0 overflow-hidden">
             <PanelNav {...panel} onPilih={() => setLaci(false)} />
           </aside>
         </div>
