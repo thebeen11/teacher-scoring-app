@@ -151,7 +151,7 @@ export default function HalamanSiswa() {
               <div className="mikro">
                 PESERTA DIDIK {b.siswa.noUrut} · {kelas.nama}
               </div>
-              <div className="text-[22px] sm:text-[26px] font-semibold leading-[1.2] mt-1.5 tracking-[-0.01em] font-[family-name:var(--font-lora)]">
+              <div className="text-[22px] sm:text-[26px] font-semibold leading-[1.2] mt-1.5 tracking-[-0.01em] font-[family-name:var(--font-judul)]">
                 {b.siswa.nama}
               </div>
             </div>

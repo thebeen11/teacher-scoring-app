@@ -30,7 +30,7 @@ export default async function HalamanKelola({
       <KepalaHalaman
         judul={
           <>
-            Kelola <span className="teks-gradien">Kelas</span>
+            Kelola Kelas
           </>
         }
       />

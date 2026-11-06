@@ -72,7 +72,7 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
       <button
         aria-label="Tutup"
         onClick={() => !sibuk && onTutup()}
-        className="absolute inset-0 w-full h-full border-0 bg-[rgba(45,55,72,0.35)] cursor-pointer"
+        className="absolute inset-0 w-full h-full border-0 bg-[rgba(23,59,85,0.35)] cursor-pointer"
       />
       <div className="relative w-full max-w-[440px] max-h-[calc(100dvh-32px)] flex flex-col papan p-0 overflow-hidden">
         <div className="px-6 pt-6 pb-4">

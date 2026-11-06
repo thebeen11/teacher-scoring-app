@@ -113,7 +113,7 @@ export default function HalamanDasbor() {
             }}
           >
             <div className="flex items-baseline gap-2">
-              <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-lora)]">
+              <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-judul)]">
                 {k.nama}
               </div>
               <div className="mikro angka">{k.siswa} SISWA</div>

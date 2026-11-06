@@ -12,7 +12,7 @@ export default async function HalamanKelasBaru() {
       <Link href="/" className="mikro">
         ← SEMUA KELAS
       </Link>
-      <h1 className="judul mt-4">Kelas <span className="teks-gradien">baru</span></h1>
+      <h1 className="judul mt-4">Kelas baru</h1>
       <p className="keterangan mt-1.5 mb-6">
         Kolom formatif dan sumatif Bab 1–Bab 4 beserta ASTS/ASAS dibuatkan otomatis dengan rentang bawaan, jadi
         kelas langsung siap diisi. Jumlah kolom, rentang, bobot tiap bagian, dan KKTP bisa diubah kapan saja

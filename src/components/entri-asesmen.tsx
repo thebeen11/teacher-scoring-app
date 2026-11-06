@@ -58,7 +58,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
         <KepalaHalaman
           judul={
             <>
-              Asesmen <span className="teks-gradien">{JUDUL[slot]}</span>
+              Asesmen {JUDUL[slot]}
             </>
           }
           aksi={<TombolUnduh jenis={slot} />}
@@ -116,7 +116,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
       <KepalaHalaman
         judul={
           <>
-            Asesmen <span className="teks-gradien">{JUDUL[slot]}</span>
+            Asesmen {JUDUL[slot]}
           </>
         }
         aksi={

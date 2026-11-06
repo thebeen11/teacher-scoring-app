@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Token diambil dari papan referensi "Serenity" (uupm.cc/demo/health-wellness).
-   Tampilan ini disengaja: kertas abu terang, tinta batu tulis, sudut membulat,
-   bayangan lembut dua arah (neumorfis), dan aksen hijau. Kartu menggantikan
+   Warna diambil dari palet logo nilaiHub (public/logo pallete.jpg): biru laut
+   #173b55, krem #ffffd2, hijau daun #a9c46c, merah muda #ffb6b9. Bentuk dari
+   papan referensi "Serenity": kertas abu terang, tinta biru laut, sudut membulat,
+   bayangan lembut dua arah (neumorfis), dan aksi biru laut. Kartu menggantikan
    garis: tiap baris tabel berdiri sendiri sebagai kartu, bukan baris bergaris.
 
    Nama token tetap berbahasa Indonesia karena dirujuk dari puluhan `style`
@@ -13,31 +14,31 @@
 @theme {
   --color-kertas: #f5f5f5;
   --color-papan: #ffffff;
-  --color-kepala: #edf2f7;
-  --color-tinta: #2d3748;
-  --color-tinta-terang: #4a5568;
-  --color-redup: #718096;
-  --color-samar: #a0aec0;
-  --color-garis: #e2e8f0;
-  --color-keping: #edf2f7;
+  --color-kepala: #eef2f5;
+  --color-tinta: #173b55;
+  --color-tinta-terang: #3a5a72;
+  --color-redup: #62788a;
+  --color-samar: #a3b2bd;
+  --color-garis: #e3e8dc;
+  --color-keping: #eef2f5;
   /* Belang baris genap pada tabel padat — sedikit lebih gelap dari kertas,
      cukup untuk menuntun mata sepanjang baris tanpa jadi garis. */
   --color-belang: #fafbfc;
-  --color-abu: #a0aec0;
+  --color-abu: #a3b2bd;
 
-  /* Aksi utama — hijau, dipakai untuk tombol dan keadaan aktif. */
-  --color-aksen: #22c55e;
-  --color-aksen-gelap: #16a34a;
+  /* Aksi utama — biru laut (hijau daun terlalu terang untuk teks putih), dipakai untuk tombol dan keadaan aktif. */
+  --color-aksen: #173b55;
+  --color-aksen-gelap: #0f2a3e;
 
-  /* Identitas: langit ke daun, dipakai untuk gradien dan bilah progres. */
-  --color-langit: #87ceeb;
-  --color-langit-gelap: #5dade2;
-  --color-daun: #90ee90;
+  /* Identitas: hijau daun (nama token lama dipertahankan), dipakai untuk gradien dan bilah progres. */
+  --color-langit: #a9c46c;
+  --color-langit-gelap: #7f9a45;
+  --color-daun: #a9c46c;
 
-  --color-bahaya: #e53e3e;
-  --color-bahaya-pekat: #9b2c2c;
-  --color-basuh: #fee2e2;
-  --color-sorot: #f0fdf4;
+  --color-bahaya: #d64550;
+  --color-bahaya-pekat: #9b2c3a;
+  --color-basuh: #ffe3e4;
+  --color-sorot: #eef1f4;
 
   --radius-none: 0px;
 
@@ -52,16 +53,16 @@
 :root {
   color-scheme: light;
   /* Bayangan — satu tempat, supaya blok cetak bisa mematikannya sekaligus. */
-  --bayang-neu: 4px 4px 10px rgba(174, 174, 192, 0.25),
+  --bayang-neu: 4px 4px 10px rgba(23, 59, 85, 0.12),
     -4px -4px 10px rgba(255, 255, 255, 0.7);
-  --bayang-neu-kecil: 4px 4px 8px rgba(174, 174, 192, 0.4),
+  --bayang-neu-kecil: 4px 4px 8px rgba(23, 59, 85, 0.18),
     -4px -4px 8px rgba(255, 255, 255, 0.8);
-  --bayang-neu-dalam: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
+  --bayang-neu-dalam: inset 3px 3px 6px rgba(23, 59, 85, 0.14),
     inset -3px -3px 6px rgba(255, 255, 255, 0.7);
   --bayang-lembut: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
   --bayang-naik: 0 4px 14px rgba(0, 0, 0, 0.07);
-  --bayang-cta: 0 4px 14px rgba(34, 197, 94, 0.3);
-  --bayang-cta-naik: 0 6px 20px rgba(34, 197, 94, 0.4);
+  --bayang-cta: 0 4px 14px rgba(23, 59, 85, 0.25);
+  --bayang-cta-naik: 0 6px 20px rgba(23, 59, 85, 0.35);
 
   --r-kartu: 1.5rem;
   --r-kendali: 1rem;
@@ -105,14 +106,14 @@ body {
   margin: 0;
   background: var(--color-kertas);
   color: var(--color-tinta);
-  font-family: var(--font-raleway), system-ui, sans-serif;
+  font-family: var(--font-badan), system-ui, sans-serif;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-judul), system-ui, sans-serif;
 }
 
 * {
@@ -402,7 +403,7 @@ a:focus-visible {
   }
   .sel-input-padat:focus {
     border-color: var(--color-aksen);
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 0 2px rgba(169, 196, 108, 0.35);
   }
 
   /* Sel induk yang sedang terlipat: satu tombol selebar sel. */
@@ -416,7 +417,7 @@ a:focus-visible {
     width: 100%;
   }
   .sel-lipat:hover {
-    background: rgba(135, 206, 235, 0.16);
+    background: var(--color-sorot);
   }
 
   /* Lebar kolom tak bisa ditransisikan — jumlah trek grid-nya sendiri berubah.
@@ -454,7 +455,7 @@ a:focus-visible {
     border-right: 1px solid var(--color-garis);
   }
   .sekat-sub {
-    border-right: 1px solid rgba(45, 55, 72, 0.06);
+    border-right: 1px solid rgba(23, 59, 85, 0.06);
   }
 
   /* Dulu garis pemisah kolom. Di tata letak kartu tidak ada lagi garis: batas
@@ -496,7 +497,7 @@ a:focus-visible {
   }
   .sel-input:focus {
     border-color: var(--color-aksen);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
   }
 
   /* Input band tujuan di kepala kolom. */
@@ -514,7 +515,7 @@ a:focus-visible {
   }
   .band-input:focus {
     border-color: var(--color-aksen);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
   }
   /* Versi sempit untuk kepala tabel padat. */
   .band-input-padat {
@@ -545,7 +546,7 @@ a:focus-visible {
   }
   .isian:focus {
     border-color: var(--color-aksen);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+    box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
   }
 
   .tombol {
@@ -615,7 +616,7 @@ a:focus-visible {
     transition: box-shadow 0.15s;
   }
   .tombol-neu:hover {
-    box-shadow: 2px 2px 4px rgba(174, 174, 192, 0.4),
+    box-shadow: 2px 2px 4px rgba(23, 59, 85, 0.18),
       -2px -2px 4px rgba(255, 255, 255, 0.8);
   }
   .tombol-neu:active {
@@ -648,7 +649,7 @@ a:focus-visible {
   }
 
   .judul {
-    font-family: var(--font-lora), Georgia, serif;
+    font-family: var(--font-judul), system-ui, sans-serif;
     font-weight: 600;
     font-size: 22px;
     line-height: 1.2;
@@ -660,17 +661,6 @@ a:focus-visible {
     line-height: 1.6;
     color: var(--color-redup);
     text-wrap: pretty;
-  }
-
-  /* Teks bergradien langit → daun, untuk kata kunci pada judul. */
-  /* Langit → hijau. Referensinya memakai langit → daun, tapi itu hanya terbaca
-     pada judul raksasa; di sini judulnya 20–34px, jadi ujungnya digelapkan. */
-  .teks-gradien {
-    background: linear-gradient(135deg, var(--color-langit-gelap), var(--color-aksen));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
   }
 
   /* Ubin ikon/inisial bersudut, isi diwarnai lewat `style` sebaris. */
@@ -704,7 +694,7 @@ a:focus-visible {
     border-radius: 9999px;
     background: linear-gradient(
       90deg,
-      var(--color-langit),
+      var(--color-langit-gelap),
       var(--color-daun)
     );
   }

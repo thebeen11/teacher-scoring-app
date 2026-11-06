@@ -1,19 +1,21 @@
 import type { Metadata } from 'next'
-import { Archivo, Lora, Raleway } from 'next/font/google'
+import { Archivo, Outfit, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import { Locator } from '@/components/locator'
 
-const raleway = Raleway({
+// Badan teks: geometris netral, terbaca jelas di ukuran tabel 11–13px.
+const badan = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-raleway',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-badan',
   display: 'swap',
 })
 
-const lora = Lora({
+// Judul: sans geometris membulat, senada dengan huruf logo nilaiHub.
+const judul = Outfit({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-lora',
+  weight: ['500', '600', '700'],
+  variable: '--font-judul',
   display: 'swap',
 })
 
@@ -27,7 +29,10 @@ const archivo = Archivo({
 })
 
 export const metadata: Metadata = {
-  title: 'Olah Nilai',
+  title: 'nilaiHub by dodeclass',
+  applicationName: 'nilaiHub',
+  creator: 'dodeclass',
+  publisher: 'dodeclass',
   description:
     'Papan olah nilai: formatif, nilai sumatif, dan asesmen sumatif yang bermuara ke daftar nilai — semua variabel skala terlihat.',
 }
@@ -36,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="id"
-      className={`${raleway.variable} ${lora.variable} ${archivo.variable}`}
+      className={`${badan.variable} ${judul.variable} ${archivo.variable}`}
     >
       <body>
         {children}

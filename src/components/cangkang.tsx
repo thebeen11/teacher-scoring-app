@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import logoNilaiHub from "../../public/logo-nilaihub.png";
 import { usePathname } from "next/navigation";
 import { useKelas } from "@/lib/store";
 import Halaman from "@/components/halaman";
@@ -201,7 +203,7 @@ function KakiPanel({
 
       <div className="px-2 pb-3">
         <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1 text-[14px] font-semibold leading-[1.25] font-[family-name:var(--font-lora)] text-[color:var(--color-tinta)]">
+          <div className="min-w-0 flex-1 text-[14px] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
             {mapel} · Kelas {kelas.nama}
           </div>
         </div>
@@ -344,19 +346,14 @@ function PanelNav({
       <Link
         href="/"
         onClick={onPilih}
-        className="flex-none flex items-center gap-2.5 px-5 pt-[22px] pb-[18px] no-underline"
+        className="flex-none flex flex-col items-start px-5 pt-[22px] pb-[18px] no-underline"
       >
-        <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
-          <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
-        </span>
-        <span className="min-w-0">
-          <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)] text-[color:var(--color-tinta)]">
-            Olah Nilai
-          </span>
-          <span className="block text-[9.5px] font-bold leading-[1.4] tracking-[0.1em] text-[color:var(--color-samar)] mt-1.5 truncate">
-            {sekolah.toUpperCase()}
-          </span>
-        </span>
+        <Image
+          src={logoNilaiHub}
+          alt="nilaiHub"
+          loading="eager"
+          className="h-11 w-auto"
+        />
       </Link>
 
       <nav className="flex-1 min-h-0 flex flex-col pb-2.5 overflow-y-auto">
@@ -468,7 +465,7 @@ export default function Cangkang({
           <button
             aria-label="Tutup menu"
             onClick={() => setLaci(false)}
-            className="absolute inset-0 w-full h-full border-0 bg-[rgba(45,55,72,0.35)] cursor-pointer"
+            className="absolute inset-0 w-full h-full border-0 bg-[rgba(23,59,85,0.35)] cursor-pointer"
           />
           <aside className="laci absolute left-3 top-3 bottom-3 w-[272px] max-w-[calc(100vw-24px)] flex flex-col papan-neu bg-white p-0 overflow-hidden">
             <PanelNav {...panel} onPilih={() => setLaci(false)} />
@@ -493,7 +490,7 @@ export default function Cangkang({
               <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-semibold leading-[1.2] truncate font-[family-name:var(--font-lora)]">
+              <div className="text-[15px] font-semibold leading-[1.2] truncate font-[family-name:var(--font-judul)]">
                 {mapel}
               </div>
               <div className="mikro mt-0.5 truncate">
@@ -524,7 +521,7 @@ function RosterKosong({ kelasId }: { kelasId: string }) {
       <div className="papan p-6 sm:p-8">
         <div
           className="kotak-ikon w-14 h-14 mb-5"
-          style={{ background: "rgba(135, 206, 235, 0.2)" }}
+          style={{ background: "rgba(169, 196, 108, 0.2)" }}
         >
           <span className="text-[22px] font-semibold text-[color:var(--color-langit-gelap)]">
             +

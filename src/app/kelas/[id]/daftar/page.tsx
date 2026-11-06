@@ -47,7 +47,7 @@ export default function HalamanDaftar() {
       <KepalaHalaman
         judul={
           <>
-            Daftar <span className="teks-gradien">Nilai</span> Peserta Didik
+            Daftar Nilai Peserta Didik
           </>
         }
         aksi={

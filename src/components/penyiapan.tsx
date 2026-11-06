@@ -13,7 +13,7 @@ export default function Penyiapan() {
         Penyiapan · satu langkah lagi
       </div>
       <h1 className="text-[28px] sm:text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
-        Olah Nilai belum terhubung ke <span className="teks-gradien">Supabase</span>
+        nilaiHub belum terhubung ke Supabase
       </h1>
       <p className="keterangan mb-7">
         Kunci proyek tidak disimpan di repo. Isi sendiri, lalu muat ulang halaman ini.

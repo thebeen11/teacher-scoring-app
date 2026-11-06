@@ -1,5 +1,5 @@
 /**
- * Inti perhitungan Olah Nilai.
+ * Inti perhitungan nilaiHub.
  *
  * Modul ini murni: tidak menyentuh React maupun Supabase, sehingga bisa diuji
  * langsung dan dipakai ulang di server. Semua rumus di sini diverifikasi

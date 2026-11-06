@@ -7,7 +7,8 @@ import type { Lembar } from './ekspor'
 export async function unduhXlsx(berkas: string, lembar: Lembar[], kop: [string, string][]) {
   const { default: ExcelJS } = await import('exceljs')
   const wb = new ExcelJS.Workbook()
-  wb.creator = 'Olah Nilai'
+  wb.creator = 'nilaiHub by dodeclass'
+  wb.company = 'dodeclass'
   wb.created = new Date()
 
   const garis = { style: 'thin' as const, color: { argb: 'FF000000' } }

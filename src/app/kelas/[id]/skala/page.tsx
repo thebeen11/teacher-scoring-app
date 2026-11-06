@@ -57,7 +57,7 @@ export default function HalamanSkala() {
       <KepalaHalaman
         judul={
           <>
-            Skala &amp; <span className="teks-gradien">KKTP</span>
+            Skala &amp; KKTP
           </>
         }
         aksi={

@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import logoNilaiHub from '../../public/logo-nilaihub.png'
 import { daftarKelas } from '@/lib/data'
 import { penggunaSaatIni } from '@/lib/supabase/server'
 import { supabaseSiap } from '@/lib/env'
@@ -17,17 +19,15 @@ export default async function Beranda() {
     <div className="min-h-screen">
       <div className="w-full max-w-halaman mx-auto">
         <header className="flex items-center gap-3 sm:gap-5 mx-4 mt-4 px-4 py-4 sm:mx-6 sm:mt-6 sm:px-6 sm:py-5 papan">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
-              <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)]">
-                Olah Nilai
-              </span>
-              <span className="block mikro mt-1.5 truncate">
-                {meta.sekolah?.toUpperCase() || 'PAPAN NILAI GURU'}
-              </span>
+          <div className="flex flex-col items-start min-w-0">
+            <Image
+              src={logoNilaiHub}
+              alt="nilaiHub"
+              loading="eager"
+              className="h-10 sm:h-11 w-auto"
+            />
+            <span className="block max-w-full mikro mt-2 truncate">
+              {meta.sekolah?.toUpperCase() || 'PAPAN NILAI GURU'}
             </span>
           </div>
           <div className="ml-auto flex items-center gap-4 min-w-0">
@@ -46,7 +46,7 @@ export default async function Beranda() {
           <Halaman>
             <KepalaHalaman
               lengket={false}
-              judul={<>Semua <span className="teks-gradien">Kelas</span></>}
+              judul={<>Semua Kelas</>}
               keterangan="Setiap kelas membawa kolom nilai, rentang skala, dan KKTP-nya sendiri."
               aksi={
                 <Link href="/kelas/baru" className="tombol no-underline">
@@ -80,7 +80,7 @@ export default async function Beranda() {
                     className="papan papan-angkat p-6 no-underline"
                   >
                     <div className="flex items-baseline gap-2">
-                      <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-lora)]">
+                      <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-judul)]">
                         {k.nama}
                       </div>
                       <div className="mikro angka">{k.jumlahSiswa} SISWA</div>

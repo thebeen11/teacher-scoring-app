@@ -59,7 +59,7 @@ export default function TombolUnduh({ jenis }: { jenis: JenisEkspor }) {
     try {
       const { unduhXlsx } = await import("@/lib/unduh-xlsx");
       await unduhXlsx(
-        namaBerkas(kelas, semua ? "Olah Nilai" : JUDUL_BERKAS[jenis]),
+        namaBerkas(kelas, semua ? "nilaiHub" : JUDUL_BERKAS[jenis]),
         lembar,
         kopLembar(kelas, hasil),
       );

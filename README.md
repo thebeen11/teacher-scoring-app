@@ -1,4 +1,6 @@
-# Olah Nilai
+# nilaiHub
+
+_Bagian dari keluarga produk **dodeclass**._
 
 Aplikasi olah nilai untuk guru — pengganti workbook `OLAH NILAI.xlsx`.
 

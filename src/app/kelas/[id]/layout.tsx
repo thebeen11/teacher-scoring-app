@@ -26,7 +26,7 @@ export default async function LayoutKelas({
     <PenyediaKelas awal={data.grup} aktifId={id} semuaKelas={semuaKelas}>
       <Cangkang
         mapel={data.mapel.nama}
-        sekolah={meta.sekolah || 'Olah Nilai'}
+        sekolah={meta.sekolah || 'nilaiHub'}
         pengguna={{ nama: meta.nama || '', email: pengguna?.email || '' }}
         semuaKelas={semuaKelas}
       >
