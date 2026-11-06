@@ -71,7 +71,6 @@ export default function KepalaHalaman({
       <div className="flex flex-wrap items-center gap-4">
         <div className="min-w-0">
           <h1 className="judul">{judul}</h1>
-          {keterangan && <p className="keterangan mt-1.5">{keterangan}</p>}
         </div>
         {aksi && (
           <div className="ml-auto flex flex-wrap items-center gap-3 max-w-full">
