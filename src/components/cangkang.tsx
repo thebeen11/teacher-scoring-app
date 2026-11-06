@@ -44,6 +44,13 @@ const NAV: ItemNav[] = [
       { label: "Asesmen Akhir Semester", ruas: "akhir", ikon: "akhir" },
     ],
   },
+  {
+    label: "Nilai Kehadiran",
+    ruas: "kehadiran",
+    ikon: "kehadiran",
+    kelompok: "NILAI TAMBAHAN",
+  },
+  { label: "Nilai Keaktifan", ruas: "keaktifan", ikon: "keaktifan" },
   { label: "Daftar Nilai", ruas: "daftar", ikon: "daftar", kelompok: "HASIL" },
   // { label: "Rincian Siswa", ruas: "siswa" },
   {
@@ -315,7 +322,7 @@ function KakiPanel({
             {mapel} · Kelas {kelas.nama}
           </span>
           <span className="block mikro mt-1">
-            SMT {kelas.semester} · {kelas.tahunAjaran} · KKTP {kelas.kktp}
+            SMT {kelas.semester} · {kelas.tahunAjaran}
           </span>
         </span>
         <PanahSamping buka={buka} />

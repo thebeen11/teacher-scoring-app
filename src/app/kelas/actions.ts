@@ -330,7 +330,7 @@ export async function terapkanPengaturan(
   if (!Array.isArray(kelasIds) || kelasIds.length === 0) {
     return { galat: 'Pilih minimal satu kelas.' }
   }
-  const angka = [p.kktp, p.bobot.formatif, p.bobot.sumatif, p.bobot.tengah, p.bobot.akhir]
+  const angka = [p.kktp, p.bobot.formatif, p.bobot.sumatif, p.bobot.tengah, p.bobot.akhir, p.bobot.kehadiran]
   if (angka.some((v) => typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 100)) {
     return { galat: 'KKTP dan bobot harus berupa angka 0–100.' }
   }
@@ -344,6 +344,7 @@ export async function terapkanPengaturan(
       bobot_sumatif: p.bobot.sumatif,
       bobot_tengah: p.bobot.tengah,
       bobot_akhir: p.bobot.akhir,
+      bobot_kehadiran: p.bobot.kehadiran,
     })
     .in('id', kelasIds)
 

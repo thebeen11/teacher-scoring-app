@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import fixture from './__fixtures__/viii-a.json'
 import {
+  bonusKeaktifan,
   hitungAsesmen,
+  hitungKehadiran,
   hitungKelas,
   hitungNA,
   hitungSiswa,
@@ -10,6 +12,7 @@ import {
   skorBagian,
   kelengkapanKolom,
   komponenOf,
+  nilaiAkhir,
   nilaiRaport,
   peringkatNA,
   resc,
@@ -105,6 +108,7 @@ function bangunKelas(): Kelas {
       sumatif: fixture.bobot / 2,
       tengah: (100 - fixture.bobot) / 2,
       akhir: (100 - fixture.bobot) / 2,
+      kehadiran: 0,
     },
     naBandMin: fixture.naBand[0],
     naBandMax: fixture.naBand[1],
@@ -114,6 +118,8 @@ function bangunKelas(): Kelas {
     asesmen,
     skorKomponen,
     skorAsesmen,
+    totalPertemuan: 0,
+    skorTambahan: {},
   }
 }
 
@@ -210,23 +216,43 @@ describe('hitungNA — bobot empat bagian', () => {
 
   it('menimbang tiap bagian dengan bobotnya sendiri', () => {
     // 40×90 + 30×80 + 10×70 + 20×60 = 7900  ->  79
-    expect(hitungNA({ formatif: 40, sumatif: 30, tengah: 10, akhir: 20 }, nilai)).toBe(79)
+    expect(hitungNA({ formatif: 40, sumatif: 30, tengah: 10, akhir: 20, kehadiran: 0 }, nilai)).toBe(79)
   })
 
   it('bagian yang tidak ada keluar, bobot sisanya dibagi ulang', () => {
     // tanpa ASTS: (30×90 + 30×80 + 20×60) / 80 = 78,75
     expect(
-      hitungNA({ formatif: 30, sumatif: 30, tengah: 20, akhir: 20 }, { ...nilai, tengah: null }),
+      hitungNA({ formatif: 30, sumatif: 30, tengah: 20, akhir: 20, kehadiran: 0 }, { ...nilai, tengah: null }),
     ).toBe(78.75)
   })
 
   it('total ≠ 100 dibagi Σw, bukan 100', () => {
     // (50×90 + 50×80 + 50×70 + 50×60) / 200 = 75
-    expect(hitungNA({ formatif: 50, sumatif: 50, tengah: 50, akhir: 50 }, nilai)).toBe(75)
+    expect(hitungNA({ formatif: 50, sumatif: 50, tengah: 50, akhir: 50, kehadiran: 0 }, nilai)).toBe(75)
+  })
+
+  it('kehadiran ikut ditimbang bila bobotnya > 0', () => {
+    // (30×90 + 30×80 + 10×70 + 20×60 + 10×82,5) / 100 = 78,25
+    expect(
+      hitungNA(
+        { formatif: 30, sumatif: 30, tengah: 10, akhir: 20, kehadiran: 10 },
+        { ...nilai, kehadiran: 82.5 },
+      ),
+    ).toBeCloseTo(78.25)
+  })
+
+  it('kehadiran yang belum bisa dihitung keluar, bobot sisanya dibagi ulang', () => {
+    // (30×90 + 30×80 + 10×70 + 20×60) / 90
+    expect(
+      hitungNA(
+        { formatif: 30, sumatif: 30, tengah: 10, akhir: 20, kehadiran: 10 },
+        { ...nilai, kehadiran: null },
+      ),
+    ).toBeCloseTo(7000 / 90)
   })
 
   it('semua bobot nol menghasilkan 0, bukan NaN', () => {
-    expect(hitungNA({ formatif: 0, sumatif: 0, tengah: 0, akhir: 0 }, nilai)).toBe(0)
+    expect(hitungNA({ formatif: 0, sumatif: 0, tengah: 0, akhir: 0, kehadiran: 0 }, nilai)).toBe(0)
   })
 })
 
@@ -493,5 +519,112 @@ describe('kelengkapanAsesmen', () => {
     const n = kelas.siswa.length
     expect(kelengkapanAsesmen(bagian, 'ASTS')).toBeCloseTo(((n - 1) / n) * 100, 9)
     expect(kelengkapanAsesmen(langsung, 'ASTS')).toBeCloseTo((1 / n) * 100, 9)
+  })
+})
+
+describe('nilai tambahan', () => {
+  const t = (hadir: number, sakit: number, izin: number) => ({ hadir, sakit, izin, keaktifan: 0 })
+
+  it('kehadiran berbobot sesuai contoh spesifikasi: 15 H, 2 S, 1 I dari 20', () => {
+    const h = hitungKehadiran(t(15, 2, 1), 20)
+    expect(h.alpa).toBe(2)
+    expect(h.valid).toBe(true)
+    expect(h.nilai).toBeCloseTo(82.5)
+    expect(h.persenHadir).toBeCloseTo(75)
+  })
+
+  it('total pertemuan 0 belum bisa dinilai', () => {
+    const h = hitungKehadiran(t(0, 0, 0), 0)
+    expect(h.valid).toBe(false)
+    expect(h.nilai).toBeNull()
+    expect(h.persenHadir).toBeNull()
+  })
+
+  it('isian melebihi total pertemuan ditandai tidak valid', () => {
+    const h = hitungKehadiran(t(18, 2, 1), 20)
+    expect(h.alpa).toBe(-1)
+    expect(h.valid).toBe(false)
+    expect(h.nilai).toBeNull()
+  })
+
+  it('bonus keaktifan 0,5 per skor, maksimal 10', () => {
+    expect(bonusKeaktifan(0)).toBe(0)
+    expect(bonusKeaktifan(3)).toBe(1.5)
+    expect(bonusKeaktifan(10)).toBe(5)
+    expect(bonusKeaktifan(20)).toBe(10)
+    expect(bonusKeaktifan(25)).toBe(10)
+  })
+})
+
+describe('kehadiran di dalam NA', () => {
+  it('total pertemuan 0: NA sama persis dengan tanpa kehadiran', () => {
+    const dasar = bangunKelas()
+    const kelas = { ...dasar, bobot: { ...dasar.bobot, kehadiran: 10 } }
+    const peta = hitungBounds(kelas)
+    for (const s of kelas.siswa) {
+      expect(hitungSiswa(kelas, s, peta).na).toBeCloseTo(hitungSiswa(dasar, s, peta).na)
+    }
+  })
+
+  it('kehadiran terisi menggeser NA sesuai bobotnya', () => {
+    const dasar = bangunKelas()
+    const s = dasar.siswa[0]
+    const kelas: Kelas = {
+      ...dasar,
+      bobot: { ...dasar.bobot, kehadiran: 10 },
+      totalPertemuan: 20,
+      skorTambahan: { [s.id]: { hadir: 15, sakit: 2, izin: 1, keaktifan: 0 } },
+    }
+    const peta = hitungBounds(kelas)
+    const naLama = hitungSiswa(dasar, s, peta).na
+    const h = hitungSiswa(kelas, s, peta)
+    expect(h.kehadiran.nilai).toBeCloseTo(82.5)
+    expect(h.na).toBeCloseTo((naLama * 100 + 10 * 82.5) / 110)
+  })
+})
+
+describe('bonus keaktifan di nilai akhir', () => {
+  const dasar = bangunKelas()
+  const hasilDasar = hitungKelas(dasar)
+  const denganSkor = (skor: Record<string, number>): Kelas => ({
+    ...dasar,
+    skorTambahan: Object.fromEntries(
+      Object.entries(skor).map(([id, k]) => [id, { hadir: 0, sakit: 0, izin: 0, keaktifan: k }]),
+    ),
+  })
+
+  it('tanpa keaktifan, raport sama dengan rescale NA biasa', () => {
+    for (const b of hasilDasar.baris) {
+      expect(b.bonus).toBe(0)
+      expect(b.raport).toBe(nilaiRaport(b.na, hasilDasar.naRange, dasar))
+    }
+  })
+
+  it('bonus ditambahkan setelah rescale', () => {
+    // Siswa terendah: rescale-nya = RENTANG min, jauh dari batas atas.
+    const bawah = hasilDasar.baris.reduce((x, y) => (y.na < x.na ? y : x))
+    const h = hitungKelas(denganSkor({ [bawah.siswa.id]: 6 }))
+    const b = h.baris.find((x) => x.siswa.id === bawah.siswa.id)!
+    expect(b.bonus).toBe(3)
+    expect(b.nilaiAkhir).toBeCloseTo(nilaiAkhir(bawah.na, h.naRange, dasar) + 3)
+    expect(b.raport).toBe(Math.round(b.nilaiAkhir))
+    // Rentang NA tidak ikut bergeser karena bonus.
+    expect(h.naRange).toEqual(hasilDasar.naRange)
+  })
+
+  it('tidak melewati RENTANG maks, dan tidak pernah menurunkan nilai', () => {
+    const atas = hasilDasar.baris.reduce((x, y) => (y.na > x.na ? y : x))
+    const h = hitungKelas(denganSkor({ [atas.siswa.id]: 40 }))
+    const b = h.baris.find((x) => x.siswa.id === atas.siswa.id)!
+    expect(b.bonus).toBe(10)
+    expect(b.nilaiAkhir).toBeCloseTo(dasar.naBandMax)
+    expect(nilaiAkhir(0, [0, 10], { ...dasar, naBandMin: 95, naBandMax: 90 }, 5)).toBe(95)
+  })
+
+  it('peringkat mengikuti nilai akhir', () => {
+    const bawah = hasilDasar.baris.reduce((x, y) => (y.na < x.na ? y : x))
+    const h = hitungKelas(denganSkor({ [bawah.siswa.id]: 20 }))
+    const b = h.baris.find((x) => x.siswa.id === bawah.siswa.id)!
+    expect(b.peringkat).toBeLessThan(bawah.peringkat)
   })
 })

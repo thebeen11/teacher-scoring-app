@@ -20,7 +20,7 @@ function kelasUji(): Kelas {
     tahunAjaran: '2026/2027',
     semester: 1,
     kktp: 75,
-    bobot: { formatif: 30, sumatif: 30, tengah: 20, akhir: 20 },
+    bobot: { formatif: 30, sumatif: 30, tengah: 20, akhir: 20, kehadiran: 0 },
     naBandMin: 75,
     naBandMax: 95,
     sumberMinMaks: 'kelas',
@@ -47,6 +47,8 @@ function kelasUji(): Kelas {
       s1: { a1: { a: 10, b: 5, c: 20, skor: 0 }, a2: { a: 0, b: 0, c: 0, skor: 60 } },
       s2: { a1: { a: 15, b: 8, c: 25, skor: 0 }, a2: { a: 0, b: 0, c: 0, skor: 90 } },
     },
+    totalPertemuan: 0,
+    skorTambahan: {},
   }
 }
 
@@ -87,7 +89,13 @@ describe('ekspor', () => {
     const i = l.kolom.findIndex((k) => k.label === 'NA')
     const j = l.kolom.findIndex((k) => k.label === 'RAPORT')
     const p = l.kolom.findIndex((k) => k.label === 'PERINGKAT')
+    const h = l.kolom.findIndex((k) => k.label === 'KEHADIRAN')
+    const bn = l.kolom.findIndex((k) => k.label === 'BONUS')
+    expect(h).toBe(i - 1)
+    expect([i, bn, j]).toEqual([i, i + 1, i + 2])
     hasil.baris.forEach((b, r) => {
+      expect(l.baris[r][bn]).toBe(b.bonus)
+      expect(l.baris[r][h]).toBe(b.kehadiran.nilai)
       expect(l.baris[r][i]).toBe(b.na)
       expect(l.baris[r][p]).toBe(b.peringkat)
       expect(l.baris[r][j]).toBe(b.raport)

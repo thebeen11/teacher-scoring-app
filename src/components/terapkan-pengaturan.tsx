@@ -81,7 +81,8 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
           </div>
           <p className="keterangan mt-1.5 text-[0.8125rem]">
             Salin KKTP {kelas.kktp} dan bobot {kelas.bobot.formatif} :{" "}
-            {kelas.bobot.sumatif} : {kelas.bobot.tengah} : {kelas.bobot.akhir}{" "}
+            {kelas.bobot.sumatif} : {kelas.bobot.tengah} : {kelas.bobot.akhir} :{" "}
+            {kelas.bobot.kehadiran}{" "}
             dari kelas {kelas.nama} ke kelas yang dipilih.
           </p>
         </div>

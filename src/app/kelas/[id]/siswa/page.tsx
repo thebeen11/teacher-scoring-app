@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useKelas } from "@/lib/store";
 import Pilihan from "@/components/pilihan";
 import { n } from "@/lib/format";
+import { tambahanMentah } from "@/lib/nilai";
 import Halaman from "@/components/halaman";
 import { ChipStatus } from "@/components/chip-status";
 
@@ -30,6 +31,7 @@ export default function HalamanSiswa() {
   if (!b) return null;
 
   const [naMin, naMax] = hasil.naRange;
+  const t = tambahanMentah(kelas, b.siswa.id);
   const w = kelas.bobot;
   // Hanya bagian yang ada di kelas ini — sama dengan yang dipakai hitungNA().
   const sukuNA = [
@@ -37,6 +39,7 @@ export default function HalamanSiswa() {
     b.lingkup.length ? { w: w.sumatif, v: b.rtNS } : null,
     b.rtTengah !== null ? { w: w.tengah, v: b.rtTengah } : null,
     b.rtAkhir !== null ? { w: w.akhir, v: b.rtAkhir } : null,
+    b.kehadiran.nilai !== null ? { w: w.kehadiran, v: b.kehadiran.nilai } : null,
   ].filter((x) => x !== null);
   const penyebutNA = sukuNA.reduce((t, x) => t + x.w, 0);
 
@@ -79,15 +82,31 @@ export default function HalamanSiswa() {
       nilai: n(a.nilai),
     })),
     {
+      kode: "H",
+      label: "Kehadiran, kredit H 1 · S 0,5 · I 0,5 · A 0",
+      detail:
+        kelas.totalPertemuan > 0
+          ? `H ${t.hadir} · S ${t.sakit} · I ${t.izin} · A ${b.kehadiran.alpa} dari ${kelas.totalPertemuan} pertemuan`
+          : "Total pertemuan belum diisi",
+      nilai: b.kehadiran.nilai === null ? "—" : n(b.kehadiran.nilai),
+    },
+    {
       kode: "NA",
-      label: "Nilai akhir, bobot formatif : sumatif : AST : AAS",
+      label: "Nilai akhir, bobot formatif : sumatif : AST : AAS : kehadiran",
       detail: `(${sukuNA.map((x) => `${x.w}×${n(x.v)}`).join(" + ")}) ÷ ${penyebutNA}`,
       nilai: n(b.na),
     },
     {
       kode: "RAPORT",
-      label: "NA direscale ke rentang raport, dibulatkan",
-      detail: `NA ${n(naMin)}–${n(naMax)}  →  rentang ${n(kelas.naBandMin, 0)}–${n(kelas.naBandMax, 0)}`,
+      label:
+        b.bonus > 0
+          ? "NA direscale ke rentang raport, + bonus keaktifan, dibulatkan"
+          : "NA direscale ke rentang raport, dibulatkan",
+      detail:
+        `NA ${n(naMin)}–${n(naMax)}  →  rentang ${n(kelas.naBandMin, 0)}–${n(kelas.naBandMax, 0)}` +
+        (b.bonus > 0
+          ? `  ·  + bonus ${n(b.bonus)} (maks ${n(kelas.naBandMax, 0)}) = ${n(b.nilaiAkhir)}`
+          : ""),
       nilai: String(b.raport),
       aksen: true,
     },

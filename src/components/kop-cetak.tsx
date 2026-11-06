@@ -57,7 +57,7 @@ export default function KopCetak({
           <span className="mikro">BOBOT </span>
           <strong className="angka">
             F {kelas.bobot.formatif} · S {kelas.bobot.sumatif} · AST {kelas.bobot.tengah} · AAS{' '}
-            {kelas.bobot.akhir}
+            {kelas.bobot.akhir} · H {kelas.bobot.kehadiran}
           </strong>
         </div>
         <div>

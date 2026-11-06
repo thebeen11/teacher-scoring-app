@@ -75,6 +75,8 @@ export type Bobot = {
   tengah: number
   /** Asesmen akhir semester/tahun (ASAS atau ASAT). */
   akhir: number
+  /** Nilai kehadiran (kategori Nilai Tambahan). */
+  kehadiran: number
 }
 
 export type Kelas = {
@@ -95,7 +97,17 @@ export type Kelas = {
   skorKomponen: Record<string, Record<string, number>>
   /** siswaId -> asesmenId -> butir A/B/C */
   skorAsesmen: Record<string, Record<string, ButirAsesmen>>
+  /** Total pertemuan semester (T) untuk nilai kehadiran; 0 = belum diisi. */
+  totalPertemuan: number
+  /** siswaId -> isian nilai tambahan (kehadiran + keaktifan) */
+  skorTambahan: Record<string, Tambahan>
 }
+
+/**
+ * Isian mentah nilai tambahan satu siswa. Alpa tidak ada di sini: ia selalu
+ * T − H − S − I, dihitung oleh hitungKehadiran().
+ */
+export type Tambahan = { hadir: number; sakit: number; izin: number; keaktifan: number }
 
 export type Rentang = readonly [number, number]
 
@@ -168,6 +180,57 @@ export function skorKolom(kelas: Kelas, siswaId: string, kolom: Komponen): numbe
 export function butirMentah(kelas: Kelas, siswaId: string, asesmenId: string): ButirAsesmen {
   const b = kelas.skorAsesmen[siswaId]?.[asesmenId]
   return { a: angka(b?.a), b: angka(b?.b), c: angka(b?.c), skor: angka(b?.skor) }
+}
+
+export function tambahanMentah(kelas: Kelas, siswaId: string): Tambahan {
+  const t = kelas.skorTambahan?.[siswaId]
+  return {
+    hadir: angka(t?.hadir),
+    sakit: angka(t?.sakit),
+    izin: angka(t?.izin),
+    keaktifan: angka(t?.keaktifan),
+  }
+}
+
+// --------------------------------------------------------- nilai tambahan --
+
+export type HasilKehadiran = {
+  /** T − H − S − I; negatif bila isian melebihi total pertemuan. */
+  alpa: number
+  /** H + S + I ≤ T dan T > 0. */
+  valid: boolean
+  /** Skor kehadiran berbobot (H 1 · S 0,5 · I 0,5 · A 0); null bila tidak valid. */
+  nilai: number | null
+  /** Persentase hadir aktual H ÷ T × 100; null bila tidak valid. */
+  persenHadir: number | null
+}
+
+/**
+ * NH = (H + 0,5·S + 0,5·I) ÷ T × 100.
+ *
+ * Ini skor berbobot, bukan persentase hadir — sakit dan izin tetap memberi
+ * separuh kredit. Persentase hadir aktual dihitung terpisah supaya keduanya
+ * tidak tertukar di layar. Tidak dibulatkan: pembulatan hanya di nilai akhir.
+ */
+export function hitungKehadiran(t: Tambahan, totalPertemuan: number): HasilKehadiran {
+  const T = angka(totalPertemuan)
+  const alpa = T - t.hadir - t.sakit - t.izin
+  const valid = T > 0 && alpa >= 0
+  if (!valid) return { alpa, valid, nilai: null, persenHadir: null }
+  return {
+    alpa,
+    valid,
+    nilai: ((t.hadir + 0.5 * t.sakit + 0.5 * t.izin) / T) * 100,
+    persenHadir: (t.hadir / T) * 100,
+  }
+}
+
+/** Bonus maksimum keaktifan. */
+export const BONUS_MAKS = 10
+
+/** B = min(skor × 0,5; 10) — bonus di luar bobot akademis. */
+export function bonusKeaktifan(skor: number): number {
+  return Math.min(Math.max(angka(skor), 0) * 0.5, BONUS_MAKS)
 }
 
 // ----------------------------------------------------------------- bounds --
@@ -282,11 +345,12 @@ export type HasilSiswa = {
   rtTengah: number | null
   /** Rerata ASAS/ASAT; null bila kelas tidak punya keduanya. */
   rtAkhir: number | null
+  kehadiran: HasilKehadiran
   na: number
 }
 
 export function totalBobot(b: Bobot): number {
-  return b.formatif + b.sumatif + b.tengah + b.akhir
+  return b.formatif + b.sumatif + b.tengah + b.akhir + b.kehadiran
 }
 
 /**
@@ -299,13 +363,20 @@ export function totalBobot(b: Bobot): number {
  */
 export function hitungNA(
   bobot: Bobot,
-  bagian: { formatif: number | null; sumatif: number | null; tengah: number | null; akhir: number | null },
+  bagian: {
+    formatif: number | null
+    sumatif: number | null
+    tengah: number | null
+    akhir: number | null
+    /** Skor kehadiran; null/absen bila belum bisa dihitung (T = 0 dsb.). */
+    kehadiran?: number | null
+  },
 ): number {
   let pembilang = 0
   let penyebut = 0
-  for (const k of ['formatif', 'sumatif', 'tengah', 'akhir'] as const) {
+  for (const k of ['formatif', 'sumatif', 'tengah', 'akhir', 'kehadiran'] as const) {
     const v = bagian[k]
-    if (v === null) continue
+    if (v === null || v === undefined) continue
     pembilang += bobot[k] * v
     penyebut += bobot[k]
   }
@@ -366,22 +437,32 @@ export function hitungSiswa(kelas: Kelas, siswa: Siswa, peta: PetaBounds): Hasil
   const rtTengah = tengah.length ? mean(tengah.map((a) => a.nilai)) : null
   const rtAkhir = akhir.length ? mean(akhir.map((a) => a.nilai)) : null
 
+  // Kehadiran yang belum bisa dihitung (total pertemuan 0, atau isian melebihi
+  // T) keluar dari NA seperti bagian yang tidak ada — bukan terbaca nol.
+  const kehadiran = hitungKehadiran(tambahanMentah(kelas, siswa.id), kelas.totalPertemuan)
+
   const na = hitungNA(kelas.bobot, {
     formatif: formatif.length ? rtF : null,
     sumatif: lingkup.length ? rtNS : null,
     tengah: rtTengah,
     akhir: rtAkhir,
+    kehadiran: kehadiran.nilai,
   })
 
-  return { siswa, formatif, lingkup, asesmen, rtF, rtNS, rtA, rtTengah, rtAkhir, na }
+  return { siswa, formatif, lingkup, asesmen, rtF, rtNS, rtA, rtTengah, rtAkhir, kehadiran, na }
 }
 
 // ------------------------------------------------------- hitung per kelas --
 
 export type BarisNilai = HasilSiswa & {
+  /** Bonus keaktifan, min(skor × 0,5; 10). */
+  bonus: number
+  /** NA direscale ke rentang raport + bonus, dibatasi RENTANG maks; belum dibulatkan. */
+  nilaiAkhir: number
+  /** nilaiAkhir dibulatkan. */
   raport: number
   tuntas: boolean
-  /** 1 = NA tertinggi sekelas; NA sama berbagi peringkat (1, 2, 2, 4). */
+  /** 1 = nilai akhir tertinggi sekelas; nilai sama berbagi peringkat (1, 2, 2, 4). */
   peringkat: number
 }
 
@@ -410,8 +491,22 @@ export function naRange(kelas: Kelas, grup: Kelas[] = [kelas]): Rentang {
   return [Math.min(...nilai), Math.max(...nilai)]
 }
 
-export function nilaiRaport(na: number, rentang: Rentang, kelas: Kelas): number {
-  return Math.round(resc(na, rentang[0], rentang[1], kelas.naBandMin, kelas.naBandMax))
+/**
+ * Nilai akhir sebelum dibulatkan: NA direscale ke rentang raport, lalu ditambah
+ * bonus keaktifan.
+ *
+ * Bonus ditambahkan SETELAH rescale. Kalau ditambahkan ke NA, min/maks kelas
+ * ikut bergeser dan menelan sebagian bonusnya — bila semua siswa mendapat +5,
+ * tidak ada raport yang berubah sama sekali. Hasilnya dibatasi RENTANG maks,
+ * tetapi tidak pernah diturunkan: bonus tidak boleh mengurangi nilai siapa pun.
+ */
+export function nilaiAkhir(na: number, rentang: Rentang, kelas: Kelas, bonus = 0): number {
+  const dasar = resc(na, rentang[0], rentang[1], kelas.naBandMin, kelas.naBandMax)
+  return Math.max(dasar, Math.min(dasar + bonus, kelas.naBandMax))
+}
+
+export function nilaiRaport(na: number, rentang: Rentang, kelas: Kelas, bonus = 0): number {
+  return Math.round(nilaiAkhir(na, rentang, kelas, bonus))
 }
 
 /**
@@ -442,10 +537,16 @@ export function hitungKelas(kelas: Kelas, grup: Kelas[] = [kelas]): HasilKelas {
         ? [0, 0]
         : [Math.min(...hasil.map((h) => h.na)), Math.max(...hasil.map((h) => h.na))]
 
-  const peringkat = peringkatNA(hasil.map((h) => h.na))
+  const akhir = hasil.map((h) => {
+    const bonus = bonusKeaktifan(tambahanMentah(kelas, h.siswa.id).keaktifan)
+    return { bonus, nilaiAkhir: nilaiAkhir(h.na, rentang, kelas, bonus) }
+  })
+
+  // Peringkat mengikuti nilai akhir, jadi bonus keaktifan bisa menggeser urutan.
+  const peringkat = peringkatNA(akhir.map((a) => a.nilaiAkhir))
   const baris: BarisNilai[] = hasil.map((h, i) => {
-    const raport = nilaiRaport(h.na, rentang, kelas)
-    return { ...h, raport, tuntas: raport >= kelas.kktp, peringkat: peringkat[i] }
+    const raport = Math.round(akhir[i].nilaiAkhir)
+    return { ...h, ...akhir[i], raport, tuntas: raport >= kelas.kktp, peringkat: peringkat[i] }
   })
 
   const jumlahTuntas = baris.filter((b) => b.tuntas).length

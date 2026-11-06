@@ -29,9 +29,11 @@ type BarisKelas = {
   bobot_sumatif: number
   bobot_tengah: number
   bobot_akhir: number
+  bobot_kehadiran: number | null
   na_band_min: number
   na_band_max: number
   sumber_minmaks: 'kelas' | 'sekolah'
+  total_pertemuan: number | null
 }
 
 export type Mapel = { id: string; nama: string }
@@ -51,6 +53,7 @@ function rakitKelas(
   asesmen: Asesmen[],
   skorKomponen: Kelas['skorKomponen'],
   skorAsesmen: Kelas['skorAsesmen'],
+  skorTambahan: Kelas['skorTambahan'],
 ): Kelas {
   return {
     id: k.id,
@@ -64,6 +67,7 @@ function rakitKelas(
       sumatif: Number(k.bobot_sumatif),
       tengah: Number(k.bobot_tengah),
       akhir: Number(k.bobot_akhir),
+      kehadiran: Number(k.bobot_kehadiran ?? 0),
     },
     naBandMin: Number(k.na_band_min),
     naBandMax: Number(k.na_band_max),
@@ -73,6 +77,8 @@ function rakitKelas(
     asesmen,
     skorKomponen,
     skorAsesmen,
+    totalPertemuan: Number(k.total_pertemuan ?? 0),
+    skorTambahan,
   }
 }
 
@@ -87,17 +93,25 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
 
   if (!fokus) return null
 
-  const [{ data: mapel }, { data: kelasRows }] = await Promise.all([
-    supabase.from('mapel').select('id, nama').eq('id', fokus.mapel_id).maybeSingle(),
+  const KOLOM_KELAS =
+    'id, mapel_id, nama, tahun_ajaran, semester, kktp, bobot_formatif, bobot_sumatif, bobot_tengah, bobot_akhir, na_band_min, na_band_max, sumber_minmaks'
+  const kueriKelas = (kolom: string) =>
     supabase
       .from('kelas')
-      .select(
-        'id, mapel_id, nama, tahun_ajaran, semester, kktp, bobot_formatif, bobot_sumatif, bobot_tengah, bobot_akhir, na_band_min, na_band_max, sumber_minmaks',
-      )
+      .select(kolom)
       .eq('mapel_id', fokus.mapel_id)
       .eq('semester', fokus.semester)
-      .order('nama'),
+      .order('nama')
+      .returns<BarisKelas[]>()
+
+  const [{ data: mapel }, hasilKelas] = await Promise.all([
+    supabase.from('mapel').select('id, nama').eq('id', fokus.mapel_id).maybeSingle(),
+    kueriKelas(`${KOLOM_KELAS}, bobot_kehadiran, total_pertemuan`),
   ])
+  // Sebelum migrasi nilai_tambahan dijalankan, kedua kolom itu belum ada dan
+  // kueri gagal total — jangan sampai seluruh halaman kelas jadi 404.
+  let kelasRows = hasilKelas.data
+  if (hasilKelas.error) kelasRows = (await kueriKelas(KOLOM_KELAS)).data
 
   if (!mapel || !kelasRows?.length) return null
 
@@ -111,12 +125,15 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
 
   const siswaIds = (siswaRows ?? []).map((s) => s.id)
 
-  const [{ data: nkRows }, { data: naRows }] = siswaIds.length
+  // Galat nilai_tambahan (mis. migrasinya belum dijalankan) dibaca sebagai
+  // kosong: halaman nilai lain tidak boleh ikut gagal karenanya.
+  const [{ data: nkRows }, { data: naRows }, { data: ntRows }] = siswaIds.length
     ? await Promise.all([
         supabase.from('nilai_komponen').select('*').in('siswa_id', siswaIds),
         supabase.from('nilai_asesmen').select('*').in('siswa_id', siswaIds),
+        supabase.from('nilai_tambahan').select('*').in('siswa_id', siswaIds),
       ])
-    : [{ data: [] }, { data: [] }]
+    : [{ data: [] }, { data: [] }, { data: [] }]
 
   // Kelompokkan sekali, lalu rakit tiap kelas.
   const perKelas = <T extends { kelas_id: string }>(rows: T[] | null) => {
@@ -144,6 +161,16 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
       b: Number(r.b),
       c: Number(r.c),
       skor: Number(r.skor_langsung ?? 0),
+    }
+  }
+
+  const skorTambahanGlobal: Kelas['skorTambahan'] = {}
+  for (const r of ntRows ?? []) {
+    skorTambahanGlobal[r.siswa_id] = {
+      hadir: Number(r.hadir ?? 0),
+      sakit: Number(r.sakit ?? 0),
+      izin: Number(r.izin ?? 0),
+      keaktifan: Number(r.keaktifan ?? 0),
     }
   }
 
@@ -184,12 +211,15 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
     // Hanya bawa skor milik siswa kelas ini.
     const skorKomponen: Kelas['skorKomponen'] = {}
     const skorAsesmen: Kelas['skorAsesmen'] = {}
+    const skorTambahan: Kelas['skorTambahan'] = {}
     for (const s of siswa) {
       skorKomponen[s.id] = skorKomponenGlobal[s.id] ?? {}
       skorAsesmen[s.id] = skorAsesmenGlobal[s.id] ?? {}
+      const t = skorTambahanGlobal[s.id]
+      if (t) skorTambahan[s.id] = t
     }
 
-    return rakitKelas(k, siswa, komponen, asesmen, skorKomponen, skorAsesmen)
+    return rakitKelas(k, siswa, komponen, asesmen, skorKomponen, skorAsesmen, skorTambahan)
   })
 
   const aktif = grup.find((k) => k.id === kelasId)

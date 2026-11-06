@@ -83,12 +83,33 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       kelas: REDUP,
     },
     {
+      // Nilai Tambahan; "–" bila total pertemuan belum diisi atau isiannya
+      // melebihi T — saat itu kehadiran juga tidak ikut NA.
+      kunci: 'kehadiran',
+      label: 'KEHADIRAN',
+      lebar: 'auto',
+      lebarCetak: 'w-24 flex-none',
+      sekat: true,
+      isi: (b) => (b.kehadiran.nilai === null ? '–' : n(b.kehadiran.nilai)),
+      kelas: REDUP,
+    },
+    {
       kunci: 'na',
       label: 'NA',
       lebar: 'auto',
       lebarCetak: 'w-[5.25rem] flex-none',
       isi: (b) => n(b.na),
       kelas: 'text-[0.9375rem] font-bold angka',
+    },
+    {
+      // Bonus keaktifan, ditambahkan ke NA yang sudah direscale (lihat
+      // nilaiAkhir), jadi kolomnya duduk tepat sebelum RAPORT.
+      kunci: 'bonus',
+      label: 'BONUS',
+      lebar: 'auto',
+      lebarCetak: 'w-20 flex-none',
+      isi: (b) => (b.bonus > 0 ? `+${n(b.bonus)}` : n(0)),
+      kelas: REDUP,
     },
     {
       kunci: 'raport',

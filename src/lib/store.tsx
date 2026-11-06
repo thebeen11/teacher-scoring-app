@@ -17,6 +17,7 @@ import {
   type ButirAsesmen,
   type ModeAsesmen,
   type HasilKelas,
+  type Tambahan,
   type Kelas,
   type Bobot,
   type SumberMinMaks,
@@ -41,6 +42,7 @@ export type StatusSimpan = 'bersih' | 'menyimpan' | 'tersimpan' | 'galat'
 type Antrean =
   | { tabel: 'nilai_komponen'; siswaId: string; komponenId: string; skor: number }
   | { tabel: 'nilai_asesmen'; siswaId: string; asesmenId: string; butir: ButirAsesmen }
+  | { tabel: 'nilai_tambahan'; siswaId: string; tambahan: Tambahan }
   | { tabel: 'komponen'; komponenId: string; bandMin: number; bandMax: number }
   | { tabel: 'asesmen'; asesmenId: string; kolom: { mode?: ModeAsesmen; band_min?: number; band_max?: number } }
   | { tabel: 'kelas'; kelasId: string; kolom: Record<string, number | string> }
@@ -54,6 +56,7 @@ type Nilai = {
   status: StatusSimpan
   setSkor: (siswaId: string, komponenId: string, skor: number) => void
   setButir: (siswaId: string, asesmenId: string, butir: ButirAsesmen) => void
+  setTambahan: (siswaId: string, tambahan: Tambahan) => void
   setModeAsesmen: (asesmenId: string, mode: ModeAsesmen) => void
   setBand: (komponenId: string, bandMin: number, bandMax: number) => void
   setBandAsesmen: (asesmenId: string, bandMin: number, bandMax: number) => void
@@ -69,6 +72,7 @@ export type PengaturanKelas = {
   naBandMin: number
   naBandMax: number
   sumberMinMaks: SumberMinMaks
+  totalPertemuan: number
 }
 
 const Konteks = createContext<Nilai | null>(null)
@@ -135,6 +139,7 @@ export function PenyediaKelas({
     const kmp = tugas.filter((t) => t.tabel === 'komponen')
     const kls = tugas.filter((t) => t.tabel === 'kelas')
     const ases = tugas.filter((t) => t.tabel === 'asesmen')
+    const nt = tugas.filter((t) => t.tabel === 'nilai_tambahan')
 
     const hasil = await Promise.all([
       nk.length
@@ -160,6 +165,19 @@ export function PenyediaKelas({
               updated_at: new Date().toISOString(),
             })),
             { onConflict: 'siswa_id,asesmen_id' },
+          )
+        : null,
+      nt.length
+        ? supabase.from('nilai_tambahan').upsert(
+            nt.map((t) => ({
+              siswa_id: t.siswaId,
+              hadir: t.tambahan.hadir,
+              sakit: t.tambahan.sakit,
+              izin: t.tambahan.izin,
+              keaktifan: t.tambahan.keaktifan,
+              updated_at: new Date().toISOString(),
+            })),
+            { onConflict: 'siswa_id' },
           )
         : null,
       ...kmp.map((t) =>
@@ -254,6 +272,17 @@ export function PenyediaKelas({
     [jadwalkan, ubahAktif],
   )
 
+  const setTambahan = useCallback(
+    (siswaId: string, tambahan: Tambahan) => {
+      ubahAktif((k) => ({
+        ...k,
+        skorTambahan: { ...k.skorTambahan, [siswaId]: tambahan },
+      }))
+      jadwalkan(`nt:${siswaId}`, { tabel: 'nilai_tambahan', siswaId, tambahan })
+    },
+    [jadwalkan, ubahAktif],
+  )
+
   /*
    * Pindah ke mode 'langsung' membawa SKOR yang baru saja terlihat di mode
    * 'bagian', supaya angkanya tidak tiba-tiba menjadi nol. Siswa yang belum
@@ -335,9 +364,11 @@ export function PenyediaKelas({
       if (p.bobot?.sumatif !== undefined) kolom.bobot_sumatif = p.bobot.sumatif
       if (p.bobot?.tengah !== undefined) kolom.bobot_tengah = p.bobot.tengah
       if (p.bobot?.akhir !== undefined) kolom.bobot_akhir = p.bobot.akhir
+      if (p.bobot?.kehadiran !== undefined) kolom.bobot_kehadiran = p.bobot.kehadiran
       if (p.naBandMin !== undefined) kolom.na_band_min = p.naBandMin
       if (p.naBandMax !== undefined) kolom.na_band_max = p.naBandMax
       if (p.sumberMinMaks !== undefined) kolom.sumber_minmaks = p.sumberMinMaks
+      if (p.totalPertemuan !== undefined) kolom.total_pertemuan = p.totalPertemuan
 
       // Digabung per-kolom supaya menggeser penggeser bobot tidak menumpuk tugas.
       const sebelumnya = antrean.current.get(`kls:${aktifId}`)
@@ -381,13 +412,14 @@ export function PenyediaKelas({
       status,
       setSkor,
       setButir,
+      setTambahan,
       setModeAsesmen,
       setBand,
       setBandAsesmen,
       setPengaturan,
       salinPengaturan,
     }),
-    [kelas, grup, semuaKelas, hasil, status, setSkor, setButir, setModeAsesmen, setBand, setBandAsesmen, setPengaturan, salinPengaturan],
+    [kelas, grup, semuaKelas, hasil, status, setSkor, setButir, setTambahan, setModeAsesmen, setBand, setBandAsesmen, setPengaturan, salinPengaturan],
   )
 
   return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>

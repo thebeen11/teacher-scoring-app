@@ -39,9 +39,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+    // Ekstensi peramban LocatorJS menulis `data-locator-target` ke <html>
+    // sebelum React hidrasi. suppressHydrationWarning hanya meredam atribut
+    // elemen ini sendiri (satu tingkat), bukan anak-anaknya.
     <html
       lang="id"
       className={`${badan.variable} ${judul.variable} ${archivo.variable}`}
+      suppressHydrationWarning
     >
       <body>
         {children}

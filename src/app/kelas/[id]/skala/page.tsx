@@ -10,11 +10,19 @@ import KepalaHalaman from "@/components/kepala-halaman";
 import DialogTerapkan from "@/components/terapkan-pengaturan";
 
 const BAGIAN = [
-  { kunci: "formatif", label: "Formatif" },
-  { kunci: "sumatif", label: "Sumatif" },
-  { kunci: "tengah", label: "Asesmen Tengah Semester" },
-  { kunci: "akhir", label: "Asesmen Akhir Semester" },
-] as const satisfies readonly { kunci: keyof Bobot; label: string }[];
+  { kunci: "formatif", label: "Formatif", kategori: "Nilai Akademis" },
+  { kunci: "sumatif", label: "Sumatif", kategori: "Nilai Akademis" },
+  { kunci: "tengah", label: "Asesmen Tengah Semester", kategori: "Nilai Akademis" },
+  { kunci: "akhir", label: "Asesmen Akhir Semester", kategori: "Nilai Akademis" },
+  { kunci: "kehadiran", label: "Kehadiran", kategori: "Nilai Tambahan" },
+] as const satisfies readonly { kunci: keyof Bobot; label: string; kategori: string }[];
+
+/** Jumlah baris berturut-turut berkategori sama, mulai dari indeks i. */
+function rentangKategori(i: number): number {
+  let j = i;
+  while (j < BAGIAN.length && BAGIAN[j].kategori === BAGIAN[i].kategori) j++;
+  return j - i;
+}
 
 /**
  * Skala & KKTP — satu papan untuk seluruh variabel yang membentuk nilai akhir:
@@ -81,6 +89,9 @@ export default function HalamanSkala() {
                   <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left w-px whitespace-nowrap mikro">
                     NO
                   </th>
+                  <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left w-px whitespace-nowrap mikro">
+                    KATEGORI
+                  </th>
                   <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left mikro">
                     KOMPONEN NILAI
                   </th>
@@ -98,6 +109,16 @@ export default function HalamanSkala() {
                     <td className="border border-[color:var(--color-garis)] px-4 py-2.5 angka">
                       {i + 1}
                     </td>
+                    {/* Kategori ditulis sekali per kelompok, membentang ke
+                        baris-baris di bawahnya. */}
+                    {(i === 0 || BAGIAN[i - 1].kategori !== g.kategori) && (
+                      <td
+                        rowSpan={rentangKategori(i)}
+                        className="border border-[color:var(--color-garis)] px-4 py-2.5 align-top whitespace-nowrap font-semibold text-[color:var(--color-redup)] bg-[color:var(--color-papan)]"
+                      >
+                        {g.kategori}
+                      </td>
+                    )}
                     <td className="border border-[color:var(--color-garis)] px-4 py-2.5 font-semibold">
                       {g.label}
                     </td>
@@ -140,7 +161,7 @@ export default function HalamanSkala() {
                   }}
                 >
                   <th
-                    colSpan={2}
+                    colSpan={3}
                     className="border border-[color:var(--color-garis)] px-4 py-3 text-left mikro"
                     style={{ color: "inherit" }}
                   >
