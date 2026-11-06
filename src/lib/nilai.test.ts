@@ -11,6 +11,7 @@ import {
   kelengkapanKolom,
   komponenOf,
   nilaiRaport,
+  peringkatNA,
   resc,
   mean,
   skorKolom,
@@ -141,6 +142,18 @@ describe('resc', () => {
 describe('mean', () => {
   it('mengembalikan 0 untuk daftar kosong, bukan NaN', () => {
     expect(mean([])).toBe(0)
+  })
+})
+
+describe('peringkatNA', () => {
+  it('NA tertinggi = 1, NA sama berbagi peringkat lalu melompat', () => {
+    expect(peringkatNA([70, 90, 80, 80, 60])).toEqual([4, 1, 2, 2, 5])
+  })
+  it('dibandingkan pada satu desimal yang tampil', () => {
+    expect(peringkatNA([84.31, 84.34, 84.4])).toEqual([2, 2, 1])
+  })
+  it('daftar kosong', () => {
+    expect(peringkatNA([])).toEqual([])
   })
 })
 

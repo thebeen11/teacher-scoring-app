@@ -133,6 +133,7 @@ export function lembarDaftar(kelas: Kelas, hasil: HasilKelas): Lembar {
     { label: 'NA' },
     { label: 'RAPORT', bulat: true },
     { label: 'STATUS', teks: true },
+    { label: 'PERINGKAT', bulat: true },
   ]
 
   const baris = hasil.baris.map((b): Sel[] => [
@@ -145,6 +146,7 @@ export function lembarDaftar(kelas: Kelas, hasil: HasilKelas): Lembar {
     b.na,
     b.raport,
     b.tuntas ? 'TUNTAS' : 'BELUM',
+    b.peringkat,
   ])
 
   return { judul: 'DAFTAR NILAI PESERTA DIDIK', namaSheet: 'Daftar Nilai', kolom, baris }

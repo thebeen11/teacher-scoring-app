@@ -86,10 +86,12 @@ describe('ekspor', () => {
     const l = lembarDaftar(kelas, hasil)
     const i = l.kolom.findIndex((k) => k.label === 'NA')
     const j = l.kolom.findIndex((k) => k.label === 'RAPORT')
+    const p = l.kolom.findIndex((k) => k.label === 'PERINGKAT')
     hasil.baris.forEach((b, r) => {
       expect(l.baris[r][i]).toBe(b.na)
+      expect(l.baris[r][p]).toBe(b.peringkat)
       expect(l.baris[r][j]).toBe(b.raport)
-      expect(l.baris[r].at(-1)).toBe(b.tuntas ? 'TUNTAS' : 'BELUM')
+      expect(l.baris[r].at(-2)).toBe(b.tuntas ? 'TUNTAS' : 'BELUM')
     })
     // Setiap baris selebar kepalanya.
     for (const lb of semuaLembar(kelas, hasil)) for (const b of lb.baris) expect(b).toHaveLength(lb.kolom.length)
