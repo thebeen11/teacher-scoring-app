@@ -4,11 +4,11 @@ import logoNilaiHub from "../../public/logo-nilaihub.png";
 import { daftarKelas } from "@/lib/data";
 import { penggunaSaatIni } from "@/lib/supabase/server";
 import { supabaseSiap } from "@/lib/env";
-import { keluar } from "./(auth)/actions";
 import Penyiapan from "@/components/penyiapan";
 import Halaman from "@/components/halaman";
 import KepalaHalaman from "@/components/kepala-halaman";
 import SaringKelas from "@/components/saring-kelas";
+import MenuAkun from "@/components/menu-akun";
 
 export default async function Beranda() {
   if (!supabaseSiap) return <Penyiapan />;
@@ -35,15 +35,10 @@ export default async function Beranda() {
               className="h-10 sm:h-11 w-auto"
             />
           </div>
-          <div className="ml-auto flex items-center gap-4 min-w-0">
-            <span className="hidden sm:inline truncate text-[0.75rem] text-[color:var(--color-redup)]">
-              {meta.nama || pengguna?.email}
-            </span>
-            <form action={keluar}>
-              <button type="submit" className="tombol-garis">
-                Keluar
-              </button>
-            </form>
+          <div className="ml-auto flex items-center min-w-0">
+            <MenuAkun
+              pengguna={{ nama: meta.nama || "", email: pengguna?.email || "" }}
+            />
           </div>
         </header>
 

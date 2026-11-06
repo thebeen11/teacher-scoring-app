@@ -17,6 +17,7 @@ import Halaman from "@/components/halaman";
 import type { RingkasanKelas } from "@/lib/data";
 import { keluar } from "@/app/(auth)/actions";
 import IkonNav, { type NamaIkon } from "@/components/ikon-nav";
+import { Avatar, type Pengguna } from "@/components/menu-akun";
 
 type ItemNav = {
   label: string;
@@ -150,20 +151,6 @@ function ButirNav({
       {label}
     </Link>
   );
-}
-
-type Pengguna = { nama: string; email: string };
-
-/** Huruf awal untuk avatar: dua kata pertama nama, atau huruf pertama email. */
-function inisial({ nama, email }: Pengguna): string {
-  const kata = nama.trim().split(/\s+/).filter(Boolean);
-  if (kata.length)
-    return kata
-      .slice(0, 2)
-      .map((k) => k[0])
-      .join("")
-      .toUpperCase();
-  return (email[0] ?? "?").toUpperCase();
 }
 
 const KELAS_BUTIR =
@@ -415,12 +402,7 @@ function KakiPanel({
         aria-expanded={menu === "akun"}
         className="w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
       >
-        <span
-          aria-hidden
-          className="kotak-ikon w-9 h-9 flex-none rounded-full bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)] text-[0.75rem] font-bold text-white"
-        >
-          {inisial(pengguna)}
-        </span>
+        <Avatar pengguna={pengguna} />
         <span className="min-w-0 flex-1">
           <span className="block text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
             {pengguna.nama || pengguna.email || "Guru"}
@@ -446,15 +428,15 @@ function KakiPanel({
           )}
         </div>
         <div className="pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
-          <span
+          <Link
+            href="/akun"
             role="menuitem"
-            aria-disabled="true"
-            className={`${KELAS_BUTIR} cursor-not-allowed`}
-            style={{ color: "var(--color-samar)" }}
+            onClick={pilih}
+            className={KELAS_BUTIR}
+            style={{ color: "var(--color-redup)" }}
           >
-            <span className="flex-1">Pengaturan akun</span>
-            <span className="tag">SEGERA</span>
-          </span>
+            Pengaturan akun
+          </Link>
           <form action={keluar}>
             <button
               type="submit"
