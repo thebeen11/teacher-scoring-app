@@ -588,6 +588,119 @@ a:focus-visible {
     box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
   }
 
+  /* Kotak pilih buatan sendiri (src/components/pilihan.tsx). Pemicunya memakai
+     kelas `isian` dari pemanggil; kelas ini hanya menambah tata letak panah. */
+  .pilihan-pemicu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    text-align: left;
+    outline: none;
+  }
+  .pilihan-pemicu:hover:not(:disabled) {
+    border-color: var(--color-samar);
+  }
+  .pilihan-pemicu:focus-visible,
+  .pilihan-pemicu[data-buka] {
+    border-color: var(--color-aksen);
+    box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
+  }
+  .pilihan-pemicu:disabled {
+    cursor: not-allowed;
+    color: var(--color-samar);
+    background: var(--color-keping);
+  }
+  .pilihan-panah {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex: none;
+    color: var(--color-redup);
+    transition: transform 0.15s;
+  }
+  .pilihan-pemicu[data-buka] .pilihan-panah {
+    transform: rotate(180deg);
+  }
+
+  .pilihan-daftar {
+    z-index: 60;
+    overflow: auto;
+    margin: 0;
+    padding: 0.375rem;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--color-garis);
+    border-radius: var(--r-kendali);
+    box-shadow: var(--bayang-naik);
+    animation: pilihan-muncul 0.12s ease-out;
+  }
+  @keyframes pilihan-muncul {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  .pilihan-opsi {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--r-kecil);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-tinta-terang);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .pilihan-opsi[data-aktif] {
+    background: var(--color-sorot);
+    color: var(--color-tinta);
+  }
+  .pilihan-opsi[aria-selected="true"] {
+    font-weight: 700;
+    color: var(--color-tinta);
+  }
+
+  /* Kotak centang: tetap <input type="checkbox"> asli (aksesibilitas gratis),
+     hanya rupanya yang diganti. */
+  .centang {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    border: 2px solid var(--color-garis);
+    border-radius: 0.375rem;
+    background: #fff center / 0.75rem no-repeat;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .centang:hover:not(:disabled) {
+    border-color: var(--color-langit);
+  }
+  .centang:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(169, 196, 108, 0.35);
+  }
+  .centang:checked,
+  .centang:indeterminate {
+    background-color: var(--color-aksen);
+    border-color: var(--color-aksen);
+  }
+  .centang:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-7'/%3E%3C/svg%3E");
+  }
+  .centang:indeterminate {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  }
+  .centang:disabled {
+    cursor: not-allowed;
+    background-color: var(--color-keping);
+    border-color: var(--color-garis);
+  }
+
   .tombol {
     border: 0;
     border-radius: var(--r-kendali);

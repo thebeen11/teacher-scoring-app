@@ -95,8 +95,11 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
                 <input
                   type="checkbox"
                   checked={semua}
+                  ref={(el) => {
+                    if (el) el.indeterminate = pilihan.size > 0 && !semua;
+                  }}
                   onChange={pilihSemua}
-                  className="w-4 h-4 accent-[color:var(--color-aksen)]"
+                  className="centang"
                 />
                 <span className="text-[0.8125rem] font-semibold">Pilih semua</span>
               </label>
@@ -112,7 +115,7 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
                         type="checkbox"
                         checked={pilihan.has(k.id)}
                         onChange={() => ubah(k.id)}
-                        className="w-4 h-4 accent-[color:var(--color-aksen)]"
+                        className="centang"
                       />
                       <span className="text-[0.8125rem] font-semibold flex-1 min-w-0 truncate">
                         {k.nama}

@@ -12,9 +12,10 @@ import { useFormStatus } from 'react-dom'
  * nilai, yang sudah lama menulis sendiri dengan penundaan (lihat lib/store.tsx)
  * dan hanya melapor lewat lencana kecil.
  *
- * Isian teks disimpan saat kursor pergi atau saat Enter ditekan; <select>
- * disimpan begitu pilihannya diganti, karena ia tidak punya saat "selesai
- * mengetik". Baris yang tidak disentuh tidak pernah dikirim.
+ * Isian teks disimpan saat kursor pergi atau saat Enter ditekan; kotak pilih
+ * (`Pilihan` dengan `kirimOtomatis`) mengirim dirinya sendiri begitu
+ * pilihannya diganti, karena ia tidak punya saat "selesai mengetik". Baris
+ * yang tidak disentuh tidak pernah dikirim.
  */
 export default function FormSwaSimpan({
   action,
@@ -38,10 +39,6 @@ export default function FormSwaSimpan({
       }}
       onSubmit={() => {
         kotor.current = false
-      }}
-      onChange={(e) => {
-        if ((e.target as HTMLElement).tagName !== 'SELECT') return
-        form.current?.requestSubmit()
       }}
       onBlur={(e) => {
         if (!kotor.current) return

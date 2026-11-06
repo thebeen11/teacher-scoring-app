@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { buatKelas, type HasilAksi } from '../actions'
+import Pilihan from '@/components/pilihan'
 
 const inputKelas = 'isian w-full'
 
@@ -59,13 +60,14 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
             required
           />
         ) : (
-          <select name="mapel_id" className={inputKelas} required defaultValue={mapel[0]?.id}>
-            {mapel.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.nama}
-              </option>
-            ))}
-          </select>
+          <Pilihan
+            name="mapel_id"
+            className={inputKelas}
+            required
+            aria-label="Mata pelajaran"
+            defaultValue={mapel[0]?.id}
+            opsi={mapel.map((m) => ({ nilai: m.id, label: m.nama }))}
+          />
         )}
         <p className="keterangan mt-2 text-[0.6875rem]">
           Kelas dengan mata pelajaran dan semester yang sama saling terhubung: dasbornya
@@ -82,13 +84,19 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
           <span className="mikro">TAHUN AJARAN</span>
           <input name="tahun_ajaran" defaultValue="2025/2026" className={inputKelas} />
         </label>
-        <label className="flex flex-col gap-1.5">
-          <span className="mikro">SEMESTER</span>
-          <select name="semester" defaultValue="1" className={inputKelas}>
-            <option value="1">1</option>
-            <option value="2">2</option>
-          </select>
-        </label>
+        <div className="flex flex-col gap-1.5">
+          <span id="label-semester" className="mikro">SEMESTER</span>
+          <Pilihan
+            name="semester"
+            defaultValue="1"
+            className={inputKelas}
+            aria-labelledby="label-semester"
+            opsi={[
+              { nilai: '1', label: '1' },
+              { nilai: '2', label: '2' },
+            ]}
+          />
+        </div>
       </div>
 
       <label className="flex flex-col gap-1.5">

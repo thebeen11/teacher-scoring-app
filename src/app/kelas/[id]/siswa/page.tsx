@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useKelas } from "@/lib/store";
+import Pilihan from "@/components/pilihan";
 import { n } from "@/lib/format";
 import Halaman from "@/components/halaman";
 import { ChipStatus } from "@/components/chip-status";
@@ -97,22 +98,22 @@ export default function HalamanSiswa() {
       {/* ------------------------------------------- pemilih (di bawah lg) --
           Daftar roster setinggi layar tidak muat di atas rincian pada layar
           sempit; satu kotak pilih menggantikannya. */}
-      <label className="lg:hidden flex flex-col gap-1.5">
-        <span className="mikro">
+      <div className="lg:hidden flex flex-col gap-1.5">
+        <span id="label-pilih-siswa" className="mikro">
           {kelas.nama} · {hasil.baris.length} SISWA
         </span>
-        <select
-          value={terpilih}
-          onChange={(e) => setTerpilih(Number(e.target.value))}
+        <Pilihan
+          value={String(terpilih)}
+          onUbah={(v) => setTerpilih(Number(v))}
           className="isian w-full"
-        >
-          {hasil.baris.map((r, i) => (
-            <option key={r.siswa.id} value={i}>
-              {r.siswa.noUrut}. {r.siswa.nama} — {r.raport}
-            </option>
-          ))}
-        </select>
-      </label>
+          aria-labelledby="label-pilih-siswa"
+          opsi={hasil.baris.map((r, i) => ({
+            nilai: String(i),
+            teks: r.siswa.nama,
+            label: `${r.siswa.noUrut}. ${r.siswa.nama} — ${r.raport}`,
+          }))}
+        />
+      </div>
 
       {/* --------------------------------------------------------- roster -- */}
       <div className="hidden lg:block w-[15.625rem] flex-none papan self-start max-h-[calc(100vh-150px)] overflow-auto p-3">

@@ -3,6 +3,13 @@ import { hapusSiswa, ubahSiswa } from "../../actions";
 import Halaman from "@/components/halaman";
 import KepalaHalaman from "@/components/kepala-halaman";
 import FormSwaSimpan, { PenandaSimpan } from "@/components/swasimpan";
+import Pilihan from "@/components/pilihan";
+
+const OPSI_JK = [
+  { nilai: "", label: "—" },
+  { nilai: "L", label: "L" },
+  { nilai: "P", label: "P" },
+];
 import { gayaKolom, KepalaBeku } from "@/components/tabel";
 import TombolHapus from "@/components/tombol-hapus";
 import {
@@ -113,16 +120,14 @@ export default async function HalamanKelola({
                 />
               </div>
               <div className="sel-padat sekat-padat">
-                <select
+                <Pilihan
                   name="jk"
                   defaultValue={s.jk ?? ""}
+                  kirimOtomatis
                   aria-label={`Jenis kelamin ${s.nama}`}
-                  className="isian px-3 py-1.5 text-[0.8125rem]"
-                >
-                  <option value="">—</option>
-                  <option value="L">L</option>
-                  <option value="P">P</option>
-                </select>
+                  className="isian px-3 py-1.5 text-[0.8125rem] min-w-[4rem]"
+                  opsi={OPSI_JK}
+                />
               </div>
               <div className="sel-padat justify-end">
                 <PenandaSimpan />
