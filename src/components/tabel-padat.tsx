@@ -157,13 +157,13 @@ export default function TabelPadat({
 
   return (
     <Halaman>
-      <div className="flex items-end gap-4 mb-5">
-        <div>
+      <div className="flex flex-wrap items-end gap-4 mb-5">
+        <div className="min-w-0">
           <div className="judul">{judul}</div>
           <p className="keterangan mt-[6px] max-w-[680px]">{keterangan}</p>
         </div>
         {tampilkanRumus && (
-          <div className="ml-auto text-[10.5px] leading-[1.7] font-medium text-[color:var(--color-redup)] text-right border-l-2 border-[color:var(--color-garis)] pl-3.5 angka">
+          <div className="w-full sm:w-auto sm:ml-auto text-[10.5px] leading-[1.7] font-medium text-[color:var(--color-redup)] sm:text-right border-l-2 border-[color:var(--color-garis)] pl-3.5 angka">
             (NA − NA min) × (NK maks − NK min)
             <br />÷ (NA maks − NA min) + NK min
           </div>

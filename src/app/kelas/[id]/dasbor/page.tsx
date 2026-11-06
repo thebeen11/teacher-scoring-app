@@ -82,15 +82,21 @@ export default function HalamanDasbor() {
   return (
     <Halaman>
       {/* ------------------------------------------------- kartu kelas -- */}
+      {/* Ditulis utuh per jumlah kartu — Tailwind tidak membaca kelas rakitan. */}
       <div
-        className="grid gap-7"
-        style={{ gridTemplateColumns: `repeat(${Math.min(kartu.length, 3)}, minmax(0, 1fr))` }}
+        className={`grid gap-4 sm:gap-7 grid-cols-1 ${
+          kartu.length >= 3
+            ? 'sm:grid-cols-2 lg:grid-cols-3'
+            : kartu.length === 2
+              ? 'sm:grid-cols-2'
+              : ''
+        }`}
       >
         {kartu.map((k) => (
           <button
             key={k.id}
             onClick={() => !k.aktif && router.push(`/kelas/${k.id}/dasbor`)}
-            className={`papan px-6 py-[22px] text-left border-0 cursor-pointer ${
+            className={`papan px-5 sm:px-6 py-[22px] text-left border-0 cursor-pointer ${
               k.aktif ? '' : 'papan-angkat'
             }`}
             style={{
@@ -143,14 +149,11 @@ export default function HalamanDasbor() {
       </div>
 
       {/* ------------------------------------------- alur + di bawah KKTP -- */}
-      <div className="flex gap-7 mt-7">
-        <div className="flex-1 min-w-0 papan px-6 py-[22px]">
+      <div className="flex flex-col xl:flex-row gap-4 sm:gap-7 mt-4 sm:mt-7">
+        <div className="flex-1 min-w-0 papan px-5 sm:px-6 py-[22px]">
           <div className="mikro-lebar">ALUR NILAI · {kelas.nama}</div>
 
-          <div
-            className="grid gap-3.5 mt-4"
-            style={{ gridTemplateColumns: `repeat(${alur.length}, minmax(0, 1fr))` }}
-          >
+          <div className="grid gap-3.5 mt-4 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
             {alur.map((a) => {
               const warna =
                 a.pct >= 100 ? 'var(--color-aksen-gelap)' : 'var(--color-bahaya)'
@@ -171,7 +174,7 @@ export default function HalamanDasbor() {
             })}
           </div>
 
-          <div className="mt-5 pt-4 border-t border-[color:var(--color-garis)] flex gap-7 flex-wrap">
+          <div className="mt-5 pt-4 border-t border-[color:var(--color-garis)] flex gap-x-7 gap-y-4 flex-wrap">
             <div>
               <div className="mikro">NA TERENDAH</div>
               <div className="text-[18px] font-bold mt-[3px] angka">{n(naMin)}</div>
@@ -195,7 +198,7 @@ export default function HalamanDasbor() {
           </div>
         </div>
 
-        <div className="w-[330px] flex-none papan px-6 py-[22px]">
+        <div className="w-full xl:w-[330px] flex-none papan px-5 sm:px-6 py-[22px]">
           <div className="mikro-lebar text-[color:var(--color-bahaya)]">
             DI BAWAH KKTP {kelas.kktp}
           </div>

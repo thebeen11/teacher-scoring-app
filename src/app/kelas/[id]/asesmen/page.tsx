@@ -67,16 +67,16 @@ export default function HalamanAsesmen() {
 
   return (
     <Halaman>
-      <div className="flex items-end gap-4 mb-7">
+      <div className="flex flex-wrap items-end gap-4 mb-7">
         <div>
           <div className="judul">
             Asesmen <span className="teks-gradien">Sumatif</span>
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 max-w-full">
           {kelas.asesmen.length > 1 && (
-            <div className="segmen">
+            <div className="segmen max-w-full overflow-x-auto">
               {kelas.asesmen.map((a) => {
                 const aktif = a.id === asesmen.id;
                 return (
@@ -98,17 +98,17 @@ export default function HalamanAsesmen() {
       </div>
 
       {/* --------------------------------------------------- bilah rumus -- */}
-      <div className="papan-neu flex items-center px-6 py-5 mb-7">
+      <div className="papan-neu flex flex-wrap items-center gap-y-2 px-5 sm:px-6 py-5 mb-7">
         <div className="mikro mr-3.5">RUMUS BUTIR</div>
         <div className="text-[12px] font-semibold angka">
           (A × {asesmen.bobotA}) + (B × {asesmen.bobotB}) + (C ×{" "}
           {asesmen.bobotC}) = SKOR
         </div>
-        <div className="w-px h-[22px] bg-[color:var(--color-garis)] mx-4" />
-        <div className="text-[12px] font-semibold angka">
+        <div className="hidden md:block w-px h-[22px] bg-[color:var(--color-garis)] mx-4" />
+        <div className="basis-full md:basis-auto text-[12px] font-semibold angka">
           NILAI = ({n(asesmen.konstanta, 0)} + SKOR) ÷ {n(asesmen.pembagi, 0)}
         </div>
-        <div className="ml-auto text-[11px] font-medium text-[color:var(--color-redup)]">
+        <div className="hidden md:block ml-auto text-[11px] font-medium text-[color:var(--color-redup)]">
           Tab / ↓ pindah sel · baris aktif tersorot
         </div>
       </div>

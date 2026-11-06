@@ -17,8 +17,8 @@ export default function HalamanCetak() {
   }, [])
 
   return (
-    <div className="p-6 bg-white min-h-full">
-      <div className="tanpa-cetak mb-6 flex items-center gap-3">
+    <div className="p-4 sm:p-6 bg-white min-h-full">
+      <div className="tanpa-cetak mb-6 flex flex-wrap items-center gap-3">
         <Link href={`/kelas/${kelas.id}/daftar`} className="tombol-garis no-underline">
           ← Kembali
         </Link>
@@ -35,7 +35,7 @@ export default function HalamanCetak() {
         SEMESTER {kelas.semester} · {kelas.tahunAjaran}
       </div>
 
-      <div className="flex gap-8 mb-3 text-[11px]">
+      <div className="flex flex-wrap gap-x-8 gap-y-2 mb-3 text-[11px]">
         <div>
           <span className="mikro">KELAS </span>
           <strong>{kelas.nama}</strong>
@@ -68,7 +68,13 @@ export default function HalamanCetak() {
         </div>
       </div>
 
-      <TabelDaftar untukCetak />
+      {/* Di layar sempit pratinjaunya digulir mendatar; di kertas A4 melintang
+          lebarnya sudah cukup, jadi gulirnya dimatikan. */}
+      <div className="overflow-x-auto print:overflow-visible">
+        <div className="min-w-[760px] print:min-w-0">
+          <TabelDaftar untukCetak />
+        </div>
+      </div>
     </div>
   )
 }

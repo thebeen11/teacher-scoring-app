@@ -48,7 +48,7 @@ export default function HalamanSkala() {
 
       {/* --------------------------------------------------- tabel skala -- */}
       <div className="papan p-0 overflow-hidden">
-        <div className="flex px-4 bg-[color:var(--color-kepala)] border-b border-[color:var(--color-garis)] mikro">
+        <div className="hidden md:flex px-4 bg-[color:var(--color-kepala)] border-b border-[color:var(--color-garis)] mikro">
           <div className="w-[150px] flex-none p-2.5">JENIS NILAI</div>
           <div className="flex-1 min-w-0 p-2.5">RUMUS</div>
           <div className="w-[150px] flex-none p-2.5">SUMBER MIN/MAKS</div>
@@ -60,18 +60,18 @@ export default function HalamanSkala() {
         {barisSkala.map((s) => (
           <div
             key={s.id}
-            className="flex items-center px-4 border-b border-[color:var(--color-garis)]"
+            className="flex flex-wrap md:flex-nowrap items-center px-2 md:px-4 py-1.5 md:py-0 border-b border-[color:var(--color-garis)]"
           >
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
+            <div className="flex-1 min-w-0 md:flex-none md:w-[150px] px-2.5 py-1.5 md:py-[11px] text-[12px] font-bold">
               {s.tipe}
             </div>
-            <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
+            <div className="order-3 md:order-none basis-full md:basis-auto md:flex-1 min-w-0 px-2.5 py-0.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
               {s.rumus}
             </div>
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
+            <div className="order-4 md:order-none basis-full md:basis-auto md:w-[150px] md:flex-none px-2.5 pt-0.5 pb-1.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-samar)] md:text-[color:var(--color-redup)]">
               {s.sumber}
             </div>
-            <div className="w-[140px] flex-none px-2.5 py-1.5 flex items-center justify-end">
+            <div className="order-2 md:order-none flex-none md:w-[140px] px-2.5 py-1.5 flex items-center justify-end">
               <InputBand min={s.min} max={s.max} onUbah={s.ubah} />
             </div>
           </div>
@@ -80,37 +80,37 @@ export default function HalamanSkala() {
         {kelas.asesmen.map((a) => (
           <div
             key={a.id}
-            className="flex items-center px-4 border-b border-[color:var(--color-garis)]"
+            className="flex flex-wrap md:flex-nowrap items-center px-2 md:px-4 py-1.5 md:py-0 border-b border-[color:var(--color-garis)]"
           >
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
+            <div className="flex-1 min-w-0 md:flex-none md:w-[150px] px-2.5 py-1.5 md:py-[11px] text-[12px] font-bold">
               {a.jenis}
             </div>
-            <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
+            <div className="order-3 md:order-none basis-full md:basis-auto md:flex-1 min-w-0 px-2.5 py-0.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
               (A×{a.bobotA})+(B×{a.bobotB})+(C×{a.bobotC}) = skor, lalu (
               {n(a.konstanta, 0)} + skor) ÷ {n(a.pembagi, 0)}
             </div>
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
+            <div className="order-4 md:order-none basis-full md:basis-auto md:w-[150px] md:flex-none px-2.5 pt-0.5 pb-1.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-samar)] md:text-[color:var(--color-redup)]">
               bobot butir, tanpa min/maks
             </div>
-            <div className="w-[140px] flex-none px-2.5 py-[11px] text-[11px] text-right text-[color:var(--color-samar)] angka">
+            <div className="order-2 md:order-none flex-none md:w-[140px] px-2.5 py-1.5 md:py-[11px] text-[11px] text-right text-[color:var(--color-samar)] angka">
               {n(a.konstanta / a.pembagi, 1)} – …
             </div>
           </div>
         ))}
 
-        <div className="flex items-center px-4 pb-1.5">
-          <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
+        <div className="flex flex-wrap md:flex-nowrap items-center px-2 md:px-4 py-1.5 md:py-0 md:pb-1.5">
+          <div className="flex-1 min-w-0 md:flex-none md:w-[150px] px-2.5 py-1.5 md:py-[11px] text-[12px] font-bold">
             Nilai Raport
           </div>
-          <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
+          <div className="order-3 md:order-none basis-full md:basis-auto md:flex-1 min-w-0 px-2.5 py-0.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
             NA direscale ke band, lalu dibulatkan
           </div>
-          <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
+          <div className="order-4 md:order-none basis-full md:basis-auto md:w-[150px] md:flex-none px-2.5 pt-0.5 pb-1.5 md:py-[11px] text-[11px] font-medium text-[color:var(--color-samar)] md:text-[color:var(--color-redup)]">
             {kelas.sumberMinMaks === "kelas"
               ? "NA min/maks kelas"
               : "NA min/maks angkatan"}
           </div>
-          <div className="w-[140px] flex-none px-2.5 py-1.5 flex items-center justify-end">
+          <div className="order-2 md:order-none flex-none md:w-[140px] px-2.5 py-1.5 flex items-center justify-end">
             <InputBand
               min={kelas.naBandMin}
               max={kelas.naBandMax}
@@ -123,7 +123,7 @@ export default function HalamanSkala() {
       </div>
 
       {/* ------------------------------------------ bobot / KKTP / sumber -- */}
-      <div className="grid grid-cols-3 gap-7 mt-7">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-7 mt-4 sm:mt-7">
         <div className="papan-neu p-6">
           <div className="mikro">BOBOT PROSES : ASESMEN</div>
           <div className="flex items-baseline gap-1.5 mt-2.5">
@@ -192,7 +192,7 @@ export default function HalamanSkala() {
       </div>
 
       {/* ------------------------------------------------------ peta 1b -- */}
-      <div className="mt-7">
+      <div className="mt-4 sm:mt-7">
         <PetaSkala />
       </div>
     </Halaman>

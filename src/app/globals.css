@@ -80,6 +80,21 @@
      bukan menulis sendiri padding dan lebarnya. Jarak antarblok di dalam satu
      halaman — judul, kartu ringkas, tabel — tetap 28px (`mb-7`). */
   --ruang-kartu: 28px;
+
+  /* Dua kolom beku tabel padat (NO, NAMA). Dibaca oleh `gayaKolom` dan
+     posisi `left` sel beku di src/components/tabel.tsx. */
+  --lebar-no: 40px;
+  --lebar-nama: 220px;
+}
+
+/* Ponsel: kolom beku menyempit supaya kolom nilai masih terlihat di sebelahnya,
+   dan kartu tidak membuang sepertiga lebar layar untuk padding. */
+@media (max-width: 639px) {
+  :root {
+    --ruang-kartu: 20px;
+    --lebar-no: 32px;
+    --lebar-nama: 150px;
+  }
 }
 
 html {
@@ -357,6 +372,17 @@ a:focus-visible {
   }
   .mekar {
     animation: mekar-kanan 0.18s ease-out;
+  }
+
+  /* Laci navigasi di layar sempit — meluncur masuk dari kiri. */
+  @keyframes laci-masuk {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+  }
+  .laci {
+    animation: laci-masuk 0.2s ease-out;
   }
 
   /* Garis kolom. Tanpa ini tabel hanya tumpukan baris: mata bisa menyusuri

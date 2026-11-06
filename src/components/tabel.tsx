@@ -9,15 +9,17 @@
  * kesalahan yang sudah dihindari `--kolom` di dalam satu tabel.
  */
 
-export const LEBAR_NO = 40
-export const LEBAR_NAMA = 220
+// Lebarnya tinggal di globals.css (`--lebar-no`, `--lebar-nama`) supaya bisa
+// menyempit di layar ponsel lewat media query tanpa menyentuh JS.
+const LEBAR_NO = 'var(--lebar-no)'
+const LEBAR_NAMA = 'var(--lebar-nama)'
 
 /**
  * Rakit nilai `--kolom`. NO dan NAMA selalu jadi dua trek pertama, jadi
  * pemanggil hanya menyebut kolom miliknya sendiri dan tidak bisa lupa.
  */
 export function gayaKolom(...trek: string[]): React.CSSProperties {
-  const kolom = [`${LEBAR_NO}px`, `${LEBAR_NAMA}px`, ...trek].join(' ')
+  const kolom = [LEBAR_NO, LEBAR_NAMA, ...trek].join(' ')
   return { ['--kolom' as string]: kolom } as React.CSSProperties
 }
 

@@ -12,7 +12,7 @@ export default function Penyiapan() {
         <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--color-aksen)]" />
         Penyiapan · satu langkah lagi
       </div>
-      <h1 className="text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
+      <h1 className="text-[28px] sm:text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
         Olah Nilai belum terhubung ke <span className="teks-gradien">Supabase</span>
       </h1>
       <p className="keterangan mb-7">

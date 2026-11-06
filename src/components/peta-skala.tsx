@@ -76,7 +76,7 @@ export default function PetaSkala() {
   const sempit = lebarBand < rentangSumber / 3
 
   return (
-    <div className="papan p-7">
+    <div className="papan p-5 sm:p-7">
       <div className="text-[18px] font-semibold leading-[1.2] font-[family-name:var(--font-lora)]">
         Peta Skala
       </div>
@@ -106,7 +106,7 @@ export default function PetaSkala() {
       </div>
 
       <div className="mt-6 pt-5 border-t border-[color:var(--color-garis)]">
-        <div className="flex items-baseline gap-2.5">
+        <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-2">
           <div className="text-[13px] font-extrabold">{judul}</div>
           <div className="text-[10px] font-medium text-[color:var(--color-redup)] angka">
             mentah {nAuto(bd[0])}–{nAuto(bd[1])}
@@ -163,7 +163,7 @@ export default function PetaSkala() {
           ))}
         </svg>
 
-        <div className="flex justify-between mt-1 text-[9.5px] font-medium text-[color:var(--color-redup)] angka">
+        <div className="flex justify-between gap-2 mt-1 text-[9.5px] font-medium text-[color:var(--color-redup)] angka">
           <span>KONVERSI {SUMBU_MIN}</span>
           <span>
             rentang {n(rentangSumber)} → {n(lebarBand, 0)} poin

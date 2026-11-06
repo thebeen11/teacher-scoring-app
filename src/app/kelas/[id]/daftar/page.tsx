@@ -22,7 +22,7 @@ export default function HalamanDaftar() {
         </div>
       </div>
 
-      <div className="papan-neu px-6 py-5 flex items-center gap-6 mb-7">
+      <div className="papan-neu px-5 sm:px-6 py-5 flex flex-wrap items-center gap-x-6 gap-y-4 mb-7">
         <div>
           <div className="mikro">NA KELAS</div>
           <div className="text-[16px] font-bold mt-[3px] angka">
@@ -30,7 +30,7 @@ export default function HalamanDaftar() {
           </div>
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="order-last sm:order-none basis-full sm:basis-0 sm:flex-1 min-w-0">
           <div className="bilah h-2.5">
             <span style={{ width: `${lebar}%` }} />
           </div>
@@ -42,12 +42,14 @@ export default function HalamanDaftar() {
           </div>
         </div>
 
-        <InputBand
-          label="BAND"
-          min={kelas.naBandMin}
-          max={kelas.naBandMax}
-          onUbah={(mn, mx) => setPengaturan({ naBandMin: mn, naBandMax: mx })}
-        />
+        <div className="ml-auto sm:ml-0">
+          <InputBand
+            label="BAND"
+            min={kelas.naBandMin}
+            max={kelas.naBandMax}
+            onUbah={(mn, mx) => setPengaturan({ naBandMin: mn, naBandMax: mx })}
+          />
+        </div>
       </div>
 
       <TabelDaftar />

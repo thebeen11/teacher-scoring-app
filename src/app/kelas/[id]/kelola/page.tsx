@@ -36,14 +36,14 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
   return (
     <Halaman lebar="sempit">
       <div className="judul">Kelola <span className="teks-gradien">Kelas</span></div>
-      <p className="keterangan mt-[5px] mb-7">
+      <p className="keterangan mt-[5px] mb-5 sm:mb-7">
         Daftar siswa dan kolom nilai. Suntingan tersimpan sendiri begitu kursor pindah — sama
         seperti layar entri nilai. Band tiap kolom diatur di layar Skala &amp; KKTP.
       </p>
 
       {/* ---------------------------------------------------- kolom nilai -- */}
-      <div className="papan p-0 overflow-hidden mb-7">
-        <div className="px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro">
+      <div className="papan p-0 overflow-hidden mb-4 sm:mb-7">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro">
           KOLOM NILAI
         </div>
 
@@ -54,7 +54,7 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
           ] as const
         ).map(([jenis, judul, daftar]) => (
           <div key={jenis} className="border-b border-[color:var(--color-garis)]">
-            <div className="px-6 pt-4 pb-2 flex items-center gap-3">
+            <div className="px-4 sm:px-6 pt-4 pb-2 flex items-center gap-3">
               <div className="text-[12px] font-bold">{judul}</div>
               <form action={tambahKomponen.bind(null, id, jenis)} className="ml-auto">
                 <button type="submit" className="tombol-garis text-[11px] px-3 py-1.5">
@@ -66,17 +66,17 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
             {daftar.map((k) => {
               const sub = jenis === 'formatif' ? subDari(k.id) : []
               return (
-                <div key={k.id} className="px-6 py-2.5 border-t border-[color:var(--color-garis)]">
+                <div key={k.id} className="px-4 sm:px-6 py-2.5 border-t border-[color:var(--color-garis)]">
                   <FormSwaSimpan
                     action={ubahNamaKomponen.bind(null, id, k.id)}
                     className="flex items-center gap-2"
                   >
-                    <span className="w-14 flex-none text-[12px] font-bold angka">{k.label}</span>
+                    <span className="w-10 sm:w-14 flex-none text-[12px] font-bold angka">{k.label}</span>
                     <input
                       name="nama"
                       defaultValue={k.nama ?? ''}
                       placeholder="Beri nama kolom — misal Ulangan Bab 1"
-                      className="isian flex-1 px-3 py-2 text-[12px]"
+                      className="isian flex-1 min-w-0 px-3 py-2 text-[12px]"
                     />
                     <PenandaSimpan />
                     <button
@@ -91,21 +91,21 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
                   </FormSwaSimpan>
 
                   {jenis === 'formatif' && (
-                    <div className="mt-1.5 ml-14 pl-3 border-l-2 border-[color:var(--color-garis)]">
+                    <div className="mt-1.5 ml-4 sm:ml-14 pl-3 border-l-2 border-[color:var(--color-garis)]">
                       {sub.map((s) => (
                         <FormSwaSimpan
                           key={s.id}
                           action={ubahNamaKomponen.bind(null, id, s.id)}
                           className="flex items-center gap-2 py-1"
                         >
-                          <span className="w-14 flex-none text-[11px] font-semibold text-[color:var(--color-redup)] angka">
+                          <span className="w-10 sm:w-14 flex-none text-[11px] font-semibold text-[color:var(--color-redup)] angka">
                             {s.label}
                           </span>
                           <input
                             name="nama"
                             defaultValue={s.nama ?? ''}
                             placeholder="Nama sub — misal Tugas 1"
-                            className="isian flex-1 px-3 py-1.5 text-[11.5px]"
+                            className="isian flex-1 min-w-0 px-3 py-1.5 text-[11.5px]"
                           />
                           <PenandaSimpan />
                           <button
@@ -130,12 +130,12 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
           </div>
         ))}
 
-        <p className="px-6 py-4 keterangan text-[11px]">
+        <p className="px-4 sm:px-6 py-4 keterangan text-[11px]">
           Jumlah kolom ikut menentukan nilai: rerata dihitung atas SEMUA kolom, termasuk yang
           masih kosong. Menambah satu kolom yang belum diisi langsung menurunkan RT F seisi
           kelas, jadi tambahkan kolom saat penilaiannya memang akan dikerjakan.
         </p>
-        <p className="px-6 pb-4 keterangan text-[11px]">
+        <p className="px-4 sm:px-6 pb-4 keterangan text-[11px]">
           Sub-formatif berlaku sama: begitu sebuah kolom punya sub, skornya tidak lagi diketik
           di layar Nilai Formatif melainkan menjadi rerata sub-subnya, sub kosong terhitung nol.
           Menghapus sub terakhir mengembalikan kolom itu jadi bisa diketik langsung, dengan skor
@@ -145,7 +145,7 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
 
       {/* -------------------------------------------------- daftar siswa -- */}
       <div className="papan p-0 overflow-hidden">
-        <div className="px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro flex">
+        <div className="px-4 sm:px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro flex">
           <span>DAFTAR SISWA</span>
           <span className="ml-auto angka">{siswa?.length ?? 0} ORANG</span>
         </div>
@@ -154,15 +154,15 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
           <FormSwaSimpan
             key={s.id}
             action={ubahSiswa.bind(null, id, s.id)}
-            className="flex items-center gap-2 px-6 py-3 border-b border-[color:var(--color-garis)]"
+            className="flex items-center gap-2 px-4 sm:px-6 py-3 border-b border-[color:var(--color-garis)]"
           >
-            <span className="w-8 text-[11.5px] text-[color:var(--color-redup)] angka">
+            <span className="w-6 sm:w-8 flex-none text-[11.5px] text-[color:var(--color-redup)] angka">
               {s.no_urut}
             </span>
             <input
               name="nama"
               defaultValue={s.nama}
-              className="isian flex-1 px-3 py-2 text-[12px]"
+              className="isian flex-1 min-w-0 px-3 py-2 text-[12px]"
             />
             <select
               name="jk"
@@ -184,7 +184,7 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
           </FormSwaSimpan>
         ))}
 
-        <form action={tambahSiswa.bind(null, id)} className="px-6 py-5">
+        <form action={tambahSiswa.bind(null, id)} className="px-4 sm:px-6 py-5">
           <div className="mikro mb-2">TAMBAH SISWA</div>
           <textarea
             name="roster"
@@ -200,7 +200,7 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
 
       {/* -------------------------------------------------------- hapus -- */}
       <div
-        className="papan mt-7 p-6 flex items-center gap-4"
+        className="papan mt-4 sm:mt-7 p-5 sm:p-6 flex flex-col items-start sm:flex-row sm:items-center gap-4"
         style={{ background: 'var(--color-basuh)' }}
       >
         <div>
@@ -209,7 +209,7 @@ export default async function HalamanKelola({ params }: { params: Promise<{ id: 
             Menghapus {kelas?.nama} beserta seluruh siswa dan nilainya. Tidak bisa dibatalkan.
           </p>
         </div>
-        <form action={hapusKelas.bind(null, id)} className="ml-auto">
+        <form action={hapusKelas.bind(null, id)} className="sm:ml-auto">
           <button
             type="submit"
             className="tombol-garis"

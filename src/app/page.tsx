@@ -15,22 +15,22 @@ export default async function Beranda() {
   return (
     <div className="min-h-screen">
       <div className="w-full max-w-halaman mx-auto">
-        <header className="flex items-center gap-5 mx-6 mt-6 px-6 py-5 papan">
-          <div className="flex items-center gap-2.5">
+        <header className="flex items-center gap-3 sm:gap-5 mx-4 mt-4 px-4 py-4 sm:mx-6 sm:mt-6 sm:px-6 sm:py-5 papan">
+          <div className="flex items-center gap-2.5 min-w-0">
             <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
               <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
             </span>
-            <span>
+            <span className="min-w-0">
               <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)]">
                 Olah Nilai
               </span>
-              <span className="block mikro mt-1.5">
+              <span className="block mikro mt-1.5 truncate">
                 {meta.sekolah?.toUpperCase() || 'PAPAN NILAI GURU'}
               </span>
             </span>
           </div>
-          <div className="ml-auto flex items-center gap-4">
-            <span className="text-[12px] text-[color:var(--color-redup)]">
+          <div className="ml-auto flex items-center gap-4 min-w-0">
+            <span className="hidden sm:inline truncate text-[12px] text-[color:var(--color-redup)]">
               {meta.nama || pengguna?.email}
             </span>
             <form action={keluar}>
@@ -43,8 +43,8 @@ export default async function Beranda() {
 
         <main>
           <Halaman>
-            <div className="flex items-end gap-4 mb-7">
-              <div>
+            <div className="flex flex-wrap items-end gap-4 mb-7">
+              <div className="min-w-0">
                 <h1 className="judul">Semua <span className="teks-gradien">Kelas</span></h1>
                 <p className="keterangan mt-1.5">
                   Setiap kelas membawa kolom nilai, band skala, dan KKTP-nya sendiri.
@@ -56,7 +56,7 @@ export default async function Beranda() {
             </div>
 
             {kelas.length === 0 ? (
-              <div className="papan p-8">
+              <div className="papan p-6 sm:p-8">
                 <div className="mikro">BELUM ADA KELAS</div>
                 <p className="keterangan mt-3 max-w-[560px]">
                   Mulai dengan membuat satu kelas: isi mata pelajaran, nama kelas, dan tempelkan
@@ -72,7 +72,7 @@ export default async function Beranda() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-7">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-4 sm:gap-7">
                 {kelas.map((k) => (
                   <Link
                     key={k.id}

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useKelas } from '@/lib/store'
@@ -47,14 +48,17 @@ function ButirNav({
   href,
   label,
   aktif,
+  onPilih,
 }: {
   href: string
   label: string
   aktif: boolean
+  onPilih?: () => void
 }) {
   return (
     <Link
       href={href}
+      onClick={onPilih}
       className="flex items-center gap-2.5 mx-2 px-3 py-[10px] rounded-[var(--r-kendali)] text-[12.5px] font-semibold no-underline transition-colors"
       style={{
         background: aktif ? 'var(--color-aksen)' : 'transparent',
@@ -71,6 +75,87 @@ function ButirNav({
   )
 }
 
+/**
+ * Isi rail navigasi: logo, daftar layar, dan rumus aktif. Digambar di dua
+ * tempat — rail tetap di layar lebar dan laci geser di bawah `lg` — jadi isinya
+ * ditulis sekali di sini.
+ */
+function PanelNav({
+  sekolah,
+  ruasAktif,
+  onPilih,
+}: {
+  sekolah: string
+  ruasAktif: string
+  onPilih?: () => void
+}) {
+  const { kelas } = useKelas()
+  const bobotSisa = 100 - kelas.bobot
+
+  return (
+    <>
+      <Link
+        href="/"
+        onClick={onPilih}
+        className="flex items-center gap-2.5 px-5 pt-[22px] pb-[18px] no-underline"
+      >
+        <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
+          <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)] text-[color:var(--color-tinta)]">
+            Olah Nilai
+          </span>
+          <span className="block text-[9.5px] font-bold leading-[1.4] tracking-[0.1em] text-[color:var(--color-samar)] mt-1.5 truncate">
+            {sekolah.toUpperCase()}
+          </span>
+        </span>
+      </Link>
+
+      <nav className="flex flex-col pb-2.5 overflow-y-auto">
+        {NAV.map((item) => (
+          <div key={item.ruas}>
+            {item.kelompok && (
+              <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
+                {item.kelompok}
+              </div>
+            )}
+            <ButirNav
+              href={`/kelas/${kelas.id}/${item.ruas}`}
+              label={item.label}
+              aktif={ruasAktif === item.ruas}
+              onPilih={onPilih}
+            />
+          </div>
+        ))}
+
+        <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
+          PENGATURAN
+        </div>
+        <ButirNav
+          href={`/kelas/${kelas.id}/kelola`}
+          label="Kelola Kelas"
+          aktif={ruasAktif === 'kelola'}
+          onPilih={onPilih}
+        />
+      </nav>
+
+      {/* Rumus aktif — berubah mengikuti bobot dan band saat ini. */}
+      <div className="mt-auto m-2 papan-dalam">
+        <div className="text-[9.5px] font-bold tracking-[0.1em] text-[color:var(--color-samar)] mb-2">
+          RUMUS AKTIF
+        </div>
+        <div className="text-[10.5px] font-medium leading-[1.7] text-[color:var(--color-redup)] angka">
+          NA = ({kelas.bobot}·(F+LM)/2 + {bobotSisa}·AS)/100
+        </div>
+        <div className="text-[10.5px] font-medium leading-[1.7] text-[color:var(--color-redup)] angka mt-1">
+          RAPORT → band {n(kelas.naBandMin, 0)}–{n(kelas.naBandMax, 0)}
+        </div>
+      </div>
+    </>
+  )
+}
+
 export default function Cangkang({
   mapel,
   sekolah,
@@ -83,70 +168,42 @@ export default function Cangkang({
   const { kelas, grup, hasil } = useKelas()
   const pathname = usePathname()
   const router = useRouter()
+  const [laci, setLaci] = useState(false)
 
   const ruasAktif = pathname.split('/')[3] ?? 'dasbor'
-  const bobotSisa = 100 - kelas.bobot
+
+  // Escape menutup laci, sama seperti klik di luar panel.
+  useEffect(() => {
+    if (!laci) return
+    const tutup = (e: KeyboardEvent) => e.key === 'Escape' && setLaci(false)
+    window.addEventListener('keydown', tutup)
+    return () => window.removeEventListener('keydown', tutup)
+  }, [laci])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[color:var(--color-kertas)]">
-      {/* ------------------------------------------------------- sidebar -- */}
-      <aside className="w-[244px] flex-none m-6 mr-0 flex flex-col papan-neu p-0 overflow-hidden tanpa-cetak">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 px-5 pt-[22px] pb-[18px] no-underline"
-        >
-          <span className="kotak-ikon w-10 h-10 bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)]">
-            <span className="w-3.5 h-3.5 rounded-[4px] bg-white/85" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-[15px] font-semibold leading-none font-[family-name:var(--font-lora)] text-[color:var(--color-tinta)]">
-              Olah Nilai
-            </span>
-            <span className="block text-[9.5px] font-bold leading-[1.4] tracking-[0.1em] text-[color:var(--color-samar)] mt-1.5 truncate">
-              {sekolah.toUpperCase()}
-            </span>
-          </span>
-        </Link>
-
-        <nav className="flex flex-col pb-2.5 overflow-y-auto">
-          {NAV.map((item) => (
-            <div key={item.ruas}>
-              {item.kelompok && (
-                <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
-                  {item.kelompok}
-                </div>
-              )}
-              <ButirNav
-                href={`/kelas/${kelas.id}/${item.ruas}`}
-                label={item.label}
-                aktif={ruasAktif === item.ruas}
-              />
-            </div>
-          ))}
-
-          <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
-            PENGATURAN
-          </div>
-          <ButirNav
-            href={`/kelas/${kelas.id}/kelola`}
-            label="Kelola Kelas"
-            aktif={ruasAktif === 'kelola'}
-          />
-        </nav>
-
-        {/* Rumus aktif — berubah mengikuti bobot dan band saat ini. */}
-        <div className="mt-auto m-2 papan-dalam">
-          <div className="text-[9.5px] font-bold tracking-[0.1em] text-[color:var(--color-samar)] mb-2">
-            RUMUS AKTIF
-          </div>
-          <div className="text-[10.5px] font-medium leading-[1.7] text-[color:var(--color-redup)] angka">
-            NA = ({kelas.bobot}·(F+LM)/2 + {bobotSisa}·AS)/100
-          </div>
-          <div className="text-[10.5px] font-medium leading-[1.7] text-[color:var(--color-redup)] angka mt-1">
-            RAPORT → band {n(kelas.naBandMin, 0)}–{n(kelas.naBandMax, 0)}
-          </div>
-        </div>
+    <div className="flex h-dvh overflow-hidden bg-[color:var(--color-kertas)]">
+      {/* ------------------------------------------------ rail (lg ke atas) -- */}
+      <aside className="hidden lg:flex w-[244px] flex-none m-6 mr-0 flex-col papan-neu p-0 overflow-hidden tanpa-cetak">
+        <PanelNav sekolah={sekolah} ruasAktif={ruasAktif} />
       </aside>
+
+      {/* --------------------------------------------- laci (di bawah lg) -- */}
+      {laci && (
+        <div className="fixed inset-0 z-50 lg:hidden tanpa-cetak" role="dialog" aria-modal="true" aria-label="Navigasi">
+          <button
+            aria-label="Tutup menu"
+            onClick={() => setLaci(false)}
+            className="absolute inset-0 w-full h-full border-0 bg-[rgba(45,55,72,0.35)] cursor-pointer"
+          />
+          <aside className="laci absolute left-3 top-3 bottom-3 w-[272px] max-w-[calc(100vw-24px)] flex flex-col papan-neu p-0 overflow-hidden">
+            <PanelNav
+              sekolah={sekolah}
+              ruasAktif={ruasAktif}
+              onPilih={() => setLaci(false)}
+            />
+          </aside>
+        </div>
+      )}
 
       {/* ---------------------------------------------------------- isi -- */}
       <div className="flex-1 min-w-0 flex flex-col">
@@ -157,9 +214,20 @@ export default function Cangkang({
             bawahnya. Dengan batas di kolom, batang gulir berada di dalam batas
             dan tepi kiri keduanya selalu jatuh di garis yang sama. */}
         <div className="w-full max-w-halaman mx-auto flex-1 min-h-0 flex flex-col">
-          <header className="flex-none flex items-center gap-5 mx-6 mt-6 px-6 py-5 papan tanpa-cetak">
-            <div className="min-w-0">
-              <div className="text-[18px] font-semibold leading-[1.2] tracking-[-0.01em] truncate font-[family-name:var(--font-lora)]">
+          <header className="flex-none flex flex-wrap items-center gap-3 sm:gap-5 mx-4 mt-4 px-4 py-4 sm:mx-6 sm:mt-6 sm:px-6 sm:py-5 papan tanpa-cetak">
+            <button
+              onClick={() => setLaci(true)}
+              aria-label="Menu"
+              aria-expanded={laci}
+              className="lg:hidden tombol-neu w-10 h-10 p-0 flex-none flex-col gap-[4px]"
+            >
+              <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
+              <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
+              <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
+            </button>
+
+            <div className="min-w-0 flex-1 sm:flex-none">
+              <div className="text-[16px] sm:text-[18px] font-semibold leading-[1.2] tracking-[-0.01em] truncate font-[family-name:var(--font-lora)]">
                 {mapel}
               </div>
               <div className="mikro mt-1">
@@ -167,17 +235,18 @@ export default function Cangkang({
               </div>
             </div>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-3 sm:gap-4 max-w-full">
               <LencanaSimpan />
 
               {grup.length > 1 && (
-                <div className="segmen">
+                <div className="segmen max-w-full overflow-x-auto">
                   {grup.map((k) => {
                     const aktif = k.id === kelas.id
                     return (
                       <button
                         key={k.id}
                         onClick={() => router.push(`/kelas/${k.id}/${ruasAktif}`)}
+                        className="flex-none whitespace-nowrap"
                         style={{
                           background: aktif ? 'var(--color-aksen)' : 'transparent',
                           color: aktif ? '#ffffff' : 'var(--color-redup)',
@@ -194,7 +263,8 @@ export default function Cangkang({
                 href={`/kelas/${kelas.id}/daftar/cetak`}
                 className="tombol no-underline"
               >
-                Cetak daftar nilai
+                <span className="sm:hidden">Cetak</span>
+                <span className="hidden sm:inline">Cetak daftar nilai</span>
               </Link>
             </div>
           </header>
@@ -213,7 +283,7 @@ export default function Cangkang({
 function RosterKosong({ kelasId }: { kelasId: string }) {
   return (
     <Halaman lebar="fokus">
-      <div className="papan p-8">
+      <div className="papan p-6 sm:p-8">
         <div
           className="kotak-ikon w-14 h-14 mb-5"
           style={{ background: 'rgba(135, 206, 235, 0.2)' }}
