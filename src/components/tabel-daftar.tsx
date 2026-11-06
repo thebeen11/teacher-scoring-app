@@ -146,7 +146,7 @@ function Layar({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
       : baris
 
   return (
-    <div className="tabel-padat min-w-max" style={gaya}>
+    <div className="tabel-padat min-w-min" style={gaya}>
       <div className="kepala-padat">
         <KepalaBeku />
         {kolom.map((k) => {

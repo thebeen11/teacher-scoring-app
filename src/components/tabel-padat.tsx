@@ -49,7 +49,8 @@ import {
 
 const RINGKASAN = "ringkasan";
 
-// Semua kolom nilai selebar isinya; sisa lebar jatuh ke NAMA (maks. separuh tabel).
+// Semua kolom nilai minimal selebar isinya; sisa lebar jatuh ke NAMA (maks. separuh
+// tabel), dan saat kolom banyak NAMA kembali ke `--lebar-nama`. Lihat `gayaKolom`.
 const LEBAR_SUB = "auto";
 const LEBAR_HASIL = "auto";
 const LEBAR_TUNGGAL = "auto";
@@ -552,7 +553,7 @@ export default function TabelPadat({
       {kepalaHalaman}
 
       {/* Tabel dan kakinya berbagi satu grid supaya trek `auto` sejajar. */}
-      <div className="kisi-padat min-w-max" style={gaya}>
+      <div className="kisi-padat min-w-min" style={gaya}>
         <div role="tabpanel" className="tabel-padat">
           {/* ------------------------------------------------ kepala kolom -- */}
           <div className="kepala-padat">

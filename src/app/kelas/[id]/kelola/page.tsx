@@ -78,7 +78,7 @@ export default async function HalamanKelola({
           Tiap baris adalah <form> swasimpan yang sekaligus jadi subgrid.
           JANGAN dibungkus elemen ber-overflow: kepala lengketnya akan menempel
           di dalam pembungkus itu (bergeser `--atas-lengket`) dan menutupi baris. */}
-      <div className="tabel-padat min-w-max" style={gayaKolom("auto", "auto")}>
+      <div className="tabel-padat min-w-min" style={gayaKolom("auto", "auto")}>
         <div className="kepala-padat">
           <KepalaBeku />
           <div className="sel-padat mikro sekat-padat">JK</div>

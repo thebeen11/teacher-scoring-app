@@ -262,7 +262,7 @@ export default function HalamanDasbor() {
 
       {/* Jangan dibungkus elemen ber-overflow: kepala lengket akan menempel
           di dalam pembungkus itu (lihat kelola/page.tsx). */}
-      <div className="tabel-padat min-w-max" style={gayaKolom("auto", "auto")}>
+      <div className="tabel-padat min-w-min" style={gayaKolom("auto", "auto")}>
         <div className="kepala-padat">
           <KepalaBeku />
           <div className="sel-padat mikro sekat-padat justify-end">RAPORT</div>

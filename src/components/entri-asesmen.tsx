@@ -154,7 +154,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
 
       {langsung ? (
         <>
-          <div className="tabel-padat min-w-max" style={gayaTabelLangsung}>
+          <div className="tabel-padat min-w-min" style={gayaTabelLangsung}>
             <div className="kepala-padat">
               <KepalaBeku />
               <div
@@ -220,7 +220,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
         <>
           {/* --------------------------------------------------- bilah rumus -- */}
 
-          <div className="tabel-padat min-w-max" style={gayaTabel}>
+          <div className="tabel-padat min-w-min" style={gayaTabel}>
             <div className="kepala-padat">
               <KepalaBeku duaBaris />
               <div

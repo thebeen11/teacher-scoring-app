@@ -18,12 +18,25 @@ const LEBAR_NAMA = 'var(--lebar-nama)'
  * Rakit nilai `--kolom`. NO dan NAMA selalu jadi dua trek pertama, jadi
  * pemanggil hanya menyebut kolom miliknya sendiri dan tidak bisa lupa.
  *
+ * Kolom lain tidak pernah lebih sempit dari isinya (`minmax(max-content, …)`),
+ * jadi trek pemanggil (sebaiknya `auto`) hanya menentukan cara ia melebar.
+ *
  * NAMA tidak pernah lebih sempit dari `--lebar-nama` dan melebar mengisi sisa
- * lebar, tapi paling lebar separuh tabel (`50%`, dihitung dari lebar kisi).
- * Sisa lebar di atas batas itu dibagi ke kolom lain, yang sebaiknya `auto`.
+ * lebar, tapi paling lebar separuh tabel (`50%`). Bila kolom banyak dan sisa
+ * lebar habis, NAMA kembali ke `--lebar-nama` (nama panjang terpotong elipsis).
+ * Sisa lebar di atas batas 50% dibagi ke kolom lain.
+ *
+ * Pasangannya: kisi WAJIB `min-w-min`, bukan `min-w-max`. Dengan `min-w-max`
+ * lebar kisi jadi lebar max-content-nya saat tabel tak muat, lalu `50%`
+ * dihitung dari lebar yang sudah membengkak itu — NAMA ikut melebar persis saat
+ * tabel seharusnya menyempit, dan tabel tergulir mendatar tanpa perlu.
  */
 export function gayaKolom(...trek: string[]): React.CSSProperties {
-  const kolom = [LEBAR_NO, `minmax(${LEBAR_NAMA}, 50%)`, ...trek].join(' ')
+  const kolom = [
+    LEBAR_NO,
+    `minmax(${LEBAR_NAMA}, 50%)`,
+    ...trek.map((t) => `minmax(max-content, ${t})`),
+  ].join(' ')
   return { ['--kolom' as string]: kolom } as React.CSSProperties
 }
 
