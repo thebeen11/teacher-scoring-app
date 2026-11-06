@@ -26,6 +26,8 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@locator/runtime": "2.0.0",
+    "@locator/webpack-loader": "^2.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.13.3",
     "@types/react": "^19",

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Archivo, Lora, Raleway } from 'next/font/google'
 import './globals.css'
+import { Locator } from '@/components/locator'
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -37,7 +38,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="id"
       className={`${raleway.variable} ${lora.variable} ${archivo.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        {process.env.NODE_ENV === 'development' && <Locator />}
+      </body>
     </html>
   )
 }
