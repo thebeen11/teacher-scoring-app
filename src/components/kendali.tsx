@@ -95,17 +95,26 @@ export function InputBand({
   onUbah,
   label,
   padat = false,
+  besar = false,
 }: {
   min: number
   max: number
   onUbah: (min: number, max: number) => void
   label?: string
   padat?: boolean
+  /** Setinggi `.tombol`, untuk diletakkan berdampingan dengan tombol. */
+  besar?: boolean
 }) {
-  const kelas = padat ? 'band-input band-input-padat' : 'band-input'
+  const kelas = padat
+    ? 'band-input band-input-padat'
+    : besar
+      ? 'band-input band-input-besar'
+      : 'band-input'
   return (
-    <div className="flex items-center gap-[5px]">
-      {label && <span className="mikro text-[9px] tracking-[0.06em]">{label}</span>}
+    <div className={`flex items-center ${besar ? 'gap-2' : 'gap-[5px]'}`}>
+      {label && (
+        <span className={besar ? 'mikro' : 'mikro text-[9px] tracking-[0.06em]'}>{label}</span>
+      )}
       <InputAngka
         nilai={min}
         onUbah={(v) => onUbah(v, max)}

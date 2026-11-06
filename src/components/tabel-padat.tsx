@@ -15,6 +15,7 @@ import { InputAngka, InputBand, navigasiSel } from "./kendali";
 import { gayaKolom, KepalaBeku, Panah, SelBeku } from "./tabel";
 import Halaman from "./halaman";
 import TombolUnduh from "./tombol-unduh";
+import KepalaHalaman from "./kepala-halaman";
 import {
   HapusDuaLangkah,
   IkonPensil,
@@ -152,11 +153,16 @@ export default function TabelPadat({
   };
   const hapus = (id: string) => jalankan(() => hapusKomponen(kelasId, id));
 
-  // `+ Sub` hanya untuk formatif, dan hanya saat sebuah tab kolom terbuka.
-  const kolomAktif = formatif ? kolom.find((k) => k.id === tab) : undefined;
+  // Tab kolom yang terbuka (bukan Ringkasan): RENTANG-nya pindah ke kartu
+  // kepala. `+ Sub` hanya untuk formatif.
+  const kolomTerbuka = kolom.find((k) => k.id === tab);
+  const kolomAktif = formatif ? kolomTerbuka : undefined;
+  const bdTerbuka = kolomTerbuka
+    ? (hasil.bounds[kolomTerbuka.id] ?? [0, 0])
+    : undefined;
 
   const barTab = (
-    <div className="flex items-center gap-3 mb-3 min-w-0">
+    <div className="flex flex-wrap items-center gap-3 min-w-0">
       <div
         role="tablist"
         aria-label={`Kolom ${judul}`}
@@ -255,31 +261,45 @@ export default function TabelPadat({
         )}
       </div>
       <PenandaAksi aktif={menyimpan} />
-      {kolomAktif && (
-        <div className="ml-auto flex-none">
-          {sunting?.mode === "tambahSub" &&
-          sunting.indukId === kolomAktif.id ? (
-            <IsianNama
-              placeholder="Nama sub baru…"
-              onSimpan={(v) => tambahSub(kolomAktif.id, v)}
-              onBatal={batal}
-              className="w-[180px]"
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() =>
-                setSunting({ mode: "tambahSub", indukId: kolomAktif.id })
-              }
-              title={
-                subOf(kelas, kolomAktif.id).length > 0
-                  ? `Tambah sub ${kolomAktif.label}`
-                  : `Tambah sub — ${kolomAktif.label} lalu menjadi rerata sub-subnya`
-              }
-              className="tombol whitespace-nowrap"
-            >
-              + Sub {kolomAktif.nama || kolomAktif.label}
-            </button>
+      {kolomTerbuka && bdTerbuka && (
+        <div className="ml-auto flex flex-wrap items-center gap-3">
+          <span className="whitespace-nowrap text-[10.5px] font-medium text-[color:var(--color-redup)] angka">
+            maks {nAuto(bdTerbuka[1])} · min {nAuto(bdTerbuka[0])}
+          </span>
+          <InputBand
+            label="RENTANG"
+            besar
+            min={kolomTerbuka.bandMin}
+            max={kolomTerbuka.bandMax}
+            onUbah={(mn, mx) => setBand(kolomTerbuka.id, mn, mx)}
+          />
+          {kolomAktif && (
+            <div className="flex-none">
+              {sunting?.mode === "tambahSub" &&
+              sunting.indukId === kolomAktif.id ? (
+                <IsianNama
+                  placeholder="Nama sub baru…"
+                  onSimpan={(v) => tambahSub(kolomAktif.id, v)}
+                  onBatal={batal}
+                  className="w-[180px]"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSunting({ mode: "tambahSub", indukId: kolomAktif.id })
+                  }
+                  title={
+                    subOf(kelas, kolomAktif.id).length > 0
+                      ? `Tambah sub ${kolomAktif.label}`
+                      : `Tambah sub — ${kolomAktif.label} lalu menjadi rerata sub-subnya`
+                  }
+                  className="tombol whitespace-nowrap"
+                >
+                  + Sub {kolomAktif.nama || kolomAktif.label}
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -287,21 +307,17 @@ export default function TabelPadat({
   );
 
   const kepalaHalaman = (
-    <div className="flex w-full flex-wrap items-end gap-4">
-      <div className="min-w-0">
-        <div className="judul">{judul}</div>
-      </div>
-      <div className="ml-auto">
-        <TombolUnduh jenis={jenis} />
-      </div>
-    </div>
+    <KepalaHalaman
+      judul={judul}
+      aksi={<TombolUnduh jenis={jenis} />}
+      bawah={barTab}
+    />
   );
 
   if (kolom.length === 0) {
     return (
       <Halaman>
-        <div className="mb-5">{kepalaHalaman}</div>
-        {barTab}
+        {kepalaHalaman}
         <div className="papan p-6">
           <div className="mikro">BELUM ADA KOLOM {jenis.toUpperCase()}</div>
           <p className="keterangan mt-2">
@@ -317,8 +333,9 @@ export default function TabelPadat({
   const selOf = (b: (typeof hasil.baris)[number]): HasilKolom[] =>
     jenis === "formatif" ? b.formatif : b.lingkup;
 
-  const kepalaKolom = (k: Komponen) => (
+  const kepalaKolom = (k: Komponen, tanpaRentang = false) => (
     <KepalaKolom
+      tanpaRentang={tanpaRentang}
       kolom={k}
       bounds={hasil.bounds[k.id] ?? [0, 0]}
       onBand={(mn, mx) => setBand(k.id, mn, mx)}
@@ -456,7 +473,7 @@ export default function TabelPadat({
           ),
         )}
         <div className="px-2.5 py-2 min-w-0 sekat-padat">
-          {kepalaKolom(k)}
+          {kepalaKolom(k, true)}
           {bersub && <div className="mikro mt-1">RERATA → NILAI</div>}
         </div>
       </>
@@ -532,9 +549,7 @@ export default function TabelPadat({
 
   return (
     <Halaman>
-      <div className="flex flex-wrap items-end gap-4 mb-5">{kepalaHalaman}</div>
-
-      {barTab}
+      {kepalaHalaman}
 
       {/* Tabel dan kakinya berbagi satu grid supaya trek `auto` sejajar. */}
       <div className="kisi-padat min-w-fit" style={gaya}>
@@ -573,11 +588,23 @@ function KepalaKolom({
   kolom,
   bounds,
   onBand,
+  tanpaRentang = false,
 }: {
   kolom: Komponen;
   bounds: Rentang;
   onBand: (min: number, max: number) => void;
+  /** Tab satu kolom: rentang dan maks/min sudah tampil di kartu kepala. */
+  tanpaRentang?: boolean;
 }) {
+  if (tanpaRentang)
+    return (
+      <span
+        className="block text-[12.5px] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
+        title={kolom.nama || kolom.label}
+      >
+        {kolom.nama || kolom.label}
+      </span>
+    );
   return (
     <>
       <div className="flex items-center gap-2 min-w-0">

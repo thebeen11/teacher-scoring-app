@@ -5,6 +5,7 @@ import { supabaseSiap } from '@/lib/env'
 import { keluar } from './(auth)/actions'
 import Penyiapan from '@/components/penyiapan'
 import Halaman from '@/components/halaman'
+import KepalaHalaman from '@/components/kepala-halaman'
 
 export default async function Beranda() {
   if (!supabaseSiap) return <Penyiapan />
@@ -43,17 +44,16 @@ export default async function Beranda() {
 
         <main>
           <Halaman>
-            <div className="flex flex-wrap items-end gap-4 mb-7">
-              <div className="min-w-0">
-                <h1 className="judul">Semua <span className="teks-gradien">Kelas</span></h1>
-                <p className="keterangan mt-1.5">
-                  Setiap kelas membawa kolom nilai, rentang skala, dan KKTP-nya sendiri.
-                </p>
-              </div>
-              <Link href="/kelas/baru" className="tombol ml-auto no-underline">
-                Kelas baru
-              </Link>
-            </div>
+            <KepalaHalaman
+              lengket={false}
+              judul={<>Semua <span className="teks-gradien">Kelas</span></>}
+              keterangan="Setiap kelas membawa kolom nilai, rentang skala, dan KKTP-nya sendiri."
+              aksi={
+                <Link href="/kelas/baru" className="tombol no-underline">
+                  Kelas baru
+                </Link>
+              }
+            />
 
             {kelas.length === 0 ? (
               <div className="papan p-6 sm:p-8">

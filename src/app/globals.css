@@ -269,7 +269,7 @@ a:focus-visible {
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
     position: sticky;
-    top: 0;
+    top: var(--atas-lengket, 0px);
     z-index: 3;
     background: var(--color-kepala);
     border-bottom: 1px solid var(--color-garis);
@@ -280,6 +280,26 @@ a:focus-visible {
   }
   .kepala-padat > :last-child {
     border-top-right-radius: var(--r-kartu);
+  }
+  /* Di bawah kartu atas yang lengket (Daftar Nilai), sudut bulat kepala
+     memperlihatkan baris yang tergulir di belakangnya. Dua pseudo ber-z
+     negatif — di atas latar kepala, di bawah selnya — mengisi sudut dengan
+     warna halaman lalu mengembalikan warna kepala di dalam lengkungnya. */
+  .kepala-tutup .kepala-padat::before,
+  .kepala-tutup .kepala-padat::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: var(--r-kartu);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .kepala-tutup .kepala-padat::before {
+    background: var(--color-kertas);
+  }
+  .kepala-tutup .kepala-padat::after {
+    background: var(--color-kepala);
+    border-radius: var(--r-kartu) var(--r-kartu) 0 0;
   }
 
   /* Kaki maks/min. Ia HARUS jadi subgrid dari `.kisi-padat` yang sama dengan
@@ -501,6 +521,15 @@ a:focus-visible {
     width: 56px;
     padding: 2px 6px;
     font-size: 13px;
+  }
+  /* Versi besar, setinggi `.tombol` (40px) di kartu atas:
+     9 + 20 + 9 padding/baris + 2 border. */
+  .band-input-besar {
+    width: 64px;
+    padding: 9px 12px;
+    font-size: 13px;
+    line-height: 20px;
+    border-radius: var(--r-kendali);
   }
 
   /* Kolom teks biasa — nama siswa, tahun ajaran, roster. */

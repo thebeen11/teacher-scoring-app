@@ -6,6 +6,7 @@ import { komponenOf, totalBobot, type Bobot } from "@/lib/nilai";
 import { n } from "@/lib/format";
 import { InputAngka, InputBand } from "@/components/kendali";
 import Halaman from "@/components/halaman";
+import KepalaHalaman from "@/components/kepala-halaman";
 import DialogTerapkan from "@/components/terapkan-pengaturan";
 
 const BAGIAN = [
@@ -53,20 +54,24 @@ export default function HalamanSkala() {
 
   return (
     <Halaman lebar="sempit">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="judul">
-          Skala &amp; <span className="teks-gradien">KKTP</span>
-        </div>
-        <button
-          className="tombol whitespace-nowrap shadow-none hover:shadow-none hover:translate-y-0"
-          onClick={() => setDialog(true)}
-        >
-          Terapkan ke kelas lain
-        </button>
-      </div>
+      <KepalaHalaman
+        judul={
+          <>
+            Skala &amp; <span className="teks-gradien">KKTP</span>
+          </>
+        }
+        aksi={
+          <button
+            className="tombol whitespace-nowrap shadow-none hover:shadow-none hover:translate-y-0"
+            onClick={() => setDialog(true)}
+          >
+            Terapkan ke kelas lain
+          </button>
+        }
+      />
 
       {/* ------------------------------------------------- bobot / KKTP -- */}
-      <div className="papan p-6 mt-4 sm:mt-7">
+      <div className="papan p-6">
         <div>
           <div className="mikro">BOBOT NILAI AKHIR</div>
 

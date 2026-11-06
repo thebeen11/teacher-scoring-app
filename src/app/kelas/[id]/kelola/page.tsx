@@ -1,6 +1,7 @@
 import { buatKlienServer } from "@/lib/supabase/server";
 import { hapusKelas, hapusSiswa, tambahSiswa, ubahSiswa } from "../../actions";
 import Halaman from "@/components/halaman";
+import KepalaHalaman from "@/components/kepala-halaman";
 import FormSwaSimpan, { PenandaSimpan } from "@/components/swasimpan";
 
 export default async function HalamanKelola({
@@ -26,9 +27,13 @@ export default async function HalamanKelola({
 
   return (
     <Halaman lebar="sempit">
-      <div className="judul">
-        Kelola <span className="teks-gradien">Kelas</span>
-      </div>
+      <KepalaHalaman
+        judul={
+          <>
+            Kelola <span className="teks-gradien">Kelas</span>
+          </>
+        }
+      />
       {/* -------------------------------------------------- daftar siswa -- */}
       <div className="papan p-0 overflow-hidden">
         <div className="px-4 sm:px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro flex">

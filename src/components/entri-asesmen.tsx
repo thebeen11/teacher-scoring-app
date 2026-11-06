@@ -8,6 +8,7 @@ import { InputAngka, InputBand, navigasiSel } from "@/components/kendali";
 import { gayaKolom, KepalaBeku, Panah, SelBeku } from "@/components/tabel";
 import Halaman from "@/components/halaman";
 import TombolUnduh from "@/components/tombol-unduh";
+import KepalaHalaman from "@/components/kepala-halaman";
 import { asesmenSlot, type SlotAsesmen } from "@/lib/ekspor";
 
 const LABEL: ("a" | "b" | "c")[] = ["a", "b", "c"];
@@ -36,7 +37,6 @@ function bobotDari(a: Asesmen, k: "a" | "b" | "c") {
   return k === "a" ? a.bobotA : k === "b" ? a.bobotB : a.bobotC;
 }
 
-
 const JUDUL: Record<SlotAsesmen, string> = {
   tengah: "Tengah Semester",
   akhir: "Akhir Semester",
@@ -55,14 +55,14 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
   if (!asesmen) {
     return (
       <Halaman lebar="fokus">
-        <div className="flex flex-wrap items-end gap-4 mb-7">
-          <div className="judul">
-            Asesmen <span className="teks-gradien">{JUDUL[slot]}</span>
-          </div>
-          <div className="ml-auto">
-            <TombolUnduh jenis={slot} />
-          </div>
-        </div>
+        <KepalaHalaman
+          judul={
+            <>
+              Asesmen <span className="teks-gradien">{JUDUL[slot]}</span>
+            </>
+          }
+          aksi={<TombolUnduh jenis={slot} />}
+        />
         <div className="papan p-6">
           <div className="mikro">
             BELUM ADA ASESMEN {JUDUL[slot].toUpperCase()}
@@ -113,41 +113,44 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
 
   return (
     <Halaman>
-      <div className="flex flex-wrap items-end gap-4 mb-7">
-        <div>
-          <div className="judul">
+      <KepalaHalaman
+        judul={
+          <>
             Asesmen <span className="teks-gradien">{JUDUL[slot]}</span>
-          </div>
-        </div>
-
-        {/* Mode entri disimpan per asesmen per kelas. Isian mode lain tidak
+          </>
+        }
+        aksi={
+          <>
+            {/* Mode entri disimpan per asesmen per kelas. Isian mode lain tidak
             dihapus, jadi berpindah bolak-balik aman. */}
-        <div
-          className="ml-auto segmen max-w-full overflow-x-auto"
-          role="radiogroup"
-          aria-label="Cara mengisi nilai"
-        >
-          {PILIHAN_MODE.map((p) => {
-            const aktif = asesmen.mode === p.mode;
-            return (
-              <button
-                key={p.mode}
-                type="button"
-                role="radio"
-                aria-checked={aktif}
-                onClick={() => setModeAsesmen(asesmen.id, p.mode)}
-                style={{
-                  background: aktif ? "var(--color-aksen)" : "transparent",
-                  color: aktif ? "#ffffff" : "var(--color-redup)",
-                }}
-              >
-                {p.label}
-              </button>
-            );
-          })}
-        </div>
-        <TombolUnduh jenis={slot} />
-      </div>
+            <div
+              className="segmen max-w-full overflow-x-auto"
+              role="radiogroup"
+              aria-label="Cara mengisi nilai"
+            >
+              {PILIHAN_MODE.map((p) => {
+                const aktif = asesmen.mode === p.mode;
+                return (
+                  <button
+                    key={p.mode}
+                    type="button"
+                    role="radio"
+                    aria-checked={aktif}
+                    onClick={() => setModeAsesmen(asesmen.id, p.mode)}
+                    style={{
+                      background: aktif ? "var(--color-aksen)" : "transparent",
+                      color: aktif ? "#ffffff" : "var(--color-redup)",
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+            <TombolUnduh jenis={slot} />
+          </>
+        }
+      />
 
       {langsung ? (
         <>
