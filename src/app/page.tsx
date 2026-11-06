@@ -31,7 +31,7 @@ export default async function Beranda() {
             </span>
           </div>
           <div className="ml-auto flex items-center gap-4 min-w-0">
-            <span className="hidden sm:inline truncate text-[12px] text-[color:var(--color-redup)]">
+            <span className="hidden sm:inline truncate text-[0.75rem] text-[color:var(--color-redup)]">
               {meta.nama || pengguna?.email}
             </span>
             <form action={keluar}>
@@ -58,7 +58,7 @@ export default async function Beranda() {
             {kelas.length === 0 ? (
               <div className="papan p-6 sm:p-8">
                 <div className="mikro">BELUM ADA KELAS</div>
-                <p className="keterangan mt-3 max-w-[560px]">
+                <p className="keterangan mt-3 max-w-[35rem]">
                   Mulai dengan membuat satu kelas: isi mata pelajaran, nama kelas, dan tempelkan
                   daftar nama siswa. Kolom formatif dan sumatif Bab 1–Bab 4, serta ASTS dan
                   ASAS akan dibuatkan otomatis dengan rentang bawaan — semuanya bisa diubah nanti di
@@ -80,12 +80,12 @@ export default async function Beranda() {
                     className="papan papan-angkat p-6 no-underline"
                   >
                     <div className="flex items-baseline gap-2">
-                      <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-judul)]">
+                      <div className="text-[1.375rem] font-semibold leading-none font-[family-name:var(--font-judul)]">
                         {k.nama}
                       </div>
                       <div className="mikro angka">{k.jumlahSiswa} SISWA</div>
                     </div>
-                    <div className="text-[12px] text-[color:var(--color-redup)] mt-3">{k.mapel}</div>
+                    <div className="text-[0.75rem] text-[color:var(--color-redup)] mt-3">{k.mapel}</div>
                     <div className="mikro mt-1.5">
                       SEMESTER {k.semester} · {k.tahunAjaran}
                     </div>

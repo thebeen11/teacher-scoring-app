@@ -113,7 +113,7 @@ export default function HalamanDasbor() {
             }}
           >
             <div className="flex items-baseline gap-2">
-              <div className="text-[22px] font-semibold leading-none font-[family-name:var(--font-judul)]">
+              <div className="text-[1.375rem] font-semibold leading-none font-[family-name:var(--font-judul)]">
                 {k.nama}
               </div>
               <div className="mikro angka">{k.siswa} SISWA</div>
@@ -125,20 +125,20 @@ export default function HalamanDasbor() {
             <div className="flex gap-[22px] mt-3.5">
               <div>
                 <div className="mikro">RERATA RAPORT</div>
-                <div className="text-[20px] font-bold mt-[3px] angka">
+                <div className="text-[1.25rem] font-bold mt-[3px] angka">
                   {k.rerata}
                 </div>
               </div>
               <div>
                 <div className="mikro">TUNTAS</div>
-                <div className="text-[20px] font-bold mt-[3px] angka">
+                <div className="text-[1.25rem] font-bold mt-[3px] angka">
                   {k.tuntas}
                 </div>
               </div>
               <div>
                 <div className="mikro">BELUM</div>
                 <div
-                  className="text-[20px] font-bold mt-[3px] angka"
+                  className="text-[1.25rem] font-bold mt-[3px] angka"
                   style={{
                     color: k.belum
                       ? "var(--color-bahaya)"
@@ -176,12 +176,12 @@ export default function HalamanDasbor() {
                   : "var(--color-bahaya)";
               return (
                 <div key={a.kode} className="papan-dalam">
-                  <div className="text-[13px] font-extrabold">{a.kode}</div>
-                  <div className="text-[11px] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 h-[30px]">
+                  <div className="text-[0.8125rem] font-extrabold">{a.kode}</div>
+                  <div className="text-[0.6875rem] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 h-[1.875rem]">
                     {a.nama}
                   </div>
                   <div
-                    className="text-[11px] font-bold mt-1 angka"
+                    className="text-[0.6875rem] font-bold mt-1 angka"
                     style={{ color: warna }}
                   >
                     {a.status}
@@ -197,26 +197,26 @@ export default function HalamanDasbor() {
           <div className="mt-5 pt-4 border-t border-[color:var(--color-garis)] flex gap-x-7 gap-y-4 flex-wrap">
             <div>
               <div className="mikro">NA TERENDAH</div>
-              <div className="text-[18px] font-bold mt-[3px] angka">
+              <div className="text-[1.125rem] font-bold mt-[3px] angka">
                 {n(naMin)}
               </div>
             </div>
             <div>
               <div className="mikro">NA TERTINGGI</div>
-              <div className="text-[18px] font-bold mt-[3px] angka">
+              <div className="text-[1.125rem] font-bold mt-[3px] angka">
                 {n(naMax)}
               </div>
             </div>
             <div>
               <div className="mikro">RENTANG RAPORT</div>
-              <div className="text-[18px] font-bold mt-[3px] angka">
+              <div className="text-[1.125rem] font-bold mt-[3px] angka">
                 {n(kelas.naBandMin, 0)}–{n(kelas.naBandMax, 0)}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="w-full xl:w-[330px] flex-none papan px-5 sm:px-6 py-[22px]">
+        <div className="w-full xl:w-[20.625rem] flex-none papan px-5 sm:px-6 py-[22px]">
           <div className="mikro-lebar text-[color:var(--color-bahaya)]">
             DI BAWAH KKTP {kelas.kktp}
           </div>
@@ -234,12 +234,12 @@ export default function HalamanDasbor() {
                   onClick={() =>
                     router.push(`/kelas/${kelas.id}/siswa?siswa=${b.siswa.id}`)
                   }
-                  className="w-full flex items-center gap-2.5 px-3 py-[10px] mb-1 rounded-[var(--r-kecil)] border-0 bg-transparent text-[12px] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
+                  className="w-full flex items-center gap-2.5 px-3 py-[10px] mb-1 rounded-[var(--r-kecil)] border-0 bg-transparent text-[0.75rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
                 >
                   <span className="flex-1 min-w-0 truncate">
                     {b.siswa.nama}
                   </span>
-                  <span className="text-[13px] font-bold text-[color:var(--color-bahaya)] angka">
+                  <span className="text-[0.8125rem] font-bold text-[color:var(--color-bahaya)] angka">
                     {b.raport}
                   </span>
                 </button>

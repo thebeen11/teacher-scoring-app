@@ -74,12 +74,12 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
         onClick={() => !sibuk && onTutup()}
         className="absolute inset-0 w-full h-full border-0 bg-[rgba(23,59,85,0.35)] cursor-pointer"
       />
-      <div className="relative w-full max-w-[440px] max-h-[calc(100dvh-32px)] flex flex-col papan p-0 overflow-hidden">
+      <div className="relative w-full max-w-[27.5rem] max-h-[calc(100dvh-32px)] flex flex-col papan p-0 overflow-hidden">
         <div className="px-6 pt-6 pb-4">
-          <div id="judul-terapkan" className="judul text-[18px]">
+          <div id="judul-terapkan" className="judul text-[1.125rem]">
             Terapkan ke kelas lain
           </div>
-          <p className="keterangan mt-1.5 text-[11px]">
+          <p className="keterangan mt-1.5 text-[0.6875rem]">
             Salin KKTP {kelas.kktp} dan bobot {kelas.bobot.formatif} :{" "}
             {kelas.bobot.sumatif} : {kelas.bobot.tengah} : {kelas.bobot.akhir}{" "}
             dari kelas {kelas.nama} ke kelas yang dipilih.
@@ -98,7 +98,7 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
                   onChange={pilihSemua}
                   className="w-4 h-4 accent-[color:var(--color-aksen)]"
                 />
-                <span className="text-[13px] font-semibold">Pilih semua</span>
+                <span className="text-[0.8125rem] font-semibold">Pilih semua</span>
               </label>
               {[...kelompok].map(([judul, daftar]) => (
                 <div key={judul} className="py-3">
@@ -114,10 +114,10 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
                         onChange={() => ubah(k.id)}
                         className="w-4 h-4 accent-[color:var(--color-aksen)]"
                       />
-                      <span className="text-[13px] font-semibold flex-1 min-w-0 truncate">
+                      <span className="text-[0.8125rem] font-semibold flex-1 min-w-0 truncate">
                         {k.nama}
                       </span>
-                      <span className="text-[11px] text-[color:var(--color-redup)] angka">
+                      <span className="text-[0.6875rem] text-[color:var(--color-redup)] angka">
                         {k.jumlahSiswa} siswa
                       </span>
                     </label>
@@ -131,7 +131,7 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
         <div className="px-6 py-4">
           {galat && (
             <p
-              className="keterangan mb-3 text-[11px]"
+              className="keterangan mb-3 text-[0.6875rem]"
               style={{ color: "var(--color-bahaya)" }}
               role="alert"
             >

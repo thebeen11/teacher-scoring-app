@@ -47,18 +47,18 @@ export default async function HalamanKelola({
             action={ubahSiswa.bind(null, id, s.id)}
             className="flex items-center gap-2 px-4 sm:px-6 py-3 border-b border-[color:var(--color-garis)]"
           >
-            <span className="w-6 sm:w-8 flex-none text-[11.5px] text-[color:var(--color-redup)] angka">
+            <span className="w-6 sm:w-8 flex-none text-[0.7188rem] text-[color:var(--color-redup)] angka">
               {s.no_urut}
             </span>
             <input
               name="nama"
               defaultValue={s.nama}
-              className="isian flex-1 min-w-0 px-3 py-2 text-[12px]"
+              className="isian flex-1 min-w-0 px-3 py-2 text-[0.75rem]"
             />
             <select
               name="jk"
               defaultValue={s.jk ?? ""}
-              className="isian px-3 py-2 text-[12px]"
+              className="isian px-3 py-2 text-[0.75rem]"
             >
               <option value="">—</option>
               <option value="L">L</option>
@@ -68,7 +68,7 @@ export default async function HalamanKelola({
             <button
               type="submit"
               formAction={hapusSiswa.bind(null, id, s.id)}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
+              className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
             >
               Hapus
             </button>
@@ -83,7 +83,7 @@ export default async function HalamanKelola({
             placeholder={
               "Satu nama per baris — boleh ditempel langsung dari spreadsheet."
             }
-            className="isian w-full text-[12px] leading-[1.6]"
+            className="isian w-full text-[0.75rem] leading-[1.6]"
           />
           <button type="submit" className="tombol mt-2.5">
             Tambahkan
@@ -100,7 +100,7 @@ export default async function HalamanKelola({
           <div className="mikro text-[color:var(--color-bahaya)]">
             HAPUS KELAS
           </div>
-          <p className="keterangan mt-1.5 text-[11px]">
+          <p className="keterangan mt-1.5 text-[0.6875rem]">
             Menghapus {kelas?.nama} beserta seluruh siswa dan nilainya. Tidak
             bisa dibatalkan.
           </p>

@@ -10,7 +10,7 @@ export default async function HalamanMasuk({
 
   return (
     <div className="papan p-7 sm:p-8">
-      <h1 className="text-[22px] leading-tight font-semibold tracking-[-0.01em]">
+      <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.01em]">
         Masuk
       </h1>
       <p className="keterangan mt-1 mb-6">Masuk untuk mengelola nilai siswa Anda.</p>

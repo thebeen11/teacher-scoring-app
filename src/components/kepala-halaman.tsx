@@ -99,13 +99,13 @@ export default function KepalaHalaman({
             >
               <div className="mikro truncate">{s.label}</div>
               <div
-                className="text-[20px] font-bold mt-[3px] leading-tight angka truncate"
+                className="text-[1.25rem] font-bold mt-[3px] leading-tight angka truncate"
                 style={s.warna ? { color: s.warna } : undefined}
               >
                 {s.nilai}
               </div>
               {s.sub && (
-                <div className="text-[10.5px] font-medium mt-0.5 text-[color:var(--color-redup)] truncate angka">
+                <div className="text-[0.6562rem] font-medium mt-0.5 text-[color:var(--color-redup)] truncate angka">
                   {s.sub}
                 </div>
               )}

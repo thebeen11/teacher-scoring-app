@@ -99,8 +99,8 @@ function ButirNav({
       aria-current={aktif ? "page" : undefined}
       className={`flex items-center gap-2.5 mr-2 rounded-[var(--r-kendali)] font-semibold no-underline transition-colors ${
         sub
-          ? "ml-6 px-3 py-[8px] text-[12px]"
-          : "ml-2 px-3 py-[10px] text-[12.5px]"
+          ? "ml-6 px-3 py-[8px] text-[0.75rem]"
+          : "ml-2 px-3 py-[10px] text-[0.7812rem]"
       }`}
       style={{
         background: aktif ? "var(--color-aksen)" : "transparent",
@@ -203,7 +203,7 @@ function KakiPanel({
 
       <div className="px-2 pb-3">
         <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1 text-[14px] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
+          <div className="min-w-0 flex-1 text-[0.875rem] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
             {mapel} · Kelas {kelas.nama}
           </div>
         </div>
@@ -219,7 +219,7 @@ function KakiPanel({
         >
           {[...kelompok].map(([judul, daftar]) => (
             <div key={judul} className="pb-1">
-              <div className="px-3 pt-2 pb-1 text-[9.5px] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
+              <div className="px-3 pt-2 pb-1 text-[0.5938rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
                 {judul.toUpperCase()}
               </div>
               {daftar.map((k) => {
@@ -232,7 +232,7 @@ function KakiPanel({
                     href={`/kelas/${k.id}/${segrup ? ruasAktif : "dasbor"}`}
                     onClick={pilih}
                     aria-current={aktif ? "true" : undefined}
-                    className="flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[12.5px] font-semibold no-underline"
+                    className="flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
                     style={{
                       background: aktif ? "var(--color-aksen)" : "transparent",
                       color: aktif ? "#ffffff" : "var(--color-tinta)",
@@ -240,7 +240,7 @@ function KakiPanel({
                   >
                     <span className="flex-1 truncate">{k.nama}</span>
                     <span
-                      className="text-[10px] font-medium angka"
+                      className="text-[0.625rem] font-medium angka"
                       style={{
                         color: aktif
                           ? "rgba(255,255,255,0.8)"
@@ -260,7 +260,7 @@ function KakiPanel({
               href="/"
               role="menuitem"
               onClick={pilih}
-              className="px-3 py-2 rounded-[var(--r-kendali)] text-[12.5px] font-semibold no-underline"
+              className="px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
               style={{ color: "var(--color-redup)" }}
             >
               Semua kelas
@@ -269,7 +269,7 @@ function KakiPanel({
               href="/kelas/baru"
               role="menuitem"
               onClick={pilih}
-              className="px-3 py-2 rounded-[var(--r-kendali)] text-[12.5px] font-semibold no-underline"
+              className="px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
               style={{ color: "var(--color-redup)" }}
             >
               Kelas baru
@@ -278,7 +278,7 @@ function KakiPanel({
               <button
                 type="submit"
                 role="menuitem"
-                className="w-full text-left px-3 py-2 rounded-[var(--r-kendali)] text-[12.5px] font-semibold border-0 bg-transparent cursor-pointer text-[color:var(--color-bahaya-pekat)]"
+                className="w-full text-left px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold border-0 bg-transparent cursor-pointer text-[color:var(--color-bahaya-pekat)]"
               >
                 Keluar
               </button>
@@ -296,18 +296,18 @@ function KakiPanel({
       >
         <span
           aria-hidden
-          className="kotak-ikon w-9 h-9 flex-none rounded-full bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)] text-[12px] font-bold text-white"
+          className="kotak-ikon w-9 h-9 flex-none rounded-full bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)] text-[0.75rem] font-bold text-white"
         >
           {inisial(pengguna)}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[12.5px] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
+          <span className="block text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
             {pengguna.nama || pengguna.email || "Guru"}
           </span>
         </span>
         <span
           aria-hidden
-          className="flex-none text-[10px] text-[color:var(--color-samar)] transition-transform"
+          className="flex-none text-[0.625rem] text-[color:var(--color-samar)] transition-transform"
           style={{ transform: buka ? "rotate(180deg)" : "none" }}
         >
           ▲
@@ -360,7 +360,7 @@ function PanelNav({
         {NAV.map((item) => (
           <div key={item.ruas}>
             {item.kelompok && (
-              <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
+              <div className="px-5 pt-4 pb-1.5 text-[0.5938rem] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
                 {item.kelompok}
               </div>
             )}
@@ -395,7 +395,7 @@ function PanelNav({
           </div>
         ))}
 
-        <div className="px-5 pt-4 pb-1.5 text-[9.5px] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
+        <div className="px-5 pt-4 pb-1.5 text-[0.5938rem] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
           PENGATURAN
         </div>
         <ButirNav
@@ -450,7 +450,7 @@ export default function Cangkang({
   return (
     <div className="flex h-dvh overflow-hidden bg-[color:var(--color-kertas)]">
       {/* ------------------------------------------------ rail (lg ke atas) -- */}
-      <aside className="hidden lg:flex w-[244px] flex-none m-6 mr-0 flex-col papan-neu bg-white p-0 overflow-hidden tanpa-cetak">
+      <aside className="hidden lg:flex w-[15.25rem] flex-none m-4 mr-0 2xl:m-6 2xl:mr-0 flex-col papan-neu bg-white p-0 overflow-hidden tanpa-cetak">
         <PanelNav {...panel} />
       </aside>
 
@@ -467,7 +467,7 @@ export default function Cangkang({
             onClick={() => setLaci(false)}
             className="absolute inset-0 w-full h-full border-0 bg-[rgba(23,59,85,0.35)] cursor-pointer"
           />
-          <aside className="laci absolute left-3 top-3 bottom-3 w-[272px] max-w-[calc(100vw-24px)] flex flex-col papan-neu bg-white p-0 overflow-hidden">
+          <aside className="laci absolute left-3 top-3 bottom-3 w-[17rem] max-w-[calc(100vw-24px)] flex flex-col papan-neu bg-white p-0 overflow-hidden">
             <PanelNav {...panel} onPilih={() => setLaci(false)} />
           </aside>
         </div>
@@ -490,7 +490,7 @@ export default function Cangkang({
               <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-semibold leading-[1.2] truncate font-[family-name:var(--font-judul)]">
+              <div className="text-[0.9375rem] font-semibold leading-[1.2] truncate font-[family-name:var(--font-judul)]">
                 {mapel}
               </div>
               <div className="mikro mt-0.5 truncate">
@@ -523,7 +523,7 @@ function RosterKosong({ kelasId }: { kelasId: string }) {
           className="kotak-ikon w-14 h-14 mb-5"
           style={{ background: "rgba(169, 196, 108, 0.2)" }}
         >
-          <span className="text-[22px] font-semibold text-[color:var(--color-langit-gelap)]">
+          <span className="text-[1.375rem] font-semibold text-[color:var(--color-langit-gelap)]">
             +
           </span>
         </div>

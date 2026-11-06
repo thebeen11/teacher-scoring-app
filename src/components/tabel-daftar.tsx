@@ -41,7 +41,7 @@ type Kolom = {
 
 type Urut = { kunci: string; arah: 'naik' | 'turun' } | null
 
-const REDUP = 'text-[13.5px] text-[color:var(--color-redup)] angka'
+const REDUP = 'text-[0.8438rem] text-[color:var(--color-redup)] angka'
 
 export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boolean }) {
   const { kelas, hasil } = useKelas()
@@ -85,17 +85,17 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       kunci: 'na',
       label: 'NA',
       lebar: 'auto',
-      lebarCetak: 'w-[84px] flex-none',
+      lebarCetak: 'w-[5.25rem] flex-none',
       isi: (b) => n(b.na),
-      kelas: 'text-[14px] font-bold angka',
+      kelas: 'text-[0.875rem] font-bold angka',
     },
     {
       kunci: 'raport',
       label: 'RAPORT',
       lebar: 'auto',
-      lebarCetak: 'w-[92px] flex-none',
+      lebarCetak: 'w-[5.75rem] flex-none',
       isi: (b) => b.raport,
-      kelas: 'text-[19px] font-extrabold angka',
+      kelas: 'text-[1.1875rem] font-extrabold angka',
       gaya: (b) => ({ color: b.tuntas ? 'var(--color-tinta)' : 'var(--color-bahaya)' }),
     },
     {
@@ -121,7 +121,7 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       lebar: 'auto',
       lebarCetak: 'w-24 flex-none',
       isi: (b) => b.peringkat,
-      kelas: 'text-[14px] font-bold angka',
+      kelas: 'text-[0.875rem] font-bold angka',
       urut: (b) => b.peringkat,
     },
   ]
@@ -155,7 +155,7 @@ function Layar({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
       : baris
 
   return (
-    <div className="tabel-padat min-w-fit" style={gaya}>
+    <div className="tabel-padat min-w-max" style={gaya}>
       <div className="kepala-padat">
         <KepalaBeku />
         {kolom.map((k) => {
@@ -220,7 +220,7 @@ function Cetak({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
     <div>
       <div className="kepala-cetak mikro">
         <div className="w-11 flex-none px-2.5 py-[11px]">NO</div>
-        <div className="flex-1 min-w-[180px] px-2.5 py-[11px] sekat">NAMA PESERTA DIDIK</div>
+        <div className="flex-1 min-w-[11.25rem] px-2.5 py-[11px] sekat">NAMA PESERTA DIDIK</div>
         {kolom.map((k) => (
           <div
             key={k.kunci}
@@ -233,11 +233,11 @@ function Cetak({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
 
       {baris.map((b) => (
         <div key={b.siswa.id} className="baris-cetak">
-          <div className="w-11 flex-none px-2.5 py-[11px] text-[11.5px] font-semibold text-[color:var(--color-samar)] angka">
+          <div className="w-11 flex-none px-2.5 py-[11px] text-[0.7188rem] font-semibold text-[color:var(--color-samar)] angka">
             {b.siswa.noUrut}
           </div>
           <div
-            className="flex-1 min-w-[180px] px-2.5 py-[11px] text-[12.5px] font-semibold sekat truncate"
+            className="flex-1 min-w-[11.25rem] px-2.5 py-[11px] text-[0.7812rem] font-semibold sekat truncate"
             title={b.siswa.nama}
           >
             {b.siswa.nama}

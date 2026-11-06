@@ -60,7 +60,7 @@ export function IsianNama({
           tutup(false);
         }
       }}
-      className={`isian px-2.5 py-1.5 text-[12px] ${className}`}
+      className={`isian px-2.5 py-1.5 text-[0.75rem] ${className}`}
     />
   );
 }
@@ -152,7 +152,7 @@ export function MenuKolom({
   };
 
   const butir =
-    "w-full text-left px-3 py-2 text-[12px] font-semibold border-0 bg-transparent cursor-pointer rounded-[var(--r-kecil)] transition-colors hover:bg-[color:var(--color-kepala)] disabled:cursor-not-allowed disabled:opacity-40";
+    "w-full text-left px-3 py-2 text-[0.75rem] font-semibold border-0 bg-transparent cursor-pointer rounded-[var(--r-kecil)] transition-colors hover:bg-[color:var(--color-kepala)] disabled:cursor-not-allowed disabled:opacity-40";
 
   return (
     <>
@@ -177,7 +177,7 @@ export function MenuKolom({
         <div
           ref={menu}
           role="menu"
-          className="papan fixed z-50 w-[200px] p-1.5"
+          className="papan fixed z-50 w-[12.5rem] p-1.5"
           style={{ top: posisi.top, left: posisi.left, boxShadow: "var(--bayang-lembut)" }}
         >
           <button role="menuitem" type="button" className={butir} onClick={() => pilih(onGantiNama)}>
@@ -263,7 +263,7 @@ export function HapusDuaLangkah({ label, onHapus }: { label: string; onHapus: ()
       onBlur={() => setYakin(false)}
       title={yakin ? `Klik lagi untuk menghapus ${label}` : `Hapus ${label}`}
       aria-label={yakin ? `Pastikan hapus ${label}` : `Hapus ${label}`}
-      className={`flex flex-none items-center border-0 cursor-pointer rounded-[var(--r-kecil)] px-1 text-[11px] font-bold leading-none text-[color:var(--color-bahaya)] transition-colors ${
+      className={`flex flex-none items-center border-0 cursor-pointer rounded-[var(--r-kecil)] px-1 text-[0.6875rem] font-bold leading-none text-[color:var(--color-bahaya)] transition-colors ${
         yakin ? "bg-[color:var(--color-basuh)] py-0.5" : "bg-transparent opacity-50 hover:opacity-100"
       }`}
     >
