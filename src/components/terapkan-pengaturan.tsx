@@ -16,7 +16,7 @@ export default function DialogTerapkan({ onTutup }: { onTutup: () => void }) {
   const [galat, setGalat] = useState<string | null>(null);
   const [sibuk, mulai] = useTransition();
 
-  const lain = semuaKelas.filter((k) => k.id !== kelas.id);
+  const lain = semuaKelas.filter((k) => k.id !== kelas.id && k.aktif);
 
   // Kelompokkan per mapel + semester + tahun, sama seperti navigasi kelas.
   const kelompok = new Map<string, RingkasanKelas[]>();

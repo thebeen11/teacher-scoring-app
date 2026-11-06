@@ -18,11 +18,12 @@ const LEBAR_NAMA = 'var(--lebar-nama)'
  * Rakit nilai `--kolom`. NO dan NAMA selalu jadi dua trek pertama, jadi
  * pemanggil hanya menyebut kolom miliknya sendiri dan tidak bisa lupa.
  *
- * NAMA tidak pernah lebih sempit dari `--lebar-nama` dan menelan seluruh sisa
- * lebar (`1fr`); kolom lain sebaiknya `auto` supaya selebar isinya saja.
+ * NAMA tidak pernah lebih sempit dari `--lebar-nama` dan melebar mengisi sisa
+ * lebar, tapi paling lebar separuh tabel (`50%`, dihitung dari lebar kisi).
+ * Sisa lebar di atas batas itu dibagi ke kolom lain, yang sebaiknya `auto`.
  */
 export function gayaKolom(...trek: string[]): React.CSSProperties {
-  const kolom = [LEBAR_NO, `minmax(${LEBAR_NAMA}, 1fr)`, ...trek].join(' ')
+  const kolom = [LEBAR_NO, `minmax(${LEBAR_NAMA}, 50%)`, ...trek].join(' ')
   return { ['--kolom' as string]: kolom } as React.CSSProperties
 }
 

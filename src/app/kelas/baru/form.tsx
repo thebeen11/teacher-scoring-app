@@ -104,7 +104,7 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
           className={`${inputKelas} font-[inherit] leading-[1.6]`}
         />
         <span className="text-[0.6875rem] text-[color:var(--color-redup)]">
-          Satu nama per baris. Boleh langsung ditempel dari spreadsheet — nomor urut di depan
+          Satu nama per baris. Boleh langsung disalin dari Excel — nomor urut di depan
           dan huruf L/P di belakang akan dikenali.
         </span>
       </label>

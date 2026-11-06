@@ -49,7 +49,7 @@ import {
 
 const RINGKASAN = "ringkasan";
 
-// Semua kolom nilai selebar isinya; sisa lebar halaman jatuh ke kolom NAMA.
+// Semua kolom nilai selebar isinya; sisa lebar jatuh ke NAMA (maks. separuh tabel).
 const LEBAR_SUB = "auto";
 const LEBAR_HASIL = "auto";
 const LEBAR_TUNGGAL = "auto";
@@ -203,7 +203,7 @@ export default function TabelPadat({
                   k ? () => setSunting({ mode: "ubah", id: k.id }) : undefined
                 }
                 title={k ? "Klik dua kali untuk mengganti nama" : undefined}
-                className={`flex flex-none items-center gap-1.5 whitespace-nowrap ${k ? "pr-1.5" : ""}`}
+                className={`flex flex-none items-center gap-1.5 whitespace-nowrap ${k && aktif ? "pr-1.5" : ""}`}
                 style={{
                   background: aktif ? "var(--color-aksen)" : "transparent",
                   color: aktif ? "#ffffff" : "var(--color-redup)",
@@ -222,7 +222,7 @@ export default function TabelPadat({
                   </span>
                 )}
               </button>
-              {k && (
+              {k && aktif && (
                 <MenuKolom
                   label={k.nama || k.label}
                   aktif={aktif}
@@ -355,7 +355,7 @@ export default function TabelPadat({
     const selPerBaris = anakOf.filter((a) => a.length === 0).length;
 
     kepala = kolom.map((k) => (
-      <div key={k.id} className="px-2.5 py-2 min-w-0 sekat-padat">
+      <div key={k.id} className="px-4 py-2.5 min-w-0 sekat-padat">
         {kepalaKolom(k)}
       </div>
     ));
@@ -472,7 +472,7 @@ export default function TabelPadat({
             </div>
           ),
         )}
-        <div className="px-2.5 py-2 min-w-0 sekat-padat">
+        <div className="px-4 py-2.5 min-w-0 sekat-padat">
           {kepalaKolom(k, true)}
           {bersub && <div className="mikro mt-1">RERATA → NILAI</div>}
         </div>

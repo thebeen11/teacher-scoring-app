@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useKelas } from "@/lib/store";
 import { n } from "@/lib/format";
 import Halaman from "@/components/halaman";
+import { ChipStatus } from "@/components/chip-status";
 
 /**
  * Rincian Siswa — rantai nilai satu siswa dibuka penuh, dari skor mentah
@@ -170,19 +171,7 @@ export default function HalamanSiswa() {
             </div>
             <div className="text-right">
               <div className="mikro">STATUS</div>
-              <div
-                className="tag mt-2 text-[0.6875rem]"
-                style={{
-                  background: b.tuntas
-                    ? "var(--color-sorot)"
-                    : "var(--color-basuh)",
-                  color: b.tuntas
-                    ? "var(--color-aksen-gelap)"
-                    : "var(--color-bahaya-pekat)",
-                }}
-              >
-                {b.tuntas ? "TUNTAS" : "BELUM"}
-              </div>
+              <ChipStatus tuntas={b.tuntas} className="mt-2 text-[0.6875rem]" />
             </div>
           </div>
         </div>

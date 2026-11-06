@@ -9,29 +9,43 @@ import { useKelas } from "@/lib/store";
 import Halaman from "@/components/halaman";
 import type { RingkasanKelas } from "@/lib/data";
 import { keluar } from "@/app/(auth)/actions";
+import IkonNav, { type NamaIkon } from "@/components/ikon-nav";
 
 type ItemNav = {
   label: string;
   ruas: string;
+  ikon: NamaIkon;
   kelompok?: string;
-  anak?: { label: string; ruas: string }[];
+  anak?: { label: string; ruas: string; ikon: NamaIkon }[];
 };
 
 const NAV: ItemNav[] = [
-  { label: "Dasbor", ruas: "dasbor" },
-  { label: "Nilai Formatif", ruas: "formatif", kelompok: "ENTRI" },
-  { label: "Nilai Sumatif", ruas: "lingkup" },
+  { label: "Dasbor", ruas: "dasbor", ikon: "dasbor" },
+  {
+    label: "Nilai Formatif",
+    ruas: "formatif",
+    ikon: "formatif",
+    kelompok: "ENTRI",
+  },
+  { label: "Nilai Sumatif", ruas: "lingkup", ikon: "lingkup" },
   {
     label: "Asesmen Sumatif",
     ruas: "asesmen",
+    ikon: "asesmen",
     anak: [
-      { label: "Asesmen Tengah Semester", ruas: "tengah" },
-      { label: "Asesmen Akhir Semester", ruas: "akhir" },
+      { label: "Asesmen Tengah Semester", ruas: "tengah", ikon: "tengah" },
+      { label: "Asesmen Akhir Semester", ruas: "akhir", ikon: "akhir" },
     ],
   },
-  { label: "Daftar Nilai", ruas: "daftar", kelompok: "HASIL" },
+  { label: "Daftar Nilai", ruas: "daftar", ikon: "daftar", kelompok: "HASIL" },
   // { label: "Rincian Siswa", ruas: "siswa" },
-  { label: "Skala & KKTP", ruas: "skala" },
+  {
+    label: "Skala & KKTP",
+    ruas: "skala",
+    ikon: "skala",
+    kelompok: "PENGATURAN",
+  },
+  { label: "Kelola Kelas", ruas: "kelola", ikon: "kelola" },
 ];
 
 function LencanaSimpan() {
@@ -78,6 +92,7 @@ function LencanaSimpan() {
 function ButirNav({
   href,
   label,
+  ikon,
   aktif,
   induk = false,
   sub = false,
@@ -85,6 +100,7 @@ function ButirNav({
 }: {
   href: string;
   label: string;
+  ikon: NamaIkon;
   aktif: boolean;
   /** Induk dari sub-menu yang sedang aktif: tinta gelap, tanpa kapsul. */
   induk?: boolean;
@@ -113,15 +129,17 @@ function ButirNav({
       }}
     >
       <span
-        className={`${sub ? "w-[5px] h-[5px]" : "w-[7px] h-[7px]"} flex-none rounded-full`}
+        className="flex-none flex"
         style={{
-          background: aktif
+          color: aktif
             ? "#ffffff"
             : induk
               ? "var(--color-aksen)"
               : "var(--color-samar)",
         }}
-      />
+      >
+        <IkonNav nama={ikon} ukuran={sub ? 14 : 16} />
+      </span>
       {label}
     </Link>
   );
@@ -184,7 +202,8 @@ function KakiPanel({
 
   // Kelompokkan per mapel + semester + tahun, urutan pertama kali muncul.
   const kelompok = new Map<string, RingkasanKelas[]>();
-  for (const k of semuaKelas) {
+  // Kelas nonaktif tidak ditawarkan — kecuali yang sedang dibuka.
+  for (const k of semuaKelas.filter((k) => k.aktif || k.id === kelas.id)) {
     const kunci = `${k.mapel} · SMT ${k.semester} · ${k.tahunAjaran}`;
     kelompok.set(kunci, [...(kelompok.get(kunci) ?? []), k]);
   }
@@ -369,6 +388,7 @@ function PanelNav({
                 <ButirNav
                   href={`/kelas/${kelas.id}/${item.ruas}/${item.anak[0].ruas}`}
                   label={item.label}
+                  ikon={item.ikon}
                   aktif={false}
                   induk={ruasAktif === item.ruas}
                   onPilih={onPilih}
@@ -378,6 +398,7 @@ function PanelNav({
                     key={anak.ruas}
                     href={`/kelas/${kelas.id}/${item.ruas}/${anak.ruas}`}
                     label={anak.label}
+                    ikon={anak.ikon}
                     aktif={ruasAktif === item.ruas && subAktif === anak.ruas}
                     sub
                     onPilih={onPilih}
@@ -388,22 +409,13 @@ function PanelNav({
               <ButirNav
                 href={`/kelas/${kelas.id}/${item.ruas}`}
                 label={item.label}
+                ikon={item.ikon}
                 aktif={ruasAktif === item.ruas}
                 onPilih={onPilih}
               />
             )}
           </div>
         ))}
-
-        <div className="px-5 pt-4 pb-1.5 text-[0.5938rem] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
-          PENGATURAN
-        </div>
-        <ButirNav
-          href={`/kelas/${kelas.id}/kelola`}
-          label="Kelola Kelas"
-          aktif={ruasAktif === "kelola"}
-          onPilih={onPilih}
-        />
       </nav>
 
       <KakiPanel

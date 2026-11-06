@@ -340,9 +340,38 @@ export async function terapkanPengaturan(
   revalidatePath('/kelas', 'layout')
 }
 
-export async function hapusKelas(kelasId: string) {
+/**
+ * Menghapus kelas beserta seluruh isinya (cascade). Pengguna harus mengetik
+ * nama kelas di dialog; nama itu dicocokkan ulang di sini supaya pemeriksaan
+ * tidak hanya hidup di peramban.
+ */
+export async function hapusKelas(kelasId: string, konfirmasi: string): Promise<HasilAksi> {
   const supabase = await buatKlienServer()
-  await supabase.from('kelas').delete().eq('id', kelasId)
+  const { data: kelas } = await supabase
+    .from('kelas')
+    .select('nama')
+    .eq('id', kelasId)
+    .maybeSingle()
+
+  if (!kelas) return { galat: 'Kelas tidak ditemukan.' }
+  if (String(konfirmasi ?? '').trim() !== kelas.nama.trim()) {
+    return { galat: 'Nama kelas tidak cocok.' }
+  }
+
+  const { error } = await supabase.from('kelas').delete().eq('id', kelasId)
+  if (error) return { galat: 'Gagal menghapus kelas. Coba lagi.' }
+
   revalidatePath('/', 'layout')
   redirect('/')
+}
+
+/**
+ * Menonaktifkan (mengarsipkan) atau mengaktifkan lagi sebuah kelas. Kelas
+ * nonaktif disembunyikan dari "Semua Kelas" dan pemilih kelas, datanya utuh.
+ */
+export async function aturAktifKelas(kelasId: string, aktif: boolean): Promise<HasilAksi> {
+  const supabase = await buatKlienServer()
+  const { error } = await supabase.from('kelas').update({ aktif }).eq('id', kelasId)
+  if (error) return { galat: 'Gagal mengubah status kelas. Coba lagi.' }
+  revalidatePath('/', 'layout')
 }

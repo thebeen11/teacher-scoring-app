@@ -170,24 +170,42 @@ export default function HalamanDasbor() {
 
           <div className="grid gap-3.5 mt-4 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
             {alur.map((a) => {
-              const warna =
-                a.pct >= 100
-                  ? "var(--color-aksen-gelap)"
-                  : "var(--color-bahaya)";
+              const lengkap = a.pct >= 100;
+              const warna = lengkap
+                ? "var(--color-aksen-gelap)"
+                : "var(--color-bahaya)";
               return (
-                <div key={a.kode} className="papan-dalam">
-                  <div className="text-[0.8125rem] font-extrabold">{a.kode}</div>
-                  <div className="text-[0.6875rem] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 h-[1.875rem]">
+                <div key={a.kode} className="papan-dalam shadow-none flex flex-col">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="mikro truncate">{a.kode}</span>
+                    <span
+                      className="w-2 h-2 rounded-full flex-none"
+                      style={{ background: warna }}
+                      aria-hidden
+                    />
+                  </div>
+
+                  <div
+                    className="text-[1.75rem] font-bold leading-none mt-3 angka"
+                    style={{ color: lengkap ? "var(--color-tinta)" : warna }}
+                  >
+                    {Math.round(a.pct)}
+                    <span className="text-[0.875rem] font-semibold ml-0.5 text-[color:var(--color-redup)]">
+                      %
+                    </span>
+                  </div>
+
+                  <div className="text-[0.75rem] font-semibold leading-[1.35] mt-2">
                     {a.nama}
                   </div>
-                  <div
-                    className="text-[0.6875rem] font-bold mt-1 angka"
-                    style={{ color: warna }}
-                  >
+                  <div className="text-[0.6875rem] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 angka">
                     {a.status}
                   </div>
-                  <div className="bilah h-1.5 mt-2">
-                    <span style={{ background: warna, width: pct(a.pct) }} />
+
+                  <div className="mt-auto pt-3">
+                    <div className="bilah h-1.5">
+                      <span style={{ background: warna, width: pct(a.pct) }} />
+                    </div>
                   </div>
                 </div>
               );

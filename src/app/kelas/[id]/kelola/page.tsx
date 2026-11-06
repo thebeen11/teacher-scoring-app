@@ -1,8 +1,15 @@
 import { buatKlienServer } from "@/lib/supabase/server";
-import { hapusKelas, hapusSiswa, tambahSiswa, ubahSiswa } from "../../actions";
+import { hapusSiswa, ubahSiswa } from "../../actions";
 import Halaman from "@/components/halaman";
 import KepalaHalaman from "@/components/kepala-halaman";
 import FormSwaSimpan, { PenandaSimpan } from "@/components/swasimpan";
+import { gayaKolom, KepalaBeku } from "@/components/tabel";
+import TombolHapus from "@/components/tombol-hapus";
+import {
+  TombolAktifKelas,
+  TombolHapusKelas,
+  TombolTambahSiswa,
+} from "@/components/aksi-kelola";
 
 export default async function HalamanKelola({
   params,
@@ -15,7 +22,7 @@ export default async function HalamanKelola({
   const [{ data: kelas }, { data: siswa }] = await Promise.all([
     supabase
       .from("kelas")
-      .select("nama, semester, tahun_ajaran")
+      .select("*")
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -25,98 +32,115 @@ export default async function HalamanKelola({
       .order("no_urut"),
   ]);
 
+  const nama: string = kelas?.nama ?? "";
+  // null bila migrasi kelas_aktif belum dijalankan: anggap aktif.
+  const aktif = kelas?.aktif !== false;
+
   return (
     <Halaman lebar="sempit">
       <KepalaHalaman
-        judul={
+        judul={<>Kelola Kelas</>}
+        aksi={
           <>
-            Kelola Kelas
+            <TombolTambahSiswa kelasId={id} />
+            <TombolAktifKelas kelasId={id} nama={nama} aktif={aktif} />
+            <TombolHapusKelas kelasId={id} nama={nama} />
           </>
         }
       />
-      {/* -------------------------------------------------- daftar siswa -- */}
-      <div className="papan p-0 overflow-hidden">
-        <div className="px-4 sm:px-6 py-3.5 border-b border-[color:var(--color-garis)] bg-[color:var(--color-kepala)] mikro flex">
-          <span>DAFTAR SISWA</span>
-          <span className="ml-auto angka">{siswa?.length ?? 0} ORANG</span>
+
+      {!aktif && (
+        <div
+          className="mb-4 px-4 py-3 rounded-[var(--r-kartu)] text-[0.75rem]"
+          style={{ background: "var(--color-sorot)", color: "var(--color-aksen-gelap)" }}
+          role="status"
+        >
+          <strong>Kelas ini nonaktif</strong> — tersembunyi dari Semua Kelas dan
+          pemilih kelas. Data tetap bisa dibuka dan diubah.
         </div>
+      )}
 
-        {(siswa ?? []).map((s) => (
-          <FormSwaSimpan
-            key={s.id}
-            action={ubahSiswa.bind(null, id, s.id)}
-            className="flex items-center gap-2 px-4 sm:px-6 py-3 border-b border-[color:var(--color-garis)]"
-          >
-            <span className="w-6 sm:w-8 flex-none text-[0.7188rem] text-[color:var(--color-redup)] angka">
-              {s.no_urut}
-            </span>
-            <input
-              name="nama"
-              defaultValue={s.nama}
-              className="isian flex-1 min-w-0 px-3 py-2 text-[0.75rem]"
-            />
-            <select
-              name="jk"
-              defaultValue={s.jk ?? ""}
-              className="isian px-3 py-2 text-[0.75rem]"
-            >
-              <option value="">—</option>
-              <option value="L">L</option>
-              <option value="P">P</option>
-            </select>
-            <PenandaSimpan />
-            <button
-              type="submit"
-              formAction={hapusSiswa.bind(null, id, s.id)}
-              className="text-[0.6875rem] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
-            >
-              Hapus
-            </button>
-          </FormSwaSimpan>
-        ))}
-
-        <form action={tambahSiswa.bind(null, id)} className="px-4 sm:px-6 py-5">
-          <div className="mikro mb-2">TAMBAH SISWA</div>
-          <textarea
-            name="roster"
-            rows={4}
-            placeholder={
-              "Satu nama per baris — boleh ditempel langsung dari spreadsheet."
-            }
-            className="isian w-full text-[0.75rem] leading-[1.6]"
-          />
-          <button type="submit" className="tombol mt-2.5">
-            Tambahkan
-          </button>
-        </form>
+      {/* -------------------------------------------------- daftar siswa -- */}
+      <div className="mikro flex mb-2 px-1">
+        <span>DAFTAR SISWA</span>
+        <span className="ml-auto angka">{siswa?.length ?? 0} ORANG</span>
       </div>
 
-      {/* -------------------------------------------------------- hapus -- */}
-      <div
-        className="papan mt-4 sm:mt-7 p-5 sm:p-6 flex flex-col items-start sm:flex-row sm:items-center gap-4"
-        style={{ background: "var(--color-basuh)" }}
-      >
-        <div>
-          <div className="mikro text-[color:var(--color-bahaya)]">
-            HAPUS KELAS
-          </div>
-          <p className="keterangan mt-1.5 text-[0.6875rem]">
-            Menghapus {kelas?.nama} beserta seluruh siswa dan nilainya. Tidak
-            bisa dibatalkan.
-          </p>
+      {/* Kisi yang sama dengan tabel lain (lihat components/tabel.tsx): NO dan
+          NAMA beku dengan lebar bersama, lalu JK dan AKSI selebar isinya.
+          Tiap baris adalah <form> swasimpan yang sekaligus jadi subgrid.
+          JANGAN dibungkus elemen ber-overflow: kepala lengketnya akan menempel
+          di dalam pembungkus itu (bergeser `--atas-lengket`) dan menutupi baris. */}
+      <div className="tabel-padat min-w-max" style={gayaKolom("auto", "auto")}>
+        <div className="kepala-padat">
+          <KepalaBeku />
+          <div className="sel-padat mikro sekat-padat">JK</div>
+          <div className="sel-padat mikro justify-end">AKSI</div>
         </div>
-        <form action={hapusKelas.bind(null, id)} className="sm:ml-auto">
-          <button
-            type="submit"
-            className="tombol-garis"
-            style={{
-              borderColor: "var(--color-bahaya)",
-              color: "var(--color-bahaya)",
-            }}
-          >
-            Hapus kelas
-          </button>
-        </form>
+
+        <div className="grup-padat">
+          {(siswa ?? []).length === 0 && (
+            <div className="baris-padat">
+              <div
+                className="sel-padat text-[0.8125rem] text-[color:var(--color-redup)]"
+                style={{ gridColumn: "1 / -1" }}
+              >
+                Belum ada siswa.
+              </div>
+            </div>
+          )}
+          {(siswa ?? []).map((s) => (
+            <FormSwaSimpan
+              key={s.id}
+              action={ubahSiswa.bind(null, id, s.id)}
+              className="baris-padat"
+            >
+              <div
+                className="sel-padat beku sekat-sub text-[0.8125rem] font-semibold text-[color:var(--color-samar)] angka"
+                style={{ left: 0 }}
+              >
+                {s.no_urut}
+              </div>
+              <div
+                className="sel-padat beku beku-tepi"
+                style={{ left: "var(--lebar-no)" }}
+              >
+                <input
+                  name="nama"
+                  defaultValue={s.nama}
+                  aria-label={`Nama siswa nomor ${s.no_urut}`}
+                  className="isian w-full min-w-0 px-3 py-1.5 text-[0.875rem] font-semibold"
+                />
+              </div>
+              <div className="sel-padat sekat-padat">
+                <select
+                  name="jk"
+                  defaultValue={s.jk ?? ""}
+                  aria-label={`Jenis kelamin ${s.nama}`}
+                  className="isian px-3 py-1.5 text-[0.8125rem]"
+                >
+                  <option value="">—</option>
+                  <option value="L">L</option>
+                  <option value="P">P</option>
+                </select>
+              </div>
+              <div className="sel-padat justify-end">
+                <PenandaSimpan />
+                <TombolHapus
+                  aksi={hapusSiswa.bind(null, id, s.id)}
+                  judul="Hapus siswa?"
+                  pesan={
+                    <>
+                      <strong>{s.nama}</strong> beserta seluruh nilainya akan
+                      dihapus dari kelas ini. Tidak bisa dibatalkan.
+                    </>
+                  }
+                  className="text-[0.75rem] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
+                />
+              </div>
+            </FormSwaSimpan>
+          ))}
+        </div>
       </div>
     </Halaman>
   );

@@ -205,32 +205,44 @@ export type RingkasanKelas = {
   tahunAjaran: string
   mapel: string
   jumlahSiswa: number
+  /** false = kelas diarsipkan; disembunyikan dari daftar utama. */
+  aktif: boolean
 }
 
 /** Daftar seluruh kelas milik guru, untuk halaman depan. */
 export async function daftarKelas(): Promise<RingkasanKelas[]> {
   const supabase = await buatKlienServer()
 
-  const { data } = await supabase
-    .from('kelas')
-    .select('id, nama, semester, tahun_ajaran, mapel(nama), siswa(count)')
-    .order('created_at', { ascending: false })
+  const kueri = (kolom: string) =>
+    supabase.from('kelas').select(kolom).order('created_at', { ascending: false })
+
+  // Sebelum migrasi kelas_aktif dijalankan, kolom `aktif` belum ada dan kueri
+  // gagal total — jangan sampai seluruh daftar kelas ikut hilang.
+  let { data, error } = await kueri(
+    'id, nama, semester, tahun_ajaran, aktif, mapel(nama), siswa(count)',
+  )
+  if (error) {
+    ;({ data, error } = await kueri('id, nama, semester, tahun_ajaran, mapel(nama), siswa(count)'))
+  }
 
   type Baris = {
     id: string
     nama: string
     semester: number
     tahun_ajaran: string
+    aktif: boolean | null
     mapel: { nama: string } | { nama: string }[] | null
     siswa: { count: number }[] | null
   }
 
-  return ((data ?? []) as Baris[]).map((k) => ({
+  return ((data ?? []) as unknown as Baris[]).map((k) => ({
     id: k.id,
     nama: k.nama,
     semester: k.semester,
     tahunAjaran: k.tahun_ajaran,
     mapel: (Array.isArray(k.mapel) ? k.mapel[0]?.nama : k.mapel?.nama) ?? '—',
     jumlahSiswa: k.siswa?.[0]?.count ?? 0,
+    // null bila migrasi kelas_aktif belum dijalankan: anggap aktif.
+    aktif: k.aktif !== false,
   }))
 }

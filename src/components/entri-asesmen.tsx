@@ -20,7 +20,7 @@ const NAMA_BAGIAN = {
 } as const;
 
 /* Satu trek per bagian, lalu dua kolom hasil; semuanya selebar isinya —
-   sisa lebar halaman jatuh ke kolom NAMA. */
+   sisa lebar jatuh ke NAMA (maks. separuh tabel). */
 const gayaTabel = gayaKolom("auto", "auto", "auto", "auto", "auto");
 
 /* Mode langsung: SKOR diketik, NILAI dihitung. */

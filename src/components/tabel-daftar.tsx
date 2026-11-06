@@ -5,6 +5,7 @@ import { useKelas } from '@/lib/store'
 import type { BarisNilai } from '@/lib/nilai'
 import { n } from '@/lib/format'
 import { gayaKolom, KepalaBeku, SelBeku } from './tabel'
+import { ChipStatus } from './chip-status'
 
 /**
  * Daftar Nilai — tidak ada satu sel pun yang diisi tangan di sini. Setiap angka
@@ -102,18 +103,8 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       kunci: 'status',
       label: 'STATUS',
       lebar: 'auto',
-      lebarCetak: 'w-24 flex-none',
-      isi: (b) => (
-        <span
-          className="tag"
-          style={{
-            background: b.tuntas ? 'var(--color-sorot)' : 'var(--color-basuh)',
-            color: b.tuntas ? 'var(--color-aksen-gelap)' : 'var(--color-bahaya-pekat)',
-          }}
-        >
-          {b.tuntas ? 'TUNTAS' : 'BELUM'}
-        </span>
-      ),
+      lebarCetak: 'w-28 flex-none',
+      isi: (b) => <ChipStatus tuntas={b.tuntas} />,
     },
     {
       kunci: 'peringkat',

@@ -82,13 +82,13 @@ export default function HalamanSkala() {
             <table className="w-full border-collapse border-hidden text-[0.8125rem]">
               <thead>
                 <tr className="bg-[color:var(--color-kepala)]">
-                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-left w-px whitespace-nowrap mikro">
+                  <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left w-px whitespace-nowrap mikro">
                     NO
                   </th>
-                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-left mikro">
+                  <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left mikro">
                     KOMPONEN NILAI
                   </th>
-                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-right w-px whitespace-nowrap mikro">
+                  <th className="border border-[color:var(--color-garis)] px-4 py-3 text-right w-px whitespace-nowrap mikro">
                     BOBOT (%)
                   </th>
                 </tr>
@@ -99,13 +99,13 @@ export default function HalamanSkala() {
                     key={g.kunci}
                     className="even:bg-[color:var(--color-belang)]"
                   >
-                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5 angka">
+                    <td className="border border-[color:var(--color-garis)] px-4 py-2.5 angka">
                       {i + 1}
                     </td>
-                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5 font-semibold">
+                    <td className="border border-[color:var(--color-garis)] px-4 py-2.5 font-semibold">
                       {g.label}
                     </td>
-                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5">
+                    <td className="border border-[color:var(--color-garis)] px-4 py-2.5">
                       <div className="flex items-center justify-end gap-1.5">
                         <InputAngka
                           nilai={kelas.bobot[g.kunci]}
@@ -145,7 +145,7 @@ export default function HalamanSkala() {
                 >
                   <th
                     colSpan={2}
-                    className="border border-[color:var(--color-garis)] px-3 py-2 text-left mikro"
+                    className="border border-[color:var(--color-garis)] px-4 py-3 text-left mikro"
                     style={{ color: "inherit" }}
                   >
                     TOTAL
@@ -153,7 +153,7 @@ export default function HalamanSkala() {
                       ` · ${total < 100 ? "KURANG" : "LEBIH"} ${Math.abs(100 - total)}%`}
                   </th>
                   <td
-                    className="border border-[color:var(--color-garis)] px-3 py-2 text-right text-[0.9375rem] font-extrabold angka"
+                    className="border border-[color:var(--color-garis)] px-4 py-3 text-right text-[0.9375rem] font-extrabold angka"
                     aria-live="polite"
                   >
                     {total}%
