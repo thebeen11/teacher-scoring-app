@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useKelas } from "@/lib/store";
 import {
-  hitungKelas,
   kelengkapanAsesmen,
   kelengkapanKelas,
   kelengkapanKolom,
@@ -11,24 +11,24 @@ import {
 } from "@/lib/nilai";
 import { n, pct } from "@/lib/format";
 import Halaman from "@/components/halaman";
+import DialogGantiKelas from "@/components/dialog-ganti-kelas";
+import { gayaKolom, KepalaBeku, SelBeku } from "@/components/tabel";
+import { ChipStatus } from "@/components/chip-status";
 
 export default function HalamanDasbor() {
-  const { kelas, grup, hasil } = useKelas();
+  const { kelas, hasil, semuaKelas } = useKelas();
+  const mapel = semuaKelas.find((r) => r.id === kelas.id)?.mapel;
   const router = useRouter();
+  const [gantiBuka, setGantiBuka] = useState(false);
 
-  const kartu = grup.map((k) => {
-    const h = k.id === kelas.id ? hasil : hitungKelas(k, grup);
-    return {
-      id: k.id,
-      nama: k.nama,
-      siswa: k.siswa.length,
-      rerata: h.baris.length ? n(h.rerataRaport) : "–",
-      tuntas: h.jumlahTuntas,
-      belum: h.jumlahBelum,
-      kelengkapan: kelengkapanKelas(k),
-      aktif: k.id === kelas.id,
-    };
-  });
+  const k = {
+    nama: kelas.nama,
+    siswa: kelas.siswa.length,
+    rerata: hasil.baris.length ? n(hasil.rerataRaport) : "–",
+    tuntas: hasil.jumlahTuntas,
+    belum: hasil.jumlahBelum,
+    kelengkapan: kelengkapanKelas(kelas),
+  };
 
   // Alur nilai: satu kotak per kelompok kolom dan per asesmen.
   const formatif = komponenOf(kelas, "formatif");
@@ -89,93 +89,80 @@ export default function HalamanDasbor() {
   return (
     <Halaman>
       {/* ------------------------------------------------- kartu kelas -- */}
-      {/* Ditulis utuh per jumlah kartu — Tailwind tidak membaca kelas rakitan. */}
       <div
-        className={`grid gap-4 sm:gap-7 grid-cols-1 ${
-          kartu.length >= 3
-            ? "sm:grid-cols-2 lg:grid-cols-3"
-            : kartu.length === 2
-              ? "sm:grid-cols-2"
-              : ""
-        }`}
+        className="papan px-5 sm:px-6 py-[22px]"
+        style={{
+          boxShadow: "var(--bayang-neu)",
+          background: "var(--color-papan)",
+        }}
       >
-        {kartu.map((k) => (
+        <div className="flex items-center gap-2">
+          <div className="text-[1.375rem] font-semibold leading-none font-[family-name:var(--font-judul)]">
+            {k.nama}
+          </div>
+          {mapel && <div className="mikro">{mapel.toUpperCase()}</div>}
+          <div className="mikro angka">{k.siswa} SISWA</div>
           <button
-            key={k.id}
-            onClick={() => !k.aktif && router.push(`/kelas/${k.id}/dasbor`)}
-            className={`papan px-5 sm:px-6 py-[22px] text-left border-0 cursor-pointer ${
-              k.aktif ? "" : "papan-angkat"
-            }`}
-            style={{
-              cursor: k.aktif ? "default" : "pointer",
-              boxShadow: k.aktif ? "var(--bayang-neu)" : undefined,
-              background: k.aktif ? "var(--color-kertas)" : undefined,
-            }}
+            type="button"
+            className="tombol-garis ml-auto py-1.5 px-3"
+            onClick={() => setGantiBuka(true)}
           >
-            <div className="flex items-baseline gap-2">
-              <div className="text-[1.375rem] font-semibold leading-none font-[family-name:var(--font-judul)]">
-                {k.nama}
-              </div>
-              <div className="mikro angka">{k.siswa} SISWA</div>
-              {k.aktif && (
-                <span className="ml-auto w-2 h-2 rounded-full bg-[color:var(--color-aksen)]" />
-              )}
-            </div>
-
-            <div className="flex gap-[22px] mt-3.5">
-              <div>
-                <div className="mikro">RERATA RAPORT</div>
-                <div className="text-[1.25rem] font-bold mt-[3px] angka">
-                  {k.rerata}
-                </div>
-              </div>
-              <div>
-                <div className="mikro">TUNTAS</div>
-                <div className="text-[1.25rem] font-bold mt-[3px] angka">
-                  {k.tuntas}
-                </div>
-              </div>
-              <div>
-                <div className="mikro">BELUM</div>
-                <div
-                  className="text-[1.25rem] font-bold mt-[3px] angka"
-                  style={{
-                    color: k.belum
-                      ? "var(--color-bahaya)"
-                      : "var(--color-tinta)",
-                  }}
-                >
-                  {k.belum}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="flex justify-between mikro">
-                <span>KELENGKAPAN</span>
-                <span className="angka">{pct(k.kelengkapan)}</span>
-              </div>
-              <div className="bilah mt-1.5">
-                <span style={{ width: pct(k.kelengkapan) }} />
-              </div>
-            </div>
+            Ganti kelas
           </button>
-        ))}
+        </div>
+        {gantiBuka && <DialogGantiKelas onTutup={() => setGantiBuka(false)} />}
+
+        <div className="flex gap-[22px] mt-3.5">
+          <div>
+            <div className="mikro">RERATA RAPORT</div>
+            <div className="text-[1.25rem] font-bold mt-[3px] angka">
+              {k.rerata}
+            </div>
+          </div>
+          <div>
+            <div className="mikro">TUNTAS</div>
+            <div className="text-[1.25rem] font-bold mt-[3px] angka">
+              {k.tuntas}
+            </div>
+          </div>
+          <div>
+            <div className="mikro">BELUM</div>
+            <div
+              className="text-[1.25rem] font-bold mt-[3px] angka"
+              style={{
+                color: k.belum ? "var(--color-bahaya)" : "var(--color-tinta)",
+              }}
+            >
+              {k.belum}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex justify-between mikro">
+            <span>KELENGKAPAN</span>
+            <span className="angka">{pct(k.kelengkapan)}</span>
+          </div>
+          <div className="bilah mt-1.5">
+            <span style={{ width: pct(k.kelengkapan) }} />
+          </div>
+        </div>
       </div>
 
       {/* ------------------------------------------- alur + di bawah KKTP -- */}
       <div className="flex flex-col xl:flex-row gap-4 sm:gap-7 mt-4 sm:mt-7">
         <div className="flex-1 min-w-0 papan px-5 sm:px-6 py-[22px]">
-          <div className="mikro-lebar">ALUR NILAI · {kelas.nama}</div>
-
-          <div className="grid gap-3.5 mt-4 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
+          <div className="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
             {alur.map((a) => {
               const lengkap = a.pct >= 100;
               const warna = lengkap
                 ? "var(--color-aksen-gelap)"
                 : "var(--color-bahaya)";
               return (
-                <div key={a.kode} className="papan-dalam shadow-none flex flex-col">
+                <div
+                  key={a.kode}
+                  className="papan-dalam shadow-none flex flex-col"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <span className="mikro truncate">{a.kode}</span>
                     <span
@@ -264,6 +251,59 @@ export default function HalamanDasbor() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* -------------------------------------------------- daftar siswa -- */}
+      <div className="mikro flex mb-2 px-1 mt-4 sm:mt-7">
+        <span>DAFTAR SISWA</span>
+        <span className="ml-auto angka">{hasil.baris.length} ORANG</span>
+      </div>
+
+      {/* Jangan dibungkus elemen ber-overflow: kepala lengket akan menempel
+          di dalam pembungkus itu (lihat kelola/page.tsx). */}
+      <div className="tabel-padat min-w-max" style={gayaKolom("auto", "auto")}>
+        <div className="kepala-padat">
+          <KepalaBeku />
+          <div className="sel-padat mikro sekat-padat justify-end">RAPORT</div>
+          <div className="sel-padat mikro">STATUS</div>
+        </div>
+
+        <div className="grup-padat">
+          {hasil.baris.length === 0 && (
+            <div className="baris-padat">
+              <div
+                className="sel-padat text-[0.8125rem] text-[color:var(--color-redup)]"
+                style={{ gridColumn: "1 / -1" }}
+              >
+                Belum ada data nilai.
+              </div>
+            </div>
+          )}
+          {hasil.baris.map((b) => (
+            <div key={b.siswa.id} className="baris-padat">
+              <SelBeku
+                no={b.siswa.noUrut}
+                nama={b.siswa.nama}
+                onKlik={() =>
+                  router.push(`/kelas/${kelas.id}/siswa?siswa=${b.siswa.id}`)
+                }
+              />
+              <div
+                className="sel-padat sekat-padat justify-end text-[1.1875rem] font-extrabold angka"
+                style={{
+                  color: b.tuntas
+                    ? "var(--color-tinta)"
+                    : "var(--color-bahaya)",
+                }}
+              >
+                {b.raport}
+              </div>
+              <div className="sel-padat">
+                <ChipStatus tuntas={b.tuntas} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </Halaman>

@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import logoNilaiHub from "../../public/logo-nilaihub.png";
@@ -159,10 +166,120 @@ function inisial({ nama, email }: Pengguna): string {
   return (email[0] ?? "?").toUpperCase();
 }
 
+const KELAS_BUTIR =
+  "flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline";
+
 /**
- * Kaki rail: konteks kelas aktif, kartu pengguna, dan pemilih kelas yang
- * terbuka ke atas. Pindah di dalam grup yang sama mempertahankan layar yang
- * sedang dibuka; pindah ke mapel lain mendarat di dasbor.
+ * Menu melayang di samping pemicunya — keluar dari rail ke kanan. Dirender
+ * lewat portal dengan posisi `fixed` supaya tidak terpotong `overflow-hidden`
+ * rail. Bila ruang di kanan sempit (laci di layar kecil), membuka ke atas.
+ */
+function MenuSamping({
+  pemicu,
+  buka,
+  onTutup,
+  label,
+  children,
+}: {
+  pemicu: React.RefObject<HTMLButtonElement | null>;
+  buka: boolean;
+  onTutup: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const menu = useRef<HTMLDivElement>(null);
+
+  // Posisi ditulis langsung ke DOM (sebelum dilukis), bukan lewat state.
+  useLayoutEffect(() => {
+    if (!buka) return;
+    const ukur = () => {
+      const el = pemicu.current;
+      const m = menu.current;
+      if (!el || !m) return;
+      const r = el.getBoundingClientRect();
+      const lebar = 256;
+      const celah = 12;
+      const keKanan = window.innerWidth - r.right >= lebar + celah + 8;
+      Object.assign(
+        m.style,
+        keKanan
+          ? {
+              left: `${r.right + celah}px`,
+              bottom: `${Math.max(8, window.innerHeight - r.bottom)}px`,
+              width: `${lebar}px`,
+              maxHeight: `${Math.min(window.innerHeight * 0.6, 420)}px`,
+            }
+          : {
+              left: `${r.left}px`,
+              bottom: `${window.innerHeight - r.top + 8}px`,
+              width: `${r.width}px`,
+              maxHeight: `${Math.min(r.top - 16, 420)}px`,
+            },
+      );
+    };
+    ukur();
+    const kunci = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onTutup();
+        pemicu.current?.focus();
+      }
+    };
+    const luar = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (pemicu.current?.contains(t) || menu.current?.contains(t)) return;
+      onTutup();
+    };
+    window.addEventListener("keydown", kunci, true);
+    window.addEventListener("scroll", ukur, true);
+    window.addEventListener("resize", ukur);
+    document.addEventListener("pointerdown", luar);
+    return () => {
+      window.removeEventListener("keydown", kunci, true);
+      window.removeEventListener("scroll", ukur, true);
+      window.removeEventListener("resize", ukur);
+      document.removeEventListener("pointerdown", luar);
+    };
+  }, [buka, onTutup, pemicu]);
+
+  if (!buka) return null;
+  return createPortal(
+    <div
+      ref={menu}
+      role="menu"
+      aria-label={label}
+      className="menu-samping tanpa-cetak"
+      style={{ position: "fixed" }}
+    >
+      {children}
+    </div>,
+    document.body,
+  );
+}
+
+/** Panah kecil penanda menu samping; berputar saat menu terbuka. */
+function PanahSamping({ buka }: { buka: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      className="w-3.5 h-3.5 flex-none text-[color:var(--color-samar)] transition-transform"
+      style={{ transform: buka ? "rotate(180deg)" : "none" }}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 4l4 4-4 4" />
+    </svg>
+  );
+}
+
+/**
+ * Kaki rail: kelas aktif (membuka pemilih kelas) dan kartu pengguna (membuka
+ * menu akun). Pindah di dalam grup yang sama mempertahankan layar yang sedang
+ * dibuka; pindah ke mapel lain mendarat di dasbor.
  */
 function KakiPanel({
   mapel,
@@ -178,27 +295,10 @@ function KakiPanel({
   onPilih?: () => void;
 }) {
   const { kelas, grup } = useKelas();
-  const [buka, setBuka] = useState(false);
-  const akar = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!buka) return;
-    const kunci = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        setBuka(false);
-      }
-    };
-    const klik = (e: MouseEvent) => {
-      if (!akar.current?.contains(e.target as Node)) setBuka(false);
-    };
-    window.addEventListener("keydown", kunci, true);
-    document.addEventListener("mousedown", klik);
-    return () => {
-      window.removeEventListener("keydown", kunci, true);
-      document.removeEventListener("mousedown", klik);
-    };
-  }, [buka]);
+  const [menu, setMenu] = useState<"kelas" | "akun" | null>(null);
+  const pemicuKelas = useRef<HTMLButtonElement>(null);
+  const pemicuAkun = useRef<HTMLButtonElement>(null);
+  const tutup = useCallback(() => setMenu(null), []);
 
   // Kelompokkan per mapel + semester + tahun, urutan pertama kali muncul.
   const kelompok = new Map<string, RingkasanKelas[]>();
@@ -209,109 +309,111 @@ function KakiPanel({
   }
 
   const pilih = () => {
-    setBuka(false);
+    setMenu(null);
     onPilih?.();
   };
 
+  const alih = (m: "kelas" | "akun") => setMenu((x) => (x === m ? null : m));
+
   return (
-    <div
-      ref={akar}
-      className="relative flex-none border-t border-[color:var(--color-garis)] px-3 pt-3 pb-3"
-    >
+    <div className="relative flex-none border-t border-[color:var(--color-garis)] px-3 pt-3 pb-3">
       <LencanaSimpan />
 
-      <div className="px-2 pb-3">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1 text-[0.875rem] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
+      <button
+        ref={pemicuKelas}
+        type="button"
+        onClick={() => alih("kelas")}
+        aria-haspopup="menu"
+        aria-expanded={menu === "kelas"}
+        className="w-full flex items-center gap-2 px-2.5 py-2 mb-1 rounded-[var(--r-kendali)] text-left border-0 bg-transparent cursor-pointer transition-colors hover:bg-[color:var(--color-sorot)]"
+        style={{
+          background: menu === "kelas" ? "var(--color-sorot)" : undefined,
+        }}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-[0.875rem] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
             {mapel} · Kelas {kelas.nama}
-          </div>
-        </div>
-        <div className="mikro mt-1">
-          SMT {kelas.semester} · {kelas.tahunAjaran} · KKTP {kelas.kktp}
-        </div>
-      </div>
+          </span>
+          <span className="block mikro mt-1">
+            SMT {kelas.semester} · {kelas.tahunAjaran} · KKTP {kelas.kktp}
+          </span>
+        </span>
+        <PanahSamping buka={menu === "kelas"} />
+      </button>
 
-      {buka && (
-        <div
-          role="menu"
-          className="papan absolute left-2 right-2 bottom-[calc(100%-8px)] z-10 p-2 max-h-[min(60vh,420px)] overflow-y-auto"
-        >
-          {[...kelompok].map(([judul, daftar]) => (
-            <div key={judul} className="pb-1">
-              <div className="px-3 pt-2 pb-1 text-[0.5938rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
-                {judul.toUpperCase()}
-              </div>
-              {daftar.map((k) => {
-                const aktif = k.id === kelas.id;
-                const segrup = grup.some((g) => g.id === k.id);
-                return (
-                  <Link
-                    key={k.id}
-                    role="menuitem"
-                    href={`/kelas/${k.id}/${segrup ? ruasAktif : "dasbor"}`}
-                    onClick={pilih}
-                    aria-current={aktif ? "true" : undefined}
-                    className="flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
+      <MenuSamping
+        pemicu={pemicuKelas}
+        buka={menu === "kelas"}
+        onTutup={tutup}
+        label="Pindah kelas"
+      >
+        {[...kelompok].map(([judul, daftar]) => (
+          <div key={judul} className="pb-1">
+            <div className="px-3 pt-2 pb-1 text-[0.5938rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
+              {judul.toUpperCase()}
+            </div>
+            {daftar.map((k) => {
+              const aktif = k.id === kelas.id;
+              const segrup = grup.some((g) => g.id === k.id);
+              return (
+                <Link
+                  key={k.id}
+                  role="menuitem"
+                  href={`/kelas/${k.id}/${segrup ? ruasAktif : "dasbor"}`}
+                  onClick={pilih}
+                  aria-current={aktif ? "true" : undefined}
+                  className={KELAS_BUTIR}
+                  style={{
+                    background: aktif ? "var(--color-aksen)" : "transparent",
+                    color: aktif ? "#ffffff" : "var(--color-tinta)",
+                  }}
+                >
+                  <span className="flex-1 truncate">{k.nama}</span>
+                  <span
+                    className="text-[0.625rem] font-medium angka"
                     style={{
-                      background: aktif ? "var(--color-aksen)" : "transparent",
-                      color: aktif ? "#ffffff" : "var(--color-tinta)",
+                      color: aktif
+                        ? "rgba(255,255,255,0.8)"
+                        : "var(--color-samar)",
                     }}
                   >
-                    <span className="flex-1 truncate">{k.nama}</span>
-                    <span
-                      className="text-[0.625rem] font-medium angka"
-                      style={{
-                        color: aktif
-                          ? "rgba(255,255,255,0.8)"
-                          : "var(--color-samar)",
-                      }}
-                    >
-                      {k.jumlahSiswa} siswa
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-
-          <div className="mt-1 pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
-            <Link
-              href="/"
-              role="menuitem"
-              onClick={pilih}
-              className="px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
-              style={{ color: "var(--color-redup)" }}
-            >
-              Semua kelas
-            </Link>
-            <Link
-              href="/kelas/baru"
-              role="menuitem"
-              onClick={pilih}
-              className="px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline"
-              style={{ color: "var(--color-redup)" }}
-            >
-              Kelas baru
-            </Link>
-            <form action={keluar}>
-              <button
-                type="submit"
-                role="menuitem"
-                className="w-full text-left px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold border-0 bg-transparent cursor-pointer text-[color:var(--color-bahaya-pekat)]"
-              >
-                Keluar
-              </button>
-            </form>
+                    {k.jumlahSiswa} siswa
+                  </span>
+                </Link>
+              );
+            })}
           </div>
+        ))}
+
+        <div className="mt-1 pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
+          <Link
+            href="/"
+            role="menuitem"
+            onClick={pilih}
+            className={KELAS_BUTIR}
+            style={{ color: "var(--color-redup)" }}
+          >
+            Semua kelas
+          </Link>
+          <Link
+            href="/kelas/baru"
+            role="menuitem"
+            onClick={pilih}
+            className={KELAS_BUTIR}
+            style={{ color: "var(--color-redup)" }}
+          >
+            Kelas baru
+          </Link>
         </div>
-      )}
+      </MenuSamping>
 
       <button
+        ref={pemicuAkun}
         type="button"
-        onClick={() => setBuka((b) => !b)}
+        onClick={() => alih("akun")}
         aria-haspopup="menu"
-        aria-expanded={buka}
-        className=" w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
+        aria-expanded={menu === "akun"}
+        className="w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
       >
         <span
           aria-hidden
@@ -324,14 +426,46 @@ function KakiPanel({
             {pengguna.nama || pengguna.email || "Guru"}
           </span>
         </span>
-        <span
-          aria-hidden
-          className="flex-none text-[0.625rem] text-[color:var(--color-samar)] transition-transform"
-          style={{ transform: buka ? "rotate(180deg)" : "none" }}
-        >
-          ▲
-        </span>
+        <PanahSamping buka={menu === "akun"} />
       </button>
+
+      <MenuSamping
+        pemicu={pemicuAkun}
+        buka={menu === "akun"}
+        onTutup={tutup}
+        label="Akun"
+      >
+        <div className="px-3 pt-2 pb-2.5">
+          <div className="text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
+            {pengguna.nama || "Guru"}
+          </div>
+          {pengguna.email && (
+            <div className="mt-0.5 text-[0.6875rem] truncate text-[color:var(--color-samar)]">
+              {pengguna.email}
+            </div>
+          )}
+        </div>
+        <div className="pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
+          <span
+            role="menuitem"
+            aria-disabled="true"
+            className={`${KELAS_BUTIR} cursor-not-allowed`}
+            style={{ color: "var(--color-samar)" }}
+          >
+            <span className="flex-1">Pengaturan akun</span>
+            <span className="tag">SEGERA</span>
+          </span>
+          <form action={keluar}>
+            <button
+              type="submit"
+              role="menuitem"
+              className={`${KELAS_BUTIR} w-full text-left border-0 bg-transparent cursor-pointer text-[color:var(--color-bahaya-pekat)]`}
+            >
+              Keluar
+            </button>
+          </form>
+        </div>
+      </MenuSamping>
     </div>
   );
 }
