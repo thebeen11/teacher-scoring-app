@@ -65,7 +65,7 @@ pnpm db:push`}
       <p className="keterangan mt-6">
         Perhitungannya sendiri tidak bergantung pada basis data: jalankan{' '}
         <code className="text-[12px]">pnpm test</code> untuk memverifikasi seluruh rantai
-        rumus — formatif, lingkup materi, asesmen, sampai nilai raport — atas satu kelas
+        rumus — formatif, nilai sumatif, asesmen, sampai nilai raport — atas satu kelas
         contoh berisi 30 siswa.
       </p>
     </Halaman>

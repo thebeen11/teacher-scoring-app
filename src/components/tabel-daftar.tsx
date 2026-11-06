@@ -17,7 +17,7 @@ import { gayaKolom, KepalaBeku, SelBeku } from './tabel'
  * halaman, jadi `untukCetak` memakai baris flex bergaris.
  *
  * Yang tidak boleh dikerjakan dua kali adalah isi selnya: kalau tiap perender
- * membaca `b.rtF`, `b.rtLM`, `b.rtA` sendiri-sendiri, menambah satu kolom
+ * membaca `b.rtF`, `b.rtNS`, `b.rtA` sendiri-sendiri, menambah satu kolom
  * berarti menyunting dua tempat dan yang kedua pasti terlewat.
  */
 
@@ -36,7 +36,7 @@ type Kolom = {
   gaya?: (b: BarisNilai) => React.CSSProperties | undefined
 }
 
-const REDUP = 'text-[12px] text-[color:var(--color-redup)] angka'
+const REDUP = 'text-[13.5px] text-[color:var(--color-redup)] angka'
 
 export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boolean }) {
   const { kelas, hasil } = useKelas()
@@ -45,33 +45,33 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
     {
       kunci: 'rtF',
       label: 'RT F',
-      lebar: '76px',
-      lebarCetak: 'flex-1 min-w-[64px]',
+      lebar: 'auto',
+      lebarCetak: 'w-16 flex-none',
       isi: (b) => n(b.rtF),
       kelas: REDUP,
     },
     {
-      kunci: 'rtLM',
-      label: 'RT LM',
-      lebar: '76px',
-      lebarCetak: 'flex-1 min-w-[64px]',
+      kunci: 'rtNS',
+      label: 'RT S',
+      lebar: 'auto',
+      lebarCetak: 'w-16 flex-none',
       sekat: true,
-      isi: (b) => n(b.rtLM),
+      isi: (b) => n(b.rtNS),
       kelas: REDUP,
     },
     ...kelas.asesmen.map((a, i) => ({
       kunci: a.id,
       label: a.jenis,
-      lebar: 'minmax(72px, 1fr)',
-      lebarCetak: 'flex-1 min-w-[64px]',
+      lebar: 'auto',
+      lebarCetak: 'w-16 flex-none',
       isi: (b: BarisNilai) => n(b.asesmen[i]?.nilai ?? 0),
       kelas: REDUP,
     })),
     {
       kunci: 'rtA',
       label: 'RT AS',
-      lebar: '76px',
-      lebarCetak: 'flex-1 min-w-[64px]',
+      lebar: 'auto',
+      lebarCetak: 'w-16 flex-none',
       sekat: true,
       isi: (b) => n(b.rtA),
       kelas: REDUP,
@@ -79,24 +79,24 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
     {
       kunci: 'na',
       label: 'NA',
-      lebar: '84px',
+      lebar: 'auto',
       lebarCetak: 'w-[84px] flex-none',
       isi: (b) => n(b.na),
-      kelas: 'text-[12.5px] font-bold angka',
+      kelas: 'text-[14px] font-bold angka',
     },
     {
       kunci: 'raport',
       label: 'RAPORT',
-      lebar: '92px',
+      lebar: 'auto',
       lebarCetak: 'w-[92px] flex-none',
       isi: (b) => b.raport,
-      kelas: 'text-[17px] font-extrabold angka',
+      kelas: 'text-[19px] font-extrabold angka',
       gaya: (b) => ({ color: b.tuntas ? 'var(--color-tinta)' : 'var(--color-bahaya)' }),
     },
     {
       kunci: 'status',
       label: 'STATUS',
-      lebar: '96px',
+      lebar: 'auto',
       lebarCetak: 'w-24 flex-none',
       isi: (b) => (
         <span
@@ -138,7 +138,7 @@ function Layar({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
         ))}
       </div>
 
-      <div>
+      <div className="grup-padat">
         {baris.map((b) => (
           <div key={b.siswa.id} className="baris-padat">
             <SelBeku no={b.siswa.noUrut} nama={b.siswa.nama} />
@@ -170,7 +170,7 @@ function Cetak({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
     <div>
       <div className="kepala-cetak mikro">
         <div className="w-11 flex-none px-2.5 py-[11px]">NO</div>
-        <div className="w-[250px] flex-none px-2.5 py-[11px] sekat">NAMA PESERTA DIDIK</div>
+        <div className="flex-1 min-w-[180px] px-2.5 py-[11px] sekat">NAMA PESERTA DIDIK</div>
         {kolom.map((k) => (
           <div
             key={k.kunci}
@@ -187,7 +187,7 @@ function Cetak({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
             {b.siswa.noUrut}
           </div>
           <div
-            className="w-[250px] flex-none px-2.5 py-[11px] text-[12.5px] font-semibold sekat truncate"
+            className="flex-1 min-w-[180px] px-2.5 py-[11px] text-[12.5px] font-semibold sekat truncate"
             title={b.siswa.nama}
           >
             {b.siswa.nama}

@@ -17,9 +17,12 @@ const LEBAR_NAMA = 'var(--lebar-nama)'
 /**
  * Rakit nilai `--kolom`. NO dan NAMA selalu jadi dua trek pertama, jadi
  * pemanggil hanya menyebut kolom miliknya sendiri dan tidak bisa lupa.
+ *
+ * NAMA tidak pernah lebih sempit dari `--lebar-nama` dan menelan seluruh sisa
+ * lebar (`1fr`); kolom lain sebaiknya `auto` supaya selebar isinya saja.
  */
 export function gayaKolom(...trek: string[]): React.CSSProperties {
-  const kolom = [LEBAR_NO, LEBAR_NAMA, ...trek].join(' ')
+  const kolom = [LEBAR_NO, `minmax(${LEBAR_NAMA}, 1fr)`, ...trek].join(' ')
   return { ['--kolom' as string]: kolom } as React.CSSProperties
 }
 
@@ -65,14 +68,14 @@ export function SelBeku({
   return (
     <>
       <div
-        className="sel-padat beku sekat-sub text-[11.5px] font-semibold text-[color:var(--color-samar)] angka"
+        className="sel-padat beku sekat-sub text-[13px] font-semibold text-[color:var(--color-samar)] angka"
         style={{ left: 0 }}
       >
         {no}
       </div>
       {onKlik ? (
         <button
-          className="sel-padat sel-lipat beku beku-tepi text-[12.5px] font-semibold"
+          className="sel-padat sel-lipat beku beku-tepi text-[14px] font-semibold"
           style={{ left: LEBAR_NO }}
           onClick={onKlik}
           title={nama}
@@ -81,7 +84,7 @@ export function SelBeku({
         </button>
       ) : (
         <div
-          className="sel-padat beku beku-tepi text-[12.5px] font-semibold"
+          className="sel-padat beku beku-tepi text-[14px] font-semibold"
           style={{ left: LEBAR_NO }}
           title={nama}
         >
@@ -95,6 +98,6 @@ export function SelBeku({
 /** Panah antara angka mentah dan hasil turunannya. */
 export function Panah() {
   return (
-    <span className="flex-none text-[11px] font-medium text-[color:var(--color-samar)]">→</span>
+    <span className="flex-none text-[12.5px] font-medium text-[color:var(--color-samar)]">→</span>
   )
 }

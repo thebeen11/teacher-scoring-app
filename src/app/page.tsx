@@ -47,7 +47,7 @@ export default async function Beranda() {
               <div className="min-w-0">
                 <h1 className="judul">Semua <span className="teks-gradien">Kelas</span></h1>
                 <p className="keterangan mt-1.5">
-                  Setiap kelas membawa kolom nilai, band skala, dan KKTP-nya sendiri.
+                  Setiap kelas membawa kolom nilai, rentang skala, dan KKTP-nya sendiri.
                 </p>
               </div>
               <Link href="/kelas/baru" className="tombol ml-auto no-underline">
@@ -60,8 +60,8 @@ export default async function Beranda() {
                 <div className="mikro">BELUM ADA KELAS</div>
                 <p className="keterangan mt-3 max-w-[560px]">
                   Mulai dengan membuat satu kelas: isi mata pelajaran, nama kelas, dan tempelkan
-                  daftar nama siswa. Kolom formatif F1–F4, lingkup materi LM1–LM4, serta ASTS dan
-                  ASAS akan dibuatkan otomatis dengan band bawaan — semuanya bisa diubah nanti di
+                  daftar nama siswa. Kolom formatif dan sumatif Bab 1–Bab 4, serta ASTS dan
+                  ASAS akan dibuatkan otomatis dengan rentang bawaan — semuanya bisa diubah nanti di
                   layar Skala &amp; KKTP.
                 </p>
                 <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useKelas } from "@/lib/store";
 import {
   komponenOf,
@@ -8,55 +8,59 @@ import {
   type HasilKolom,
   type JenisKomponen,
   type Komponen,
+  type Rentang,
 } from "@/lib/nilai";
 import { n, nAuto } from "@/lib/format";
 import { InputAngka, InputBand, navigasiSel } from "./kendali";
 import { gayaKolom, KepalaBeku, Panah, SelBeku } from "./tabel";
 import Halaman from "./halaman";
+import TombolUnduh from "./tombol-unduh";
+import {
+  HapusDuaLangkah,
+  IkonPensil,
+  IsianNama,
+  MenuKolom,
+  PenandaAksi,
+  useAksiKolom,
+} from "./sunting-kolom";
+import {
+  hapusKomponen,
+  tambahKomponen,
+  tambahSubKomponen,
+  ubahNamaKomponen,
+} from "@/app/kelas/actions";
 
 /**
- * Tabel entri padat dengan kolom bersub yang bisa dilipat.
+ * Tabel entri padat dengan panel tab per kolom.
  *
- * Dua masalah yang diperbaiki dari `tabel-komponen.tsx`:
+ * Tab "Ringkasan" menampilkan semua kolom tingkat atas sekaligus: kolom tanpa
+ * sub bisa langsung diketik, kolom bersub hanya menampilkan hasilnya
+ * (rerata → konversi). Tiap kolom juga punya tab sendiri; di tab itu seluruh
+ * sub-nya tampil sebagai kolom ketik, lalu rerata dan konversinya.
  *
- *  1. LEBAR. Di sana semua sub selalu tergambar, jadi satu kolom bersub tiga
- *     memakan 330px dan lima kolom semacam itu sudah melewati 2000px — tabel
- *     tergulir mendatar sebelum satu angka pun diketik, dan nama siswa serta
- *     RT F yang justru sedang dikemudikan hilang dari layar. Di sini kolom
- *     bersub terlipat: yang tampil hanya hasilnya (rerata → konversi), dan
- *     sub-nya mekar ke kanan hanya ketika kolomnya diklik. Satu kolom terbuka
- *     pada satu waktu, jadi tabel tidak pernah melebar lebih dari satu kolom.
- *
- *  2. TINGGI. Di sana tiap siswa adalah kartu tersendiri (padding 12/24,
- *     jarak 14px, bayangan, dan angkat saat disentuh tetikus) dan kepala
- *     kolomnya tiga baris. Satu kelas tiga puluhan siswa butuh lima layar.
- *     Di sini satu kartu membungkus seluruh tabel, tiap siswa jadi baris
- *     bergaris setinggi 28px, kepalanya lengket, dan kolom nomor serta nama
- *     membeku saat digulir mendatar.
+ * Dengan tab, tabel tidak pernah memuat lebih dari satu kolom bersub yang
+ * terbuka, jadi lebarnya tetap terkendali tanpa kolom yang mekar dan melipat
+ * di tengah tabel.
  *
  * Lebar kolom ditulis SEKALI sebagai daftar trek grid dan dibagikan ke kepala,
- * tiap baris, dan kaki lewat satu variabel `--kolom`. Pendahulunya menghitung
- * ulang lebar di tiga tempat terpisah; dengan pelipatan, tiap lebar juga
- * bergantung pada kolom mana yang sedang terbuka, dan tiga salinan rumus itu
- * pasti melenceng.
+ * tiap baris, dan kaki lewat satu variabel `--kolom`.
  */
 
-const LEBAR_SUB = "72px";
-const LEBAR_RERATA = "minmax(104px, 1fr)";
-const LEBAR_TUNGGAL = "minmax(176px, 1fr)";
-const LEBAR_RT = 92;
+const RINGKASAN = "ringkasan";
 
-/** Satu kolom tingkat atas beserta letaknya di grid. */
-type Grup = {
-  kolom: Komponen;
-  anak: Komponen[];
-  /** Punya sub DAN sedang terbuka. */
-  buka: boolean;
-  /** Indeks trek grid pertama, berbasis 1. */
-  awal: number;
-  /** Jumlah trek yang dipakai grup ini. */
-  trek: number;
-};
+// Semua kolom nilai selebar isinya; sisa lebar halaman jatuh ke kolom NAMA.
+const LEBAR_SUB = "auto";
+const LEBAR_HASIL = "auto";
+const LEBAR_TUNGGAL = "auto";
+const LEBAR_RT = "auto";
+
+/** Isian nama yang sedang terbuka, bila ada — paling banyak satu sekaligus. */
+type Sunting =
+  | null
+  | { mode: "tambah" }
+  | { mode: "ubah"; id: string }
+  | { mode: "tambahSub"; indukId: string }
+  | { mode: "ubahSub"; id: string };
 
 export default function TabelPadat({
   jenis,
@@ -74,362 +78,544 @@ export default function TabelPadat({
   const { kelas, hasil, setSkor, setBand } = useKelas();
   const kolom = komponenOf(kelas, jenis);
 
-  const [terbuka, setTerbuka] = useState<string | null>(null);
+  const [tabPilih, setTabPilih] = useState<string>(RINGKASAN);
+  const [sunting, setSunting] = useState<Sunting>(null);
+  const { menyimpan, jalankan } = useAksiKolom();
 
-  // Kolom yang terbuka bisa dihapus dari layar Kelola Kelas sementara layar ini
-  // hidup; jangan biarkan grid mengacu pada kolom yang sudah tidak ada.
-  const buka = kolom.some((k) => k.id === terbuka) ? terbuka : null;
+  // Kolom yang tab-nya aktif bisa dihapus lewat menu pensil di tab-nya sendiri;
+  // kembali ke Ringkasan alih-alih mengacu kolom yang hilang.
+  const tab = kolom.some((k) => k.id === tabPilih) ? tabPilih : RINGKASAN;
 
-  // Siswa yang barisnya diklik saat kolom masih terlipat — karetnya menyusul
-  // setelah kolomnya mekar, supaya sekali klik langsung bisa mengetik.
+  // Siswa yang selnya diklik di Ringkasan — karetnya menyusul setelah tab
+  // kolomnya tergambar, supaya sekali klik langsung bisa mengetik.
   const menuju = useRef<string | null>(null);
 
   useEffect(() => {
     const siswaId = menuju.current;
-    if (!buka || !siswaId) return;
+    if (tab === RINGKASAN || !siswaId) return;
     menuju.current = null;
     document
-      .querySelector<HTMLInputElement>(`[data-awal="${buka}:${siswaId}"]`)
+      .querySelector<HTMLInputElement>(`[data-awal="${tab}:${siswaId}"]`)
       ?.focus();
-  }, [buka]);
+  }, [tab]);
 
-  const lipat = useCallback((komponenId: string, siswaId?: string) => {
+  const pilih = (id: string, siswaId?: string) => {
     menuju.current = siswaId ?? null;
-    setTerbuka((lama) => (lama === komponenId ? null : komponenId));
-  }, []);
+    setTabPilih(id);
+  };
 
-  // Escape menutup kolom yang terbuka dan mengembalikan fokus ke tombolnya,
-  // supaya keyboard tidak tertinggal di sel yang baru saja lenyap.
-  const padaTombolEsc = (e: React.KeyboardEvent) => {
-    if (e.key !== "Escape" || !buka) return;
-    e.stopPropagation();
-    setTerbuka(null);
+  const labelRT = jenis === "formatif" ? "RT F" : "RT S";
+  const daftarTab = [RINGKASAN, ...kolom.map((k) => k.id)];
+
+  // ←/→ berpindah tab, Home/End ke ujung — pola tablist WAI-ARIA.
+  const padaTabKey = (e: React.KeyboardEvent) => {
+    const i = daftarTab.indexOf(tab);
+    let j = -1;
+    if (e.key === "ArrowRight") j = (i + 1) % daftarTab.length;
+    else if (e.key === "ArrowLeft")
+      j = (i - 1 + daftarTab.length) % daftarTab.length;
+    else if (e.key === "Home") j = 0;
+    else if (e.key === "End") j = daftarTab.length - 1;
+    if (j < 0) return;
+    e.preventDefault();
+    pilih(daftarTab[j]);
     document
-      .querySelector<HTMLButtonElement>(`[data-lipat="${buka}"]`)
+      .querySelector<HTMLButtonElement>(`[data-tab="${daftarTab[j]}"]`)
       ?.focus();
   };
 
+  // ---------------------------------------------------- sunting kolom --
+  // Setiap aksi menulis lewat aksi server; revalidasi layout membuat penyimpan
+  // menyerap struktur baru, jadi tab dan tabel ikut berubah sendiri.
+  const formatif = jenis === "formatif";
+  const kelasId = kelas.id;
+  const batal = () => setSunting(null);
+
+  const tambahKolom = (nama: string) => {
+    setSunting(null);
+    if (!nama) return;
+    jalankan(async () => {
+      const id = await tambahKomponen(kelasId, jenis, nama);
+      // Tab baru terbuka begitu penyimpan memuatnya; sebelum itu `tab` jatuh
+      // ke Ringkasan lewat penjaga di atas.
+      if (id) setTabPilih(id);
+    });
+  };
+  const gantiNama = (id: string, nama: string) => {
+    setSunting(null);
+    jalankan(() => ubahNamaKomponen(kelasId, id, nama));
+  };
+  const tambahSub = (indukId: string, nama: string) => {
+    setSunting(null);
+    if (!nama) return;
+    jalankan(() => tambahSubKomponen(kelasId, indukId, nama));
+  };
+  const hapus = (id: string) => jalankan(() => hapusKomponen(kelasId, id));
+
+  // `+ Sub` hanya untuk formatif, dan hanya saat sebuah tab kolom terbuka.
+  const kolomAktif = formatif ? kolom.find((k) => k.id === tab) : undefined;
+
+  const barTab = (
+    <div className="flex items-center gap-3 mb-3 min-w-0">
+      <div
+        role="tablist"
+        aria-label={`Kolom ${judul}`}
+        className="segmen min-w-0 max-w-full overflow-x-auto"
+        onKeyDown={padaTabKey}
+      >
+        {daftarTab.map((id) => {
+          const k = kolom.find((x) => x.id === id);
+          const jumlahSub = k ? subOf(kelas, k.id).length : 0;
+          const aktif = id === tab;
+
+          if (k && sunting?.mode === "ubah" && sunting.id === k.id) {
+            return (
+              <div
+                key={id}
+                className="flex flex-none items-center px-2 py-1.5 border-x border-[color:var(--color-garis)]"
+              >
+                <IsianNama
+                  awal={k.nama}
+                  placeholder={`Nama ${k.label}`}
+                  onSimpan={(v) => gantiNama(k.id, v)}
+                  onBatal={batal}
+                  className="w-[160px]"
+                />
+              </div>
+            );
+          }
+
+          return (
+            <Fragment key={id}>
+              <button
+                role="tab"
+                data-tab={id}
+                aria-selected={aktif}
+                tabIndex={aktif ? 0 : -1}
+                onClick={() => pilih(id)}
+                onDoubleClick={
+                  k ? () => setSunting({ mode: "ubah", id: k.id }) : undefined
+                }
+                title={k ? "Klik dua kali untuk mengganti nama" : undefined}
+                className={`flex flex-none items-center gap-1.5 whitespace-nowrap ${k ? "pr-1.5" : ""}`}
+                style={{
+                  background: aktif ? "var(--color-aksen)" : "transparent",
+                  color: aktif ? "#ffffff" : "var(--color-redup)",
+                }}
+              >
+                {k ? k.nama || k.label : "Ringkasan"}
+                {jumlahSub > 0 && (
+                  <span
+                    className={`flex-none text-[9.5px] font-bold tracking-[0.06em] rounded-full px-1.5 py-px angka ${
+                      aktif
+                        ? "bg-white/25 text-white"
+                        : "bg-[color:var(--color-keping)] text-[color:var(--color-redup)]"
+                    }`}
+                  >
+                    {jumlahSub} SUB
+                  </span>
+                )}
+              </button>
+              {k && (
+                <MenuKolom
+                  label={k.nama || k.label}
+                  aktif={aktif}
+                  bisaHapus={kolom.length > 1}
+                  onGantiNama={() => setSunting({ mode: "ubah", id: k.id })}
+                  onHapus={() => hapus(k.id)}
+                />
+              )}
+            </Fragment>
+          );
+        })}
+
+        {sunting?.mode === "tambah" ? (
+          <div className="flex flex-none items-center px-2 py-1.5 border-l border-[color:var(--color-garis)]">
+            <IsianNama
+              placeholder="Nama kolom baru…"
+              onSimpan={tambahKolom}
+              onBatal={batal}
+              className="w-[180px]"
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            tabIndex={-1}
+            title="Tambah kolom — beri nama dulu, lalu Enter"
+            onClick={() => setSunting({ mode: "tambah" })}
+            className="flex-none whitespace-nowrap"
+            style={{
+              background: "transparent",
+              color: "var(--color-aksen-gelap)",
+            }}
+          >
+            + Bab Baru
+          </button>
+        )}
+      </div>
+      <PenandaAksi aktif={menyimpan} />
+      {kolomAktif && (
+        <div className="ml-auto flex-none">
+          {sunting?.mode === "tambahSub" &&
+          sunting.indukId === kolomAktif.id ? (
+            <IsianNama
+              placeholder="Nama sub baru…"
+              onSimpan={(v) => tambahSub(kolomAktif.id, v)}
+              onBatal={batal}
+              className="w-[180px]"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() =>
+                setSunting({ mode: "tambahSub", indukId: kolomAktif.id })
+              }
+              title={
+                subOf(kelas, kolomAktif.id).length > 0
+                  ? `Tambah sub ${kolomAktif.label}`
+                  : `Tambah sub — ${kolomAktif.label} lalu menjadi rerata sub-subnya`
+              }
+              className="tombol whitespace-nowrap"
+            >
+              + Sub {kolomAktif.nama || kolomAktif.label}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const kepalaHalaman = (
+    <div className="flex w-full flex-wrap items-end gap-4">
+      <div className="min-w-0">
+        <div className="judul">{judul}</div>
+      </div>
+      <div className="ml-auto">
+        <TombolUnduh jenis={jenis} />
+      </div>
+    </div>
+  );
+
   if (kolom.length === 0) {
     return (
-      <Halaman lebar="fokus">
+      <Halaman>
+        <div className="mb-5">{kepalaHalaman}</div>
+        {barTab}
         <div className="papan p-6">
-          <div className="mikro">TIDAK ADA KOLOM {jenis.toUpperCase()}</div>
+          <div className="mikro">BELUM ADA KOLOM {jenis.toUpperCase()}</div>
           <p className="keterangan mt-2">
-            Tambahkan kolom di layar Skala &amp; KKTP.
+            Klik + Kolom di atas, beri nama kolom pertama, lalu tekan Enter.
           </p>
         </div>
       </Halaman>
     );
   }
 
-  const labelRT = jenis === "formatif" ? "RT F" : "RT LM";
+  const nilaiRT = (b: (typeof hasil.baris)[number]) =>
+    n(jenis === "formatif" ? b.rtF : b.rtNS);
+  const selOf = (b: (typeof hasil.baris)[number]): HasilKolom[] =>
+    jenis === "formatif" ? b.formatif : b.lingkup;
 
-  // ------------------------------------------------------- tata letak grid --
-  // Trek 1 = NO, trek 2 = NAMA, lalu tiap grup, lalu satu trek RT di ujung.
-  const grup: Grup[] = [];
-  let kursor = 3;
-  for (const k of kolom) {
+  const kepalaKolom = (k: Komponen) => (
+    <KepalaKolom
+      kolom={k}
+      bounds={hasil.bounds[k.id] ?? [0, 0]}
+      onBand={(mn, mx) => setBand(k.id, mn, mx)}
+    />
+  );
+
+  // ------------------------------------------------------------- isi tab --
+  let gaya: React.CSSProperties;
+  let kepala: React.ReactNode;
+  let barisan: React.ReactNode;
+  let kaki: React.ReactNode;
+
+  if (tab === RINGKASAN) {
+    const anakOf = kolom.map((k) => subOf(kelas, k.id));
+    gaya = gayaKolom(...kolom.map(() => LEBAR_TUNGGAL), LEBAR_RT);
+    // Hanya kolom tanpa sub yang punya kotak ketik di Ringkasan.
+    const selPerBaris = anakOf.filter((a) => a.length === 0).length;
+
+    kepala = kolom.map((k) => (
+      <div key={k.id} className="px-2.5 py-2 min-w-0 sekat-padat">
+        {kepalaKolom(k)}
+      </div>
+    ));
+
+    barisan = hasil.baris.map((baris) => {
+      const sel = selOf(baris);
+      return (
+        <div key={baris.siswa.id} className="baris-padat">
+          <SelBeku no={baris.siswa.noUrut} nama={baris.siswa.nama} />
+          {kolom.map((k, i) => {
+            const c = sel[i];
+            if (!c) return <div key={k.id} />;
+            const anak = anakOf[i];
+            if (anak.length === 0) {
+              return (
+                <div key={k.id} className="sel-padat sekat-padat">
+                  <InputAngka
+                    data-sel="1"
+                    nilai={c.mentah}
+                    onUbah={(v) => setSkor(baris.siswa.id, c.komponen.id, v)}
+                    onKeyDown={(e) => navigasiSel(e, selPerBaris)}
+                    className="sel-input-padat w-[72px]"
+                    aria-label={`${c.komponen.label} ${baris.siswa.nama}`}
+                  />
+                  <Panah />
+                  <Konversi nilai={c.konversi} />
+                </div>
+              );
+            }
+            return (
+              <button
+                key={k.id}
+                className="sel-padat sel-lipat sekat-padat"
+                onClick={() => pilih(k.id, baris.siswa.id)}
+                title={`Rerata ${anak.length} sub — klik untuk mengisi sub ${baris.siswa.nama}`}
+                aria-label={`Buka tab ${k.nama || k.label} untuk ${baris.siswa.nama}`}
+              >
+                <Rerata nilai={c.mentah} />
+                <Panah />
+                <Konversi nilai={c.konversi} />
+                <span
+                  aria-hidden
+                  className="ml-auto text-[11px] text-[color:var(--color-samar)]"
+                >
+                  ▶
+                </span>
+              </button>
+            );
+          })}
+          <div className="sel-padat justify-end text-[15px] font-extrabold angka">
+            {nilaiRT(baris)}
+          </div>
+        </div>
+      );
+    });
+
+    kaki = kolom.map((k) => {
+      const bd = hasil.bounds[k.id] ?? [0, 0];
+      return (
+        <div
+          key={k.id}
+          className="sel-padat sekat-padat text-[13px] font-semibold angka"
+        >
+          {nAuto(bd[1])} / {nAuto(bd[0])}
+        </div>
+      );
+    });
+  } else {
+    const idx = kolom.findIndex((k) => k.id === tab);
+    const k = kolom[idx];
     const anak = subOf(kelas, k.id);
-    const terbukaIni = anak.length > 0 && k.id === buka;
-    const trek = terbukaIni ? anak.length + 1 : 1;
-    grup.push({ kolom: k, anak, buka: terbukaIni, awal: kursor, trek });
-    kursor += trek;
+    const bersub = anak.length > 0;
+
+    const rentang = `3 / span ${anak.length + 1}`;
+
+    gaya = bersub
+      ? gayaKolom(...anak.map(() => LEBAR_SUB), LEBAR_HASIL, LEBAR_RT)
+      : gayaKolom(LEBAR_HASIL, LEBAR_RT);
+    const selPerBaris = bersub ? anak.length : 1;
+
+    kepala = (
+      <>
+        {anak.map((s) =>
+          sunting?.mode === "ubahSub" && sunting.id === s.id ? (
+            <div key={s.id} className="sel-padat sekat-sub min-w-0">
+              <IsianNama
+                awal={s.nama}
+                placeholder={`Nama ${s.label}`}
+                onSimpan={(v) => gantiNama(s.id, v)}
+                onBatal={batal}
+                className="w-full min-w-0"
+              />
+            </div>
+          ) : (
+            <div
+              key={s.id}
+              className="sel-padat mikro sekat-sub min-w-0 gap-1"
+              title={`${s.nama || s.label} — klik dua kali untuk mengganti nama`}
+              onDoubleClick={() => setSunting({ mode: "ubahSub", id: s.id })}
+            >
+              <span className="truncate">{s.nama || s.label}</span>
+              <button
+                type="button"
+                onClick={() => setSunting({ mode: "ubahSub", id: s.id })}
+                aria-label={`Ganti nama ${s.label}`}
+                className="ml-auto flex-none border-0 bg-transparent cursor-pointer px-0.5 text-[11px] leading-none text-[color:var(--color-samar)] hover:text-[color:var(--color-tinta)]"
+              >
+                <IkonPensil ukuran={11} />
+              </button>
+              <HapusDuaLangkah
+                label={s.nama || s.label}
+                onHapus={() => hapus(s.id)}
+              />
+            </div>
+          ),
+        )}
+        <div className="px-2.5 py-2 min-w-0 sekat-padat">
+          {kepalaKolom(k)}
+          {bersub && <div className="mikro mt-1">RERATA → NILAI</div>}
+        </div>
+      </>
+    );
+
+    barisan = hasil.baris.map((baris) => {
+      const c = selOf(baris)[idx];
+      return (
+        <div key={baris.siswa.id} className="baris-padat">
+          <SelBeku no={baris.siswa.noUrut} nama={baris.siswa.nama} />
+          {!c ? (
+            <div style={{ gridColumn: rentang }} />
+          ) : bersub ? (
+            <>
+              {c.sub.map((s, j) => (
+                <div key={s.komponen.id} className="sel-padat sekat-sub">
+                  <InputAngka
+                    data-sel="1"
+                    data-awal={
+                      j === 0 ? `${k.id}:${baris.siswa.id}` : undefined
+                    }
+                    nilai={s.mentah}
+                    onUbah={(v) => setSkor(baris.siswa.id, s.komponen.id, v)}
+                    onKeyDown={(e) => navigasiSel(e, selPerBaris)}
+                    className="sel-input-padat"
+                    aria-label={`${s.komponen.label} ${baris.siswa.nama}`}
+                  />
+                </div>
+              ))}
+              <div
+                className="sel-padat sekat-padat"
+                title={`Rerata ${c.sub.length} sub, tidak bisa diketik`}
+              >
+                <Rerata nilai={c.mentah} />
+                <Panah />
+                <Konversi nilai={c.konversi} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="sel-padat sekat-padat">
+                <InputAngka
+                  data-sel="1"
+                  data-awal={`${k.id}:${baris.siswa.id}`}
+                  nilai={c.mentah}
+                  onUbah={(v) => setSkor(baris.siswa.id, c.komponen.id, v)}
+                  onKeyDown={(e) => navigasiSel(e, selPerBaris)}
+                  className="sel-input-padat w-[72px]"
+                  aria-label={`${c.komponen.label} ${baris.siswa.nama}`}
+                />
+                <Panah />
+                <Konversi nilai={c.konversi} />
+              </div>
+            </>
+          )}
+          <div className="sel-padat justify-end text-[15px] font-extrabold angka">
+            {nilaiRT(baris)}
+          </div>
+        </div>
+      );
+    });
+
+    const bd = hasil.bounds[k.id] ?? [0, 0];
+    kaki = (
+      <div
+        className="sel-padat sekat-padat text-[13px] font-semibold angka justify-end"
+        style={{ gridColumn: rentang }}
+      >
+        {nAuto(bd[1])} / {nAuto(bd[0])}
+      </div>
+    );
   }
-  const trekRT = kursor;
-
-  const gaya = gayaKolom(
-    ...grup.flatMap((g) =>
-      g.buka ? [...g.anak.map(() => LEBAR_SUB), LEBAR_RERATA] : [LEBAR_TUNGGAL],
-    ),
-    `${LEBAR_RT}px`,
-  );
-
-  const adaSub = grup.some((g) => g.anak.length > 0);
-
-  // Lompatan ↓ / ↑ / Enter harus sepanjang satu baris penuh. Kolom bersub yang
-  // TERLIPAT tidak menggambar satu kotak ketik pun, jadi ia menyumbang nol —
-  // inilah yang diam-diam rusak kalau pelipatan ditambahkan tanpa menghitung
-  // ulang langkahnya.
-  const selPerBaris = grup.reduce(
-    (t, g) => t + (g.anak.length === 0 ? 1 : g.buka ? g.anak.length : 0),
-    0,
-  );
 
   return (
     <Halaman>
-      <div className="flex flex-wrap items-end gap-4 mb-5">
-        <div className="min-w-0">
-          <div className="judul">{judul}</div>
-          <p className="keterangan mt-[6px] max-w-[680px]">{keterangan}</p>
+      <div className="flex flex-wrap items-end gap-4 mb-5">{kepalaHalaman}</div>
+
+      {barTab}
+
+      {/* Tabel dan kakinya berbagi satu grid supaya trek `auto` sejajar. */}
+      <div className="kisi-padat min-w-fit" style={gaya}>
+        <div role="tabpanel" className="tabel-padat">
+          {/* ------------------------------------------------ kepala kolom -- */}
+          <div className="kepala-padat">
+            <KepalaBeku />
+            {kepala}
+            <div className="sel-padat mikro justify-end">{labelRT}</div>
+          </div>
+
+          {/* -------------------------------------------- satu baris/siswa -- */}
+          <div className="grup-padat">{barisan}</div>
         </div>
-        {tampilkanRumus && (
-          <div className="w-full sm:w-auto sm:ml-auto text-[10.5px] leading-[1.7] font-medium text-[color:var(--color-redup)] sm:text-right border-l-2 border-[color:var(--color-garis)] pl-3.5 angka">
-            (NA − NA min) × (NK maks − NK min)
-            <br />÷ (NA maks − NA min) + NK min
+
+        {/* ---------------------------------------- kaki maks/min sekelas -- */}
+        {tampilkanKaki && (
+          <div className="papan-neu kaki-padat p-0 mt-3">
+            <div
+              className="sel-padat beku beku-tepi mikro"
+              style={{ gridColumn: "1 / 3", left: 0 }}
+            >
+              MAKS / MIN KELAS
+            </div>
+            {kaki}
+            <div />
           </div>
         )}
       </div>
-
-      <div
-        className="tabel-padat min-w-fit"
-        style={gaya}
-        onKeyDown={padaTombolEsc}
-      >
-        {/* ------------------------------------------------ kepala kolom -- */}
-        <div className="kepala-padat">
-          <KepalaBeku duaBaris />
-
-          {grup.map((g) => {
-            const bd = hasil.bounds[g.kolom.id] ?? [0, 0];
-            const bersub = g.anak.length > 0;
-            return (
-              <div
-                key={g.kolom.id}
-                className="px-2 py-1.5 min-w-0 sekat-padat"
-                style={{ gridColumn: `${g.awal} / span ${g.trek}`, gridRow: 1 }}
-              >
-                {/* Baris 1 — identitas kolom dan rentang mentahnya. Band turun
-                    ke baris 2: satu kolom hanya selebar ~180px, dan sepasang
-                    kotak band di baris yang sama pasti melimpah ke kolom
-                    sebelahnya. */}
-                <div className="flex items-center gap-2 min-w-0">
-                  {bersub ? (
-                    <button
-                      data-lipat={g.kolom.id}
-                      onClick={() => lipat(g.kolom.id)}
-                      aria-expanded={g.buka}
-                      title={`${g.anak.length} sub — klik untuk ${g.buka ? "melipat" : "membuka"}`}
-                      className="flex items-center gap-1.5 min-w-0 border-0 bg-transparent p-0 cursor-pointer font-[inherit] text-left"
-                    >
-                      <span
-                        aria-hidden
-                        className="flex-none text-[9px] text-[color:var(--color-redup)] transition-transform"
-                        style={{
-                          transform: g.buka ? "rotate(90deg)" : undefined,
-                        }}
-                      >
-                        ▶
-                      </span>
-                      <LabelKolom kolom={g.kolom} />
-                      <span className="flex-none text-[9px] font-bold tracking-[0.06em] text-[color:var(--color-redup)] bg-[color:var(--color-keping)] rounded-full px-1.5 py-px angka">
-                        {g.anak.length} SUB
-                      </span>
-                    </button>
-                  ) : (
-                    <span className="flex items-center gap-1.5 min-w-0">
-                      <LabelKolom kolom={g.kolom} />
-                    </span>
-                  )}
-                  <span className="ml-auto flex-none whitespace-nowrap text-[9.5px] font-medium text-[color:var(--color-redup)] angka">
-                    maks {nAuto(bd[1])} · min {nAuto(bd[0])}
-                  </span>
-                </div>
-
-                <div className="mt-1">
-                  <InputBand
-                    label="BAND"
-                    padat
-                    min={g.kolom.bandMin}
-                    max={g.kolom.bandMax}
-                    onUbah={(mn, mx) => setBand(g.kolom.id, mn, mx)}
-                  />
-                </div>
-              </div>
-            );
-          })}
-
-          <div
-            className="sel-padat mikro justify-end"
-            style={{ gridColumn: trekRT, gridRow: "1 / 3" }}
-          >
-            {labelRT}
-          </div>
-
-          {/* Baris kedua hanya ada untuk kolom yang sedang terbuka; kolom lain
-              membiarkan treknya kosong, jadi baris ini setinggi nol saat semua
-              kolom terlipat. */}
-          {grup
-            .filter((g) => g.buka)
-            .flatMap((g) => [
-              ...g.anak.map((s, i) => (
-                <div
-                  key={s.id}
-                  className="mekar px-2 pb-1 mikro text-[9px] tracking-[0.06em] truncate sekat-sub"
-                  style={{ gridColumn: g.awal + i, gridRow: 2 }}
-                  title={s.nama || s.label}
-                >
-                  {s.nama || s.label}
-                </div>
-              )),
-              <div
-                key={`${g.kolom.id}-rerata`}
-                className="mekar px-2 pb-1 mikro text-[9px] tracking-[0.06em] sekat-padat"
-                style={{ gridColumn: g.awal + g.anak.length, gridRow: 2 }}
-              >
-                RERATA
-              </div>,
-            ])}
-        </div>
-
-        {/* -------------------------------------------- satu baris/siswa -- */}
-        <div>
-          {hasil.baris.map((baris) => {
-            const sel: HasilKolom[] =
-              jenis === "formatif" ? baris.formatif : baris.lingkup;
-            return (
-              <div key={baris.siswa.id} className="baris-padat">
-                <SelBeku no={baris.siswa.noUrut} nama={baris.siswa.nama} />
-
-                {grup.map((g, i) => {
-                  const c = sel[i];
-                  if (!c) return null;
-
-                  // Kolom tanpa sub — satu kotak ketik, seperti sebelumnya.
-                  if (g.anak.length === 0) {
-                    return (
-                      <div key={g.kolom.id} className="sel-padat sekat-padat">
-                        <InputAngka
-                          data-sel="1"
-                          nilai={c.mentah}
-                          onUbah={(v) =>
-                            setSkor(baris.siswa.id, c.komponen.id, v)
-                          }
-                          onKeyDown={(e) => navigasiSel(e, selPerBaris)}
-                          className="sel-input-padat max-w-[62px]"
-                          aria-label={`${c.komponen.label} ${baris.siswa.nama}`}
-                        />
-                        <Panah />
-                        <Konversi nilai={c.konversi} />
-                      </div>
-                    );
-                  }
-
-                  // Kolom bersub yang terlipat — hasilnya saja, dan sekali klik
-                  // membukanya lalu menaruh karet di sub pertama siswa ini.
-                  if (!g.buka) {
-                    return (
-                      <button
-                        key={g.kolom.id}
-                        className="sel-padat sel-lipat sekat-padat"
-                        onClick={() => lipat(g.kolom.id, baris.siswa.id)}
-                        title={`Rerata ${g.anak.length} sub — klik untuk mengisi sub ${baris.siswa.nama}`}
-                        aria-label={`Buka sub ${c.komponen.label} untuk ${baris.siswa.nama}`}
-                      >
-                        <span className="text-[11.5px] font-semibold text-[color:var(--color-samar)] angka">
-                          {n(c.mentah)}
-                        </span>
-                        <Panah />
-                        <Konversi nilai={c.konversi} />
-                        <span
-                          aria-hidden
-                          className="ml-auto text-[10px] text-[color:var(--color-samar)]"
-                        >
-                          ▶
-                        </span>
-                      </button>
-                    );
-                  }
-
-                  // Kolom bersub yang terbuka — satu kotak ketik per sub, lalu
-                  // rerata yang memang tidak boleh diketik.
-                  return (
-                    <Fragmen key={g.kolom.id}>
-                      {c.sub.map((s, j) => (
-                        <div
-                          key={s.komponen.id}
-                          className="sel-padat mekar sekat-sub"
-                        >
-                          <InputAngka
-                            data-sel="1"
-                            data-awal={
-                              j === 0
-                                ? `${g.kolom.id}:${baris.siswa.id}`
-                                : undefined
-                            }
-                            nilai={s.mentah}
-                            onUbah={(v) =>
-                              setSkor(baris.siswa.id, s.komponen.id, v)
-                            }
-                            onKeyDown={(e) => navigasiSel(e, selPerBaris)}
-                            className="sel-input-padat"
-                            aria-label={`${s.komponen.label} ${baris.siswa.nama}`}
-                          />
-                        </div>
-                      ))}
-                      <div
-                        className="sel-padat mekar sekat-padat"
-                        title={`Rerata ${c.sub.length} sub, tidak bisa diketik`}
-                      >
-                        <span className="text-[11.5px] font-semibold text-[color:var(--color-samar)] angka">
-                          {n(c.mentah)}
-                        </span>
-                        <Panah />
-                        <Konversi nilai={c.konversi} />
-                      </div>
-                    </Fragmen>
-                  );
-                })}
-
-                <div className="sel-padat justify-end text-[13px] font-extrabold angka">
-                  {n(jenis === "formatif" ? baris.rtF : baris.rtLM)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ---------------------------------------- kaki maks/min sekelas -- */}
-      {tampilkanKaki && (
-        <div className="papan-neu kaki-padat p-0 mt-3 min-w-fit" style={gaya}>
-          <div
-            className="sel-padat beku beku-tepi mikro"
-            style={{ gridColumn: "1 / 3", left: 0 }}
-          >
-            MAKS / MIN {kelas.sumberMinMaks === "kelas" ? "KELAS" : "ANGKATAN"}
-          </div>
-          {grup.map((g) => {
-            const bd = hasil.bounds[g.kolom.id] ?? [0, 0];
-            return (
-              <div
-                key={g.kolom.id}
-                className="sel-padat sekat-padat text-[11.5px] font-semibold angka"
-                style={{ gridColumn: `${g.awal} / span ${g.trek}` }}
-              >
-                {nAuto(bd[1])} / {nAuto(bd[0])}
-              </div>
-            );
-          })}
-          <div style={{ gridColumn: trekRT }} />
-        </div>
-      )}
     </Halaman>
   );
 }
 
-/** Kode kolom dan nama bebasnya, satu baris. */
-function LabelKolom({ kolom }: { kolom: Komponen }) {
+/** Kepala satu kolom tingkat atas: nama, rentang mentah, dan rentang tujuan. */
+function KepalaKolom({
+  kolom,
+  bounds,
+  onBand,
+}: {
+  kolom: Komponen;
+  bounds: Rentang;
+  onBand: (min: number, max: number) => void;
+}) {
   return (
     <>
-      <span className="flex-none text-[12px] font-bold text-[color:var(--color-tinta)]">
-        {kolom.label}
-      </span>
-      {kolom.nama && (
+      <div className="flex items-center gap-2 min-w-0">
         <span
-          className="text-[11px] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
-          title={kolom.nama}
+          className="text-[12.5px] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
+          title={kolom.nama || kolom.label}
         >
-          {kolom.nama}
+          {kolom.nama || kolom.label}
         </span>
-      )}
+        <span className="ml-auto flex-none whitespace-nowrap text-[10.5px] font-medium text-[color:var(--color-redup)] angka">
+          maks {nAuto(bounds[1])} · min {nAuto(bounds[0])}
+        </span>
+      </div>
+      <div className="mt-1">
+        <InputBand
+          label="RENTANG"
+          padat
+          min={kolom.bandMin}
+          max={kolom.bandMax}
+          onUbah={onBand}
+        />
+      </div>
     </>
+  );
+}
+
+function Rerata({ nilai }: { nilai: number }) {
+  return (
+    <span className="text-[13px] font-semibold text-[color:var(--color-samar)] angka">
+      {n(nilai)}
+    </span>
   );
 }
 
 function Konversi({ nilai }: { nilai: number }) {
   return (
     <span
-      className="text-[12.5px] font-bold angka"
+      className="text-[14px] font-bold angka"
       style={{
         color: nilai >= 90 ? "var(--color-aksen-gelap)" : "var(--color-tinta)",
       }}
@@ -437,11 +623,4 @@ function Konversi({ nilai }: { nilai: number }) {
       {n(nilai)}
     </span>
   );
-}
-
-/* Sub dan reratanya adalah sel-sel sejajar di grid yang sama, bukan satu grup
-   bersarang — pembungkus apa pun akan memutus keselarasannya dengan label di
-   kepala. Fragment dipakai supaya keduanya tetap anak langsung barisnya. */
-function Fragmen({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }

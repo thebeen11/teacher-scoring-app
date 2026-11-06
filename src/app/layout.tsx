@@ -29,7 +29,7 @@ const archivo = Archivo({
 export const metadata: Metadata = {
   title: 'Olah Nilai',
   description:
-    'Papan olah nilai: formatif, lingkup materi, dan asesmen sumatif yang bermuara ke daftar nilai — semua variabel skala terlihat.',
+    'Papan olah nilai: formatif, nilai sumatif, dan asesmen sumatif yang bermuara ke daftar nilai — semua variabel skala terlihat.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

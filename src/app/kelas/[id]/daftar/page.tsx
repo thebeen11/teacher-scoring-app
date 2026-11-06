@@ -5,6 +5,7 @@ import { n } from "@/lib/format";
 import { InputBand } from "@/components/kendali";
 import TabelDaftar from "@/components/tabel-daftar";
 import Halaman from "@/components/halaman";
+import TombolUnduh from "@/components/tombol-unduh";
 
 export default function HalamanDaftar() {
   const { kelas, hasil, setPengaturan } = useKelas();
@@ -16,9 +17,12 @@ export default function HalamanDaftar() {
 
   return (
     <Halaman>
-      <div className="mb-7">
-        <div className="judul">
+      <div className="mb-7 flex flex-wrap items-end gap-4">
+        <div className="judul min-w-0">
           Daftar <span className="teks-gradien">Nilai</span> Peserta Didik
+        </div>
+        <div className="ml-auto">
+          <TombolUnduh jenis="daftar" />
         </div>
       </div>
 
@@ -35,7 +39,7 @@ export default function HalamanDaftar() {
             <span style={{ width: `${lebar}%` }} />
           </div>
           <div className="flex justify-between mt-[5px] text-[10px] font-medium text-[color:var(--color-redup)]">
-            <span>dipetakan ke band raport</span>
+            <span>dipetakan ke rentang raport</span>
             <span className="angka">
               {n(kelas.naBandMin, 0)}–{n(kelas.naBandMax, 0)}
             </span>
@@ -44,7 +48,7 @@ export default function HalamanDaftar() {
 
         <div className="ml-auto sm:ml-0">
           <InputBand
-            label="BAND"
+            label="RENTANG"
             min={kelas.naBandMin}
             max={kelas.naBandMax}
             onUbah={(mn, mx) => setPengaturan({ naBandMin: mn, naBandMax: mx })}

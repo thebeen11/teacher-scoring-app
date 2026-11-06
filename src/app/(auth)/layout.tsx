@@ -10,7 +10,7 @@ export default function LayoutAuth({ children }: { children: React.ReactNode }) 
           Papan Olah <span className="teks-gradien">Nilai</span>
         </h1>
         <p className="keterangan mb-7">
-          Formatif, lingkup materi, dan asesmen sumatif dalam satu rantai — dengan setiap
+          Formatif, nilai sumatif, dan asesmen sumatif dalam satu rantai — dengan setiap
           variabel skala terlihat, bukan tersembunyi di baris kaki.
         </p>
         {children}

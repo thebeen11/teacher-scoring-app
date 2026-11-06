@@ -8,9 +8,9 @@
  *
  * Rantainya:
  *
- *   skor mentah --rescale per kolom--> nilai konversi --rerata--> RT F, RT LM
- *   butir A/B/C --(A*wa + B*wb + C*wc)--> SKOR --(k + SKOR)/p--> nilai asesmen
- *   RT F, RT LM, RT AS --bobot--> NA --rescale ke band--> NILAI RAPORT
+ *   skor mentah --rescale per kolom--> nilai konversi --rerata--> RT F, RT S
+ *   butir A/B/C --(A*wa + B*wb + C*wc)--> SKOR --rescale ke rentang--> nilai asesmen
+ *   RT F, RT S, ASTS, ASAS/ASAT --bobot 4 bagian--> NA --rescale ke band--> NILAI RAPORT
  *
  * Dua sifat yang menentukan arsitektur aplikasi:
  *
@@ -24,12 +24,18 @@
 export type JenisKomponen = 'formatif' | 'lingkup'
 export type JenisAsesmen = 'ASTS' | 'ASAS' | 'ASAT'
 export type SumberMinMaks = 'kelas' | 'sekolah'
+/**
+ * 'bagian': A/B/C x bobot = SKOR; 'langsung': SKOR diketik langsung.
+ * Keduanya lalu lewat rumus yang sama: SKOR direscale dari min/maks SKOR
+ * sekelas ke rentang asesmen (bandMin..bandMax), seperti kolom formatif.
+ */
+export type ModeAsesmen = 'bagian' | 'langsung'
 
 export type Komponen = {
   id: string
   jenis: JenisKomponen
   urutan: number
-  /** Kode otomatis yang tidak pernah berubah: F1, LM2, F1.1. */
+  /** Kode otomatis yang tidak pernah berubah: F1, S2, F1.1. */
   label: string
   /** Nama bebas dari guru ("Ulangan Bab 1"); boleh kosong. */
   nama: string
@@ -42,11 +48,13 @@ export type Komponen = {
 export type Asesmen = {
   id: string
   jenis: JenisAsesmen
+  mode: ModeAsesmen
   bobotA: number
   bobotB: number
   bobotC: number
-  konstanta: number
-  pembagi: number
+  /** Rentang tujuan NILAI, sama seperti band kolom formatif/sumatif. */
+  bandMin: number
+  bandMax: number
 }
 
 export type Siswa = {
@@ -56,7 +64,18 @@ export type Siswa = {
   jk: 'L' | 'P' | null
 }
 
-export type ButirAsesmen = { a: number; b: number; c: number }
+/** Isian mentah satu asesmen. `skor` hanya dipakai di mode 'langsung'. */
+export type ButirAsesmen = { a: number; b: number; c: number; skor: number }
+
+/** Bobot NA per bagian, dalam persen. Seharusnya berjumlah 100. */
+export type Bobot = {
+  formatif: number
+  sumatif: number
+  /** Asesmen tengah semester (ASTS). */
+  tengah: number
+  /** Asesmen akhir semester/tahun (ASAS atau ASAT). */
+  akhir: number
+}
 
 export type Kelas = {
   id: string
@@ -65,7 +84,7 @@ export type Kelas = {
   tahunAjaran: string
   semester: number
   kktp: number
-  bobot: number
+  bobot: Bobot
   naBandMin: number
   naBandMax: number
   sumberMinMaks: SumberMinMaks
@@ -148,7 +167,7 @@ export function skorKolom(kelas: Kelas, siswaId: string, kolom: Komponen): numbe
 
 export function butirMentah(kelas: Kelas, siswaId: string, asesmenId: string): ButirAsesmen {
   const b = kelas.skorAsesmen[siswaId]?.[asesmenId]
-  return { a: angka(b?.a), b: angka(b?.b), c: angka(b?.c) }
+  return { a: angka(b?.a), b: angka(b?.b), c: angka(b?.c), skor: angka(b?.skor) }
 }
 
 // ----------------------------------------------------------------- bounds --
@@ -204,7 +223,28 @@ export function hitungBounds(kelas: Kelas, grup: Kelas[] = [kelas]): PetaBounds 
       peta[kol.id] = bounds(kelas, kol, grup)
     }
   }
+  for (const a of kelas.asesmen) {
+    peta[a.id] = boundsAsesmen(kelas, a, grup)
+  }
   return peta
+}
+
+/**
+ * Min/maks SKOR sebuah asesmen — cakupannya sama dengan bounds() kolom.
+ * Kelas lain dalam grup dicocokkan lewat `jenis` (ASTS/ASAS/ASAT unik sekelas).
+ */
+export function boundsAsesmen(kelas: Kelas, asesmen: Asesmen, grup: Kelas[] = [kelas]): Rentang {
+  const cakupan = kelas.sumberMinMaks === 'sekolah' ? grup : [kelas]
+  const nilai: number[] = []
+
+  for (const k of cakupan) {
+    const a = k.id === kelas.id ? asesmen : k.asesmen.find((x) => x.jenis === asesmen.jenis)
+    if (!a) continue
+    for (const s of k.siswa) nilai.push(skorAsesmen(butirMentah(k, s.id, a.id), a))
+  }
+
+  if (nilai.length === 0) return [0, 0]
+  return [Math.min(...nilai), Math.max(...nilai)]
 }
 
 // ------------------------------------------------------- hitung per siswa --
@@ -221,9 +261,11 @@ export type HasilKolom = {
 export type HasilAsesmen = {
   asesmen: Asesmen
   butir: ButirAsesmen
-  /** (A*wa) + (B*wb) + (C*wc) */
+  /** (A*wa) + (B*wb) + (C*wc), atau SKOR yang diketik di mode 'langsung' */
   total: number
-  /** (konstanta + total) / pembagi */
+  /** min/maks SKOR yang menjadi sumber rescale */
+  bounds: Rentang
+  /** total direscale dari bounds ke rentang asesmen */
   nilai: number
 }
 
@@ -233,14 +275,62 @@ export type HasilSiswa = {
   lingkup: HasilKolom[]
   asesmen: HasilAsesmen[]
   rtF: number
-  rtLM: number
+  rtNS: number
+  /** Rerata seluruh asesmen — untuk tampilan. */
   rtA: number
+  /** Nilai ASTS; null bila kelas tidak punya ASTS. */
+  rtTengah: number | null
+  /** Rerata ASAS/ASAT; null bila kelas tidak punya keduanya. */
+  rtAkhir: number | null
   na: number
 }
 
-export function hitungAsesmen(butir: ButirAsesmen, a: Asesmen): HasilAsesmen {
-  const total = butir.a * a.bobotA + butir.b * a.bobotB + butir.c * a.bobotC
-  return { asesmen: a, butir, total, nilai: (a.konstanta + total) / a.pembagi }
+export function totalBobot(b: Bobot): number {
+  return b.formatif + b.sumatif + b.tengah + b.akhir
+}
+
+/**
+ * NA = Σ(w × nilai) ÷ Σw, hanya atas bagian yang ADA di kelas ini.
+ *
+ * Bagian yang tidak ada (kelas tanpa ASTS, tanpa kolom formatif, ...) keluar
+ * dari pembilang dan penyebut sekaligus, supaya bobotnya tidak diam-diam
+ * menarik NA ke nol. Pembaginya Σw, bukan 100, sehingga total sementara yang
+ * belum genap 100 tetap menghasilkan angka di skala yang sama.
+ */
+export function hitungNA(
+  bobot: Bobot,
+  bagian: { formatif: number | null; sumatif: number | null; tengah: number | null; akhir: number | null },
+): number {
+  let pembilang = 0
+  let penyebut = 0
+  for (const k of ['formatif', 'sumatif', 'tengah', 'akhir'] as const) {
+    const v = bagian[k]
+    if (v === null) continue
+    pembilang += bobot[k] * v
+    penyebut += bobot[k]
+  }
+  return penyebut === 0 ? 0 : pembilang / penyebut
+}
+
+/** SKOR dari rincian bagian: (A*wa) + (B*wb) + (C*wc). */
+export function skorBagian(butir: ButirAsesmen, a: Asesmen): number {
+  return butir.a * a.bobotA + butir.b * a.bobotB + butir.c * a.bobotC
+}
+
+/** SKOR yang dipakai asesmen sesuai modenya. */
+export function skorAsesmen(butir: ButirAsesmen, a: Asesmen): number {
+  return a.mode === 'langsung' ? butir.skor : skorBagian(butir, a)
+}
+
+export function hitungAsesmen(butir: ButirAsesmen, a: Asesmen, bd: Rentang): HasilAsesmen {
+  const total = skorAsesmen(butir, a)
+  return {
+    asesmen: a,
+    butir,
+    total,
+    bounds: bd,
+    nilai: resc(total, bd[0], bd[1], a.bandMin, a.bandMax),
+  }
 }
 
 export function hitungSiswa(kelas: Kelas, siswa: Siswa, peta: PetaBounds): HasilSiswa {
@@ -262,15 +352,28 @@ export function hitungSiswa(kelas: Kelas, siswa: Siswa, peta: PetaBounds): Hasil
 
   const formatif = kolom('formatif')
   const lingkup = kolom('lingkup')
-  const asesmen = kelas.asesmen.map((a) => hitungAsesmen(butirMentah(kelas, siswa.id, a.id), a))
+  const asesmen = kelas.asesmen.map((a) =>
+    hitungAsesmen(butirMentah(kelas, siswa.id, a.id), a, peta[a.id] ?? [0, 0]),
+  )
 
   const rtF = mean(formatif.map((c) => c.konversi))
-  const rtLM = mean(lingkup.map((c) => c.konversi))
+  const rtNS = mean(lingkup.map((c) => c.konversi))
   const rtA = mean(asesmen.map((a) => a.nilai))
-  const w = kelas.bobot
-  const na = (w * ((rtF + rtLM) / 2) + (100 - w) * rtA) / 100
 
-  return { siswa, formatif, lingkup, asesmen, rtF, rtLM, rtA, na }
+  // Pemisahan slot sama dengan layar entri: ASTS di tengah, sisanya di akhir.
+  const tengah = asesmen.filter((a) => a.asesmen.jenis === 'ASTS')
+  const akhir = asesmen.filter((a) => a.asesmen.jenis !== 'ASTS')
+  const rtTengah = tengah.length ? mean(tengah.map((a) => a.nilai)) : null
+  const rtAkhir = akhir.length ? mean(akhir.map((a) => a.nilai)) : null
+
+  const na = hitungNA(kelas.bobot, {
+    formatif: formatif.length ? rtF : null,
+    sumatif: lingkup.length ? rtNS : null,
+    tengah: rtTengah,
+    akhir: rtAkhir,
+  })
+
+  return { siswa, formatif, lingkup, asesmen, rtF, rtNS, rtA, rtTengah, rtAkhir, na }
 }
 
 // ------------------------------------------------------- hitung per kelas --
@@ -361,8 +464,10 @@ export function kelengkapanKolom(kelas: Kelas, komponenId: string): number {
 
 export function kelengkapanAsesmen(kelas: Kelas, asesmenId: string): number {
   if (kelas.siswa.length === 0) return 0
+  const langsung = kelas.asesmen.find((a) => a.id === asesmenId)?.mode === 'langsung'
   const terisi = kelas.siswa.filter((s) => {
     const b = butirMentah(kelas, s.id, asesmenId)
+    if (langsung) return b.skor !== 0
     return b.a !== 0 || b.b !== 0 || b.c !== 0
   }).length
   return (terisi / kelas.siswa.length) * 100

@@ -69,8 +69,7 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
         )}
         <p className="keterangan mt-2 text-[11px]">
           Kelas dengan mata pelajaran dan semester yang sama saling terhubung: dasbornya
-          menampilkan semua kartu kelas, dan mode min/maks “Semua kelas” memakai rentang
-          gabungan mereka.
+          menampilkan semua kartu kelas.
         </p>
       </div>
 

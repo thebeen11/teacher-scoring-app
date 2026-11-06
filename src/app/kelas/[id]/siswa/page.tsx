@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { useKelas } from '@/lib/store'
-import { n } from '@/lib/format'
-import Halaman from '@/components/halaman'
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useKelas } from "@/lib/store";
+import { n } from "@/lib/format";
+import Halaman from "@/components/halaman";
 
 /**
  * Rincian Siswa — rantai nilai satu siswa dibuka penuh, dari skor mentah
@@ -14,67 +14,82 @@ import Halaman from '@/components/halaman'
  * berikutnya, sampai band raport terakhir.
  */
 export default function HalamanSiswa() {
-  const { kelas, hasil } = useKelas()
-  const params = useSearchParams()
-  const dariTaut = params.get('siswa')
+  const { kelas, hasil } = useKelas();
+  const params = useSearchParams();
+  const dariTaut = params.get("siswa");
 
   const indeksAwal = Math.max(
     0,
     hasil.baris.findIndex((b) => b.siswa.id === dariTaut),
-  )
-  const [terpilih, setTerpilih] = useState(indeksAwal)
+  );
+  const [terpilih, setTerpilih] = useState(indeksAwal);
 
-  const b = hasil.baris[Math.min(terpilih, hasil.baris.length - 1)]
-  if (!b) return null
+  const b = hasil.baris[Math.min(terpilih, hasil.baris.length - 1)];
+  if (!b) return null;
 
-  const [naMin, naMax] = hasil.naRange
-  const bobotSisa = 100 - kelas.bobot
+  const [naMin, naMax] = hasil.naRange;
+  const w = kelas.bobot;
+  // Hanya bagian yang ada di kelas ini — sama dengan yang dipakai hitungNA().
+  const sukuNA = [
+    b.formatif.length ? { w: w.formatif, v: b.rtF } : null,
+    b.lingkup.length ? { w: w.sumatif, v: b.rtNS } : null,
+    b.rtTengah !== null ? { w: w.tengah, v: b.rtTengah } : null,
+    b.rtAkhir !== null ? { w: w.akhir, v: b.rtAkhir } : null,
+  ].filter((x) => x !== null);
+  const penyebutNA = sukuNA.reduce((t, x) => t + x.w, 0);
 
   const tahap = [
     {
-      kode: b.formatif.length ? `${b.formatif[0].komponen.label}–${b.formatif.at(-1)!.komponen.label}` : 'F',
-      label: 'Formatif, tiap kolom direscale ke band-nya',
-      detail: `${b.formatif.map((c) => c.mentah).join(' · ')}  →  ${b.formatif
+      kode: b.formatif.length
+        ? `${b.formatif[0].komponen.label}–${b.formatif.at(-1)!.komponen.label}`
+        : "F",
+      label: "Formatif, tiap kolom direscale ke rentangnya",
+      detail: `${b.formatif.map((c) => c.mentah).join(" · ")}  →  ${b.formatif
         .map((c) => n(c.konversi))
-        .join(' · ')}`,
+        .join(" · ")}`,
       nilai: n(b.rtF),
     },
     {
-      kode: b.lingkup.length ? `${b.lingkup[0].komponen.label}–${b.lingkup.at(-1)!.komponen.label}` : 'LM',
-      label: 'Sumatif lingkup materi, band per kolom',
-      detail: `${b.lingkup.map((c) => c.mentah).join(' · ')}  →  ${b.lingkup
+      kode: b.lingkup.length
+        ? `${b.lingkup[0].komponen.label}–${b.lingkup.at(-1)!.komponen.label}`
+        : "S",
+      label: "Nilai sumatif, rentang per kolom",
+      detail: `${b.lingkup.map((c) => c.mentah).join(" · ")}  →  ${b.lingkup
         .map((c) => n(c.konversi))
-        .join(' · ')}`,
-      nilai: n(b.rtLM),
+        .join(" · ")}`,
+      nilai: n(b.rtNS),
     },
     ...b.asesmen.map((a) => ({
       kode: a.asesmen.jenis,
       label:
-        a.asesmen.jenis === 'ASTS'
-          ? 'Asesmen tengah semester'
-          : a.asesmen.jenis === 'ASAS'
-            ? 'Asesmen akhir semester'
-            : 'Asesmen akhir tahun',
+        a.asesmen.jenis === "ASTS"
+          ? "Asesmen tengah semester"
+          : a.asesmen.jenis === "ASAS"
+            ? "Asesmen akhir semester"
+            : "Asesmen akhir tahun",
       detail:
-        `(${a.butir.a}×${a.asesmen.bobotA})+(${a.butir.b}×${a.asesmen.bobotB})+` +
-        `${a.butir.c === 0 ? '0' : a.butir.c} = ${n(a.total, 0)} → ` +
-        `(${n(a.asesmen.konstanta, 0)}+${n(a.total, 0)})÷${n(a.asesmen.pembagi, 0)}`,
+        a.asesmen.mode === "langsung"
+          ? `SKOR ${n(a.total, 0)} diketik langsung → ` +
+            `skala ${n(a.bounds[0], 0)}–${n(a.bounds[1], 0)} → ${n(a.asesmen.bandMin, 0)}–${n(a.asesmen.bandMax, 0)}`
+          : `(${a.butir.a}×${a.asesmen.bobotA})+(${a.butir.b}×${a.asesmen.bobotB})+` +
+            `${a.butir.c === 0 ? "0" : a.butir.c} = ${n(a.total, 0)} → ` +
+            `skala ${n(a.bounds[0], 0)}–${n(a.bounds[1], 0)} → ${n(a.asesmen.bandMin, 0)}–${n(a.asesmen.bandMax, 0)}`,
       nilai: n(a.nilai),
     })),
     {
-      kode: 'NA',
-      label: 'Nilai akhir, bobot proses : asesmen',
-      detail: `(${kelas.bobot}×(${n(b.rtF)}+${n(b.rtLM)})/2 + ${bobotSisa}×${n(b.rtA)}) ÷ 100`,
+      kode: "NA",
+      label: "Nilai akhir, bobot formatif : sumatif : AST : AAS",
+      detail: `(${sukuNA.map((x) => `${x.w}×${n(x.v)}`).join(" + ")}) ÷ ${penyebutNA}`,
       nilai: n(b.na),
     },
     {
-      kode: 'RAPORT',
-      label: 'NA direscale ke band raport, dibulatkan',
-      detail: `NA ${n(naMin)}–${n(naMax)}  →  band ${n(kelas.naBandMin, 0)}–${n(kelas.naBandMax, 0)}`,
+      kode: "RAPORT",
+      label: "NA direscale ke rentang raport, dibulatkan",
+      detail: `NA ${n(naMin)}–${n(naMax)}  →  rentang ${n(kelas.naBandMin, 0)}–${n(kelas.naBandMax, 0)}`,
       nilai: String(b.raport),
       aksen: true,
     },
-  ]
+  ];
 
   return (
     <Halaman className="flex flex-col lg:flex-row gap-4 sm:gap-7">
@@ -108,13 +123,19 @@ export default function HalamanSiswa() {
             key={r.siswa.id}
             onClick={() => setTerpilih(i)}
             className="w-full flex gap-2 px-3 py-[9px] rounded-[var(--r-kecil)] border-0 text-[11.5px] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-kepala)]"
-            style={{ background: i === terpilih ? 'var(--color-sorot)' : 'transparent' }}
+            style={{
+              background: i === terpilih ? "var(--color-sorot)" : "transparent",
+            }}
           >
-            <span className="text-[color:var(--color-samar)] angka">{r.siswa.noUrut}</span>
+            <span className="text-[color:var(--color-samar)] angka">
+              {r.siswa.noUrut}
+            </span>
             <span className="flex-1 min-w-0 truncate">{r.siswa.nama}</span>
             <span
               className="font-bold angka"
-              style={{ color: r.tuntas ? 'var(--color-tinta)' : 'var(--color-bahaya)' }}
+              style={{
+                color: r.tuntas ? "var(--color-tinta)" : "var(--color-bahaya)",
+              }}
             >
               {r.raport}
             </span>
@@ -138,7 +159,11 @@ export default function HalamanSiswa() {
               <div className="mikro">NILAI RAPORT</div>
               <div
                 className="text-[46px] font-extrabold leading-none tracking-[-0.02em] angka"
-                style={{ color: b.tuntas ? 'var(--color-tinta)' : 'var(--color-bahaya)' }}
+                style={{
+                  color: b.tuntas
+                    ? "var(--color-tinta)"
+                    : "var(--color-bahaya)",
+                }}
               >
                 {b.raport}
               </div>
@@ -148,11 +173,15 @@ export default function HalamanSiswa() {
               <div
                 className="tag mt-2 text-[11px]"
                 style={{
-                  background: b.tuntas ? 'var(--color-sorot)' : 'var(--color-basuh)',
-                  color: b.tuntas ? 'var(--color-aksen-gelap)' : 'var(--color-bahaya-pekat)',
+                  background: b.tuntas
+                    ? "var(--color-sorot)"
+                    : "var(--color-basuh)",
+                  color: b.tuntas
+                    ? "var(--color-aksen-gelap)"
+                    : "var(--color-bahaya-pekat)",
                 }}
               >
-                {b.tuntas ? 'TUNTAS' : 'BELUM'}
+                {b.tuntas ? "TUNTAS" : "BELUM"}
               </div>
             </div>
           </div>
@@ -180,18 +209,23 @@ export default function HalamanSiswa() {
               </div>
               <div
                 className="order-2 md:order-none px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[18px] font-extrabold text-right angka"
-                style={{ color: t.aksen ? 'var(--color-aksen-gelap)' : 'var(--color-tinta)' }}
+                style={{
+                  color: t.aksen
+                    ? "var(--color-aksen-gelap)"
+                    : "var(--color-tinta)",
+                }}
               >
                 {t.nilai}
               </div>
             </div>
           ))}
           <p className="px-4 sm:px-6 py-4 keterangan">
-            Setiap baris memakai variabel skala yang bisa diubah di layar{' '}
-            <strong>Skala &amp; KKTP</strong>. Ubah satu, seluruh rantai ini ikut bergerak.
+            Setiap baris memakai variabel skala yang bisa diubah di layar{" "}
+            <strong>Skala &amp; KKTP</strong>. Ubah satu, seluruh rantai ini
+            ikut bergerak.
           </p>
         </div>
       </div>
     </Halaman>
-  )
+  );
 }

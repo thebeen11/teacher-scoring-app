@@ -10,7 +10,7 @@ export default function HalamanFormatif() {
       tampilkanRumus
       tampilkanKaki
       keterangan={
-        "Ketik skor mentah tiap kolom — sel kosong terhitung nol. Tiap kolom dikonversi ke band tujuannya sendiri, lalu seluruh kolom dirata-rata menjadi RT F. Kolom yang punya sub diisi lewat sub-subnya."
+        "Ketik skor mentah tiap kolom — sel kosong terhitung nol. Tiap kolom dikonversi ke rentang tujuannya sendiri, lalu seluruh kolom dirata-rata menjadi RT F. Kolom yang punya sub diisi lewat sub-subnya. Tambah kolom lewat + Kolom, ganti nama atau hapus lewat ikon pensil di tab-nya, dan tambah sub lewat tombol + Sub. Kolom yang belum diisi tetap ikut dirata-rata, jadi tambahkan saat penilaiannya memang dikerjakan."
       }
     />
   );

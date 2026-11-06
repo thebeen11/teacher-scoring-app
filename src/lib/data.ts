@@ -25,7 +25,10 @@ type BarisKelas = {
   tahun_ajaran: string
   semester: number
   kktp: number
-  bobot: number
+  bobot_formatif: number
+  bobot_sumatif: number
+  bobot_tengah: number
+  bobot_akhir: number
   na_band_min: number
   na_band_max: number
   sumber_minmaks: 'kelas' | 'sekolah'
@@ -56,7 +59,12 @@ function rakitKelas(
     tahunAjaran: k.tahun_ajaran,
     semester: k.semester,
     kktp: Number(k.kktp),
-    bobot: Number(k.bobot),
+    bobot: {
+      formatif: Number(k.bobot_formatif),
+      sumatif: Number(k.bobot_sumatif),
+      tengah: Number(k.bobot_tengah),
+      akhir: Number(k.bobot_akhir),
+    },
     naBandMin: Number(k.na_band_min),
     naBandMax: Number(k.na_band_max),
     sumberMinMaks: k.sumber_minmaks,
@@ -84,7 +92,7 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
     supabase
       .from('kelas')
       .select(
-        'id, mapel_id, nama, tahun_ajaran, semester, kktp, bobot, na_band_min, na_band_max, sumber_minmaks',
+        'id, mapel_id, nama, tahun_ajaran, semester, kktp, bobot_formatif, bobot_sumatif, bobot_tengah, bobot_akhir, na_band_min, na_band_max, sumber_minmaks',
       )
       .eq('mapel_id', fokus.mapel_id)
       .eq('semester', fokus.semester)
@@ -135,6 +143,7 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
       a: Number(r.a),
       b: Number(r.b),
       c: Number(r.c),
+      skor: Number(r.skor_langsung ?? 0),
     }
   }
 
@@ -150,7 +159,8 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
       id: c.id,
       jenis: c.jenis,
       urutan: c.urutan,
-      label: c.label,
+      // Database tetap menyimpan LM1, LM2, ...; tampilan memakai S (Sumatif).
+      label: c.label.replace(/^LM/, 'S'),
       nama: c.nama ?? '',
       indukId: c.induk_id ?? null,
       bandMin: Number(c.band_min),
@@ -162,11 +172,12 @@ export async function muatGrup(kelasId: string): Promise<GrupKelas | null> {
       .map((a) => ({
         id: a.id,
         jenis: a.jenis as Asesmen['jenis'],
+        mode: (a.mode === 'langsung' ? 'langsung' : 'bagian') as Asesmen['mode'],
         bobotA: Number(a.bobot_a),
         bobotB: Number(a.bobot_b),
         bobotC: Number(a.bobot_c),
-        konstanta: Number(a.konstanta),
-        pembagi: Number(a.pembagi),
+        bandMin: Number(a.band_min ?? 80),
+        bandMax: Number(a.band_max ?? 100),
       }))
       .sort((x, y) => urutanAsesmen[x.jenis] - urutanAsesmen[y.jenis])
 

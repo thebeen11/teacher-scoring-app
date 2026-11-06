@@ -6,10 +6,10 @@ export default function HalamanLingkup() {
   return (
     <TabelPadat
       jenis="lingkup"
-      judul="Sumatif Lingkup Materi"
+      judul="Nilai Sumatif"
       tampilkanKaki
       keterangan={
-        "Satu kolom per lingkup materi. Skornya dikonversi ke band tujuan masing-masing, lalu dirata-rata menjadi RT LM — yang bersama RT F membentuk nilai proses."
+        "Satu kolom per nilai sumatif. Skornya dikonversi ke rentang tujuan masing-masing, lalu dirata-rata menjadi RT S — yang bersama RT F membentuk nilai proses. Tambah kolom lewat + Kolom, ganti nama atau hapus lewat ikon pensil di tab-nya."
       }
     />
   );
