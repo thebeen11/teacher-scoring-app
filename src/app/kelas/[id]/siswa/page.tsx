@@ -114,7 +114,7 @@ export default function HalamanSiswa() {
       </label>
 
       {/* --------------------------------------------------------- roster -- */}
-      <div className="hidden lg:block w-[250px] flex-none papan self-start max-h-[calc(100vh-150px)] overflow-auto p-3">
+      <div className="hidden lg:block w-[15.625rem] flex-none papan self-start max-h-[calc(100vh-150px)] overflow-auto p-3">
         <div className="px-3 py-2.5 mb-1 border-b border-[color:var(--color-garis)] mikro sticky top-0 bg-[color:var(--color-papan)] z-10">
           {kelas.nama} · {hasil.baris.length} SISWA
         </div>
@@ -122,7 +122,7 @@ export default function HalamanSiswa() {
           <button
             key={r.siswa.id}
             onClick={() => setTerpilih(i)}
-            className="w-full flex gap-2 px-3 py-[9px] rounded-[var(--r-kecil)] border-0 text-[11.5px] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-kepala)]"
+            className="w-full flex gap-2 px-3 py-[9px] rounded-[var(--r-kecil)] border-0 text-[0.7188rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-kepala)]"
             style={{
               background: i === terpilih ? "var(--color-sorot)" : "transparent",
             }}
@@ -151,14 +151,14 @@ export default function HalamanSiswa() {
               <div className="mikro">
                 PESERTA DIDIK {b.siswa.noUrut} · {kelas.nama}
               </div>
-              <div className="text-[22px] sm:text-[26px] font-semibold leading-[1.2] mt-1.5 tracking-[-0.01em] font-[family-name:var(--font-judul)]">
+              <div className="text-[1.375rem] sm:text-[1.625rem] font-semibold leading-[1.2] mt-1.5 tracking-[-0.01em] font-[family-name:var(--font-judul)]">
                 {b.siswa.nama}
               </div>
             </div>
             <div className="sm:ml-auto sm:text-right">
               <div className="mikro">NILAI RAPORT</div>
               <div
-                className="text-[46px] font-extrabold leading-none tracking-[-0.02em] angka"
+                className="text-[2.875rem] font-extrabold leading-none tracking-[-0.02em] angka"
                 style={{
                   color: b.tuntas
                     ? "var(--color-tinta)"
@@ -171,7 +171,7 @@ export default function HalamanSiswa() {
             <div className="text-right">
               <div className="mikro">STATUS</div>
               <div
-                className="tag mt-2 text-[11px]"
+                className="tag mt-2 text-[0.6875rem]"
                 style={{
                   background: b.tuntas
                     ? "var(--color-sorot)"
@@ -198,17 +198,17 @@ export default function HalamanSiswa() {
               key={t.kode}
               className="grid grid-cols-[1fr_auto] md:grid-cols-[120px_200px_minmax(0,1fr)_120px] items-center px-1.5 py-2 md:py-0 border-b border-[color:var(--color-garis)]"
             >
-              <div className="px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[13px] font-extrabold sekat">
+              <div className="px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[0.8125rem] font-extrabold sekat">
                 {t.kode}
               </div>
-              <div className="order-3 md:order-none col-span-2 md:col-span-1 px-3 md:px-[18px] md:py-3.5 text-[11.5px] leading-[1.4] text-[color:var(--color-redup)]">
+              <div className="order-3 md:order-none col-span-2 md:col-span-1 px-3 md:px-[18px] md:py-3.5 text-[0.7188rem] leading-[1.4] text-[color:var(--color-redup)]">
                 {t.label}
               </div>
-              <div className="order-4 md:order-none col-span-2 md:col-span-1 min-w-0 px-3 md:px-[18px] pt-1 pb-1.5 md:py-3.5 text-[11.5px] font-medium angka break-words">
+              <div className="order-4 md:order-none col-span-2 md:col-span-1 min-w-0 px-3 md:px-[18px] pt-1 pb-1.5 md:py-3.5 text-[0.7188rem] font-medium angka break-words">
                 {t.detail}
               </div>
               <div
-                className="order-2 md:order-none px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[18px] font-extrabold text-right angka"
+                className="order-2 md:order-none px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[1.125rem] font-extrabold text-right angka"
                 style={{
                   color: t.aksen
                     ? "var(--color-aksen-gelap)"

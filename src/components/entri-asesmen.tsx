@@ -92,10 +92,10 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
   const kepalaNilai = (
     <>
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-[12.5px] font-semibold text-[color:var(--color-redup)]">
+        <span className="text-[0.7812rem] font-semibold text-[color:var(--color-redup)]">
           NILAI
         </span>
-        <span className="ml-auto flex-none whitespace-nowrap text-[10.5px] font-medium text-[color:var(--color-redup)] angka">
+        <span className="ml-auto flex-none whitespace-nowrap text-[0.6562rem] font-medium text-[color:var(--color-redup)] angka">
           maks {nAuto(bd[1])} · min {nAuto(bd[0])}
         </span>
       </div>
@@ -154,7 +154,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
 
       {langsung ? (
         <>
-          <div className="tabel-padat min-w-fit" style={gayaTabelLangsung}>
+          <div className="tabel-padat min-w-max" style={gayaTabelLangsung}>
             <div className="kepala-padat">
               <KepalaBeku />
               <div
@@ -195,12 +195,12 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
                         onUbah={(v) => ubah(baris.siswa.id, "skor", v)}
                         onFocus={() => setFokus(i)}
                         onKeyDown={(e) => navigasiSel(e, 1)}
-                        className="sel-input-padat w-[72px]"
+                        className="sel-input-padat w-[4.5rem]"
                         aria-label={`Skor ${baris.siswa.nama}`}
                       />
                     </div>
                     <div
-                      className="sel-padat justify-end text-[15px] font-extrabold angka"
+                      className="sel-padat justify-end text-[0.9375rem] font-extrabold angka"
                       style={{
                         color:
                           h.nilai >= 70
@@ -220,7 +220,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
         <>
           {/* --------------------------------------------------- bilah rumus -- */}
 
-          <div className="tabel-padat min-w-fit" style={gayaTabel}>
+          <div className="tabel-padat min-w-max" style={gayaTabel}>
             <div className="kepala-padat">
               <KepalaBeku duaBaris />
               <div
@@ -235,7 +235,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
               {LABEL.map((k, i) => (
                 <div
                   key={k}
-                  className={`px-2 pt-1.5 pb-1 mikro text-[10.5px] tracking-[0.06em] ${
+                  className={`px-2 pt-1.5 pb-1 mikro text-[0.6562rem] tracking-[0.06em] ${
                     i === 2 ? "sekat-padat" : "sekat-sub"
                   }`}
                   style={{ gridColumn: 3 + i, gridRow: 2 }}
@@ -290,21 +290,21 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
                           onUbah={(v) => ubah(baris.siswa.id, k, v)}
                           onFocus={() => setFokus(i)}
                           onKeyDown={(e) => navigasiSel(e, 3)}
-                          className="sel-input-padat w-[48px]"
+                          className="sel-input-padat w-[3rem]"
                           aria-label={`${NAMA_BAGIAN[k]} ${baris.siswa.nama}`}
                         />
                         <Panah />
-                        <span className="text-[14px] font-bold angka">
+                        <span className="text-[0.875rem] font-bold angka">
                           {h.butir[k] * bobotDari(asesmen, k)}
                         </span>
                       </div>
                     ))}
 
-                    <div className="sel-padat sekat-padat justify-end text-[14px] font-semibold angka">
+                    <div className="sel-padat sekat-padat justify-end text-[0.875rem] font-semibold angka">
                       {n(h.total, 0)}
                     </div>
                     <div
-                      className="sel-padat justify-end text-[15px] font-extrabold angka"
+                      className="sel-padat justify-end text-[0.9375rem] font-extrabold angka"
                       style={{
                         color:
                           h.nilai >= 70

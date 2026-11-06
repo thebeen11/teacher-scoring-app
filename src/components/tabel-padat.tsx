@@ -185,7 +185,7 @@ export default function TabelPadat({
                   placeholder={`Nama ${k.label}`}
                   onSimpan={(v) => gantiNama(k.id, v)}
                   onBatal={batal}
-                  className="w-[160px]"
+                  className="w-[10rem]"
                 />
               </div>
             );
@@ -212,7 +212,7 @@ export default function TabelPadat({
                 {k ? k.nama || k.label : "Ringkasan"}
                 {jumlahSub > 0 && (
                   <span
-                    className={`flex-none text-[9.5px] font-bold tracking-[0.06em] rounded-full px-1.5 py-px angka ${
+                    className={`flex-none text-[0.5938rem] font-bold tracking-[0.06em] rounded-full px-1.5 py-px angka ${
                       aktif
                         ? "bg-white/25 text-white"
                         : "bg-[color:var(--color-keping)] text-[color:var(--color-redup)]"
@@ -241,7 +241,7 @@ export default function TabelPadat({
               placeholder="Nama kolom baru…"
               onSimpan={tambahKolom}
               onBatal={batal}
-              className="w-[180px]"
+              className="w-[11.25rem]"
             />
           </div>
         ) : (
@@ -263,7 +263,7 @@ export default function TabelPadat({
       <PenandaAksi aktif={menyimpan} />
       {kolomTerbuka && bdTerbuka && (
         <div className="ml-auto flex flex-wrap items-center gap-3">
-          <span className="whitespace-nowrap text-[10.5px] font-medium text-[color:var(--color-redup)] angka">
+          <span className="whitespace-nowrap text-[0.6562rem] font-medium text-[color:var(--color-redup)] angka">
             maks {nAuto(bdTerbuka[1])} · min {nAuto(bdTerbuka[0])}
           </span>
           <InputBand
@@ -281,7 +281,7 @@ export default function TabelPadat({
                   placeholder="Nama sub baru…"
                   onSimpan={(v) => tambahSub(kolomAktif.id, v)}
                   onBatal={batal}
-                  className="w-[180px]"
+                  className="w-[11.25rem]"
                 />
               ) : (
                 <button
@@ -377,7 +377,7 @@ export default function TabelPadat({
                     nilai={c.mentah}
                     onUbah={(v) => setSkor(baris.siswa.id, c.komponen.id, v)}
                     onKeyDown={(e) => navigasiSel(e, selPerBaris)}
-                    className="sel-input-padat w-[72px]"
+                    className="sel-input-padat w-[4.5rem]"
                     aria-label={`${c.komponen.label} ${baris.siswa.nama}`}
                   />
                   <Panah />
@@ -398,14 +398,14 @@ export default function TabelPadat({
                 <Konversi nilai={c.konversi} />
                 <span
                   aria-hidden
-                  className="ml-auto text-[11px] text-[color:var(--color-samar)]"
+                  className="ml-auto text-[0.6875rem] text-[color:var(--color-samar)]"
                 >
                   ▶
                 </span>
               </button>
             );
           })}
-          <div className="sel-padat justify-end text-[15px] font-extrabold angka">
+          <div className="sel-padat justify-end text-[0.9375rem] font-extrabold angka">
             {nilaiRT(baris)}
           </div>
         </div>
@@ -417,7 +417,7 @@ export default function TabelPadat({
       return (
         <div
           key={k.id}
-          className="sel-padat sekat-padat text-[13px] font-semibold angka"
+          className="sel-padat sekat-padat text-[0.8125rem] font-semibold angka"
         >
           {nAuto(bd[1])} / {nAuto(bd[0])}
         </div>
@@ -461,7 +461,7 @@ export default function TabelPadat({
                 type="button"
                 onClick={() => setSunting({ mode: "ubahSub", id: s.id })}
                 aria-label={`Ganti nama ${s.label}`}
-                className="ml-auto flex-none border-0 bg-transparent cursor-pointer px-0.5 text-[11px] leading-none text-[color:var(--color-samar)] hover:text-[color:var(--color-tinta)]"
+                className="ml-auto flex-none border-0 bg-transparent cursor-pointer px-0.5 text-[0.6875rem] leading-none text-[color:var(--color-samar)] hover:text-[color:var(--color-tinta)]"
               >
                 <IkonPensil ukuran={11} />
               </button>
@@ -521,7 +521,7 @@ export default function TabelPadat({
                   nilai={c.mentah}
                   onUbah={(v) => setSkor(baris.siswa.id, c.komponen.id, v)}
                   onKeyDown={(e) => navigasiSel(e, selPerBaris)}
-                  className="sel-input-padat w-[72px]"
+                  className="sel-input-padat w-[4.5rem]"
                   aria-label={`${c.komponen.label} ${baris.siswa.nama}`}
                 />
                 <Panah />
@@ -529,7 +529,7 @@ export default function TabelPadat({
               </div>
             </>
           )}
-          <div className="sel-padat justify-end text-[15px] font-extrabold angka">
+          <div className="sel-padat justify-end text-[0.9375rem] font-extrabold angka">
             {nilaiRT(baris)}
           </div>
         </div>
@@ -539,7 +539,7 @@ export default function TabelPadat({
     const bd = hasil.bounds[k.id] ?? [0, 0];
     kaki = (
       <div
-        className="sel-padat sekat-padat text-[13px] font-semibold angka justify-end"
+        className="sel-padat sekat-padat text-[0.8125rem] font-semibold angka justify-end"
         style={{ gridColumn: rentang }}
       >
         {nAuto(bd[1])} / {nAuto(bd[0])}
@@ -552,7 +552,7 @@ export default function TabelPadat({
       {kepalaHalaman}
 
       {/* Tabel dan kakinya berbagi satu grid supaya trek `auto` sejajar. */}
-      <div className="kisi-padat min-w-fit" style={gaya}>
+      <div className="kisi-padat min-w-max" style={gaya}>
         <div role="tabpanel" className="tabel-padat">
           {/* ------------------------------------------------ kepala kolom -- */}
           <div className="kepala-padat">
@@ -599,7 +599,7 @@ function KepalaKolom({
   if (tanpaRentang)
     return (
       <span
-        className="block text-[12.5px] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
+        className="block text-[0.7812rem] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
         title={kolom.nama || kolom.label}
       >
         {kolom.nama || kolom.label}
@@ -609,12 +609,12 @@ function KepalaKolom({
     <>
       <div className="flex items-center gap-2 min-w-0">
         <span
-          className="text-[12.5px] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
+          className="text-[0.7812rem] font-semibold text-[color:var(--color-redup)] truncate min-w-0"
           title={kolom.nama || kolom.label}
         >
           {kolom.nama || kolom.label}
         </span>
-        <span className="ml-auto flex-none whitespace-nowrap text-[10.5px] font-medium text-[color:var(--color-redup)] angka">
+        <span className="ml-auto flex-none whitespace-nowrap text-[0.6562rem] font-medium text-[color:var(--color-redup)] angka">
           maks {nAuto(bounds[1])} · min {nAuto(bounds[0])}
         </span>
       </div>
@@ -633,7 +633,7 @@ function KepalaKolom({
 
 function Rerata({ nilai }: { nilai: number }) {
   return (
-    <span className="text-[13px] font-semibold text-[color:var(--color-samar)] angka">
+    <span className="text-[0.8125rem] font-semibold text-[color:var(--color-samar)] angka">
       {n(nilai)}
     </span>
   );
@@ -642,7 +642,7 @@ function Rerata({ nilai }: { nilai: number }) {
 function Konversi({ nilai }: { nilai: number }) {
   return (
     <span
-      className="text-[14px] font-bold angka"
+      className="text-[0.875rem] font-bold angka"
       style={{
         color: nilai >= 90 ? "var(--color-aksen-gelap)" : "var(--color-tinta)",
       }}

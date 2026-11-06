@@ -68,14 +68,14 @@ export function SelBeku({
   return (
     <>
       <div
-        className="sel-padat beku sekat-sub text-[13px] font-semibold text-[color:var(--color-samar)] angka"
+        className="sel-padat beku sekat-sub text-[0.8125rem] font-semibold text-[color:var(--color-samar)] angka"
         style={{ left: 0 }}
       >
         {no}
       </div>
       {onKlik ? (
         <button
-          className="sel-padat sel-lipat beku beku-tepi text-[14px] font-semibold"
+          className="sel-padat sel-lipat beku beku-tepi text-[0.875rem] font-semibold"
           style={{ left: LEBAR_NO }}
           onClick={onKlik}
           title={nama}
@@ -84,7 +84,7 @@ export function SelBeku({
         </button>
       ) : (
         <div
-          className="sel-padat beku beku-tepi text-[14px] font-semibold"
+          className="sel-padat beku beku-tepi text-[0.875rem] font-semibold"
           style={{ left: LEBAR_NO }}
           title={nama}
         >
@@ -98,6 +98,6 @@ export function SelBeku({
 /** Panah antara angka mentah dan hasil turunannya. */
 export function Panah() {
   return (
-    <span className="flex-none text-[12.5px] font-medium text-[color:var(--color-samar)]">→</span>
+    <span className="flex-none text-[0.7812rem] font-medium text-[color:var(--color-samar)]">→</span>
   )
 }

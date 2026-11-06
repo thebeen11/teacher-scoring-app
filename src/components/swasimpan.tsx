@@ -77,7 +77,7 @@ export function PenandaSimpan() {
   return (
     <span
       aria-live="polite"
-      className="mikro w-[52px] flex-none text-right"
+      className="mikro w-[3.25rem] flex-none text-right"
       style={{ color: baruSaja && !pending ? 'var(--color-aksen-gelap)' : 'var(--color-samar)' }}
     >
       {teks.toUpperCase()}

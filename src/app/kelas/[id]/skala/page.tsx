@@ -79,7 +79,7 @@ export default function HalamanSkala() {
               diberi radius. `border-hidden` menyembunyikan tepi luar tabel
               supaya tidak dobel dengan garis pembungkus. */}
           <div className="mt-3 overflow-x-auto rounded-[var(--r-kartu)] border border-[color:var(--color-garis)] bg-[color:var(--color-papan)]">
-            <table className="w-full border-collapse border-hidden text-[13px]">
+            <table className="w-full border-collapse border-hidden text-[0.8125rem]">
               <thead>
                 <tr className="bg-[color:var(--color-kepala)]">
                   <th className="border border-[color:var(--color-garis)] px-3 py-2 text-left w-px whitespace-nowrap mikro">
@@ -121,10 +121,10 @@ export default function HalamanSkala() {
                           }
                           max={100}
                           step={5}
-                          className="sel-input-padat w-[64px]"
+                          className="sel-input-padat w-[4rem]"
                           aria-label={`Bobot ${g.label}`}
                         />
-                        <span className="text-[12px] font-semibold text-[color:var(--color-redup)]">
+                        <span className="text-[0.75rem] font-semibold text-[color:var(--color-redup)]">
                           %
                         </span>
                       </div>
@@ -153,7 +153,7 @@ export default function HalamanSkala() {
                       ` · ${total < 100 ? "KURANG" : "LEBIH"} ${Math.abs(100 - total)}%`}
                   </th>
                   <td
-                    className="border border-[color:var(--color-garis)] px-3 py-2 text-right text-[15px] font-extrabold angka"
+                    className="border border-[color:var(--color-garis)] px-3 py-2 text-right text-[0.9375rem] font-extrabold angka"
                     aria-live="polite"
                   >
                     {total}%
@@ -164,7 +164,7 @@ export default function HalamanSkala() {
           </div>
 
           <p
-            className="keterangan mt-3 text-[11px]"
+            className="keterangan mt-3 text-[0.6875rem]"
             style={pasBobot ? undefined : { color: "var(--color-bahaya)" }}
           >
             {pasBobot
@@ -178,10 +178,10 @@ export default function HalamanSkala() {
           <InputAngka
             nilai={kelas.kktp}
             onUbah={(v) => setPengaturan({ kktp: v })}
-            className="sel-input w-24 mt-2.5 px-3 py-2.5 text-[24px] font-extrabold angka"
+            className="sel-input w-24 mt-2.5 px-3 py-2.5 text-[1.5rem] font-extrabold angka"
             aria-label="KKTP"
           />
-          <p className="keterangan mt-2.5 text-[11px]">
+          <p className="keterangan mt-2.5 text-[0.6875rem]">
             Batas ketuntasan. Nilai di bawahnya ditandai merah di Daftar Nilai
             dan muncul di dasbor.
           </p>

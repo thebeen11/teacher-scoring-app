@@ -67,7 +67,7 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
             ))}
           </select>
         )}
-        <p className="keterangan mt-2 text-[11px]">
+        <p className="keterangan mt-2 text-[0.6875rem]">
           Kelas dengan mata pelajaran dan semester yang sama saling terhubung: dasbornya
           menampilkan semua kartu kelas.
         </p>
@@ -103,14 +103,14 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
           placeholder={'ABDUL GHOFAR\nADINDA SYIFA KHAERUNNISA\nAKHMAD MUBAROK'}
           className={`${inputKelas} font-[inherit] leading-[1.6]`}
         />
-        <span className="text-[11px] text-[color:var(--color-redup)]">
+        <span className="text-[0.6875rem] text-[color:var(--color-redup)]">
           Satu nama per baris. Boleh langsung ditempel dari spreadsheet — nomor urut di depan
           dan huruf L/P di belakang akan dikenali.
         </span>
       </label>
 
       {state?.galat ? (
-        <p className="text-[12px] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
+        <p className="text-[0.75rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
           {state.galat}
         </p>
       ) : null}
