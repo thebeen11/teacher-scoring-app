@@ -1,20 +1,25 @@
-export default function LayoutAuth({ children }: { children: React.ReactNode }) {
+import Image from "next/image";
+import logoNilaiHub from "../../../public/logo-nilaihub.png";
+
+export default function LayoutAuth({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="min-h-screen flex items-start justify-center px-4 py-10 sm:px-6 sm:py-16">
-      <div className="w-full max-w-otentikasi">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-semibold tracking-[0.04em] text-[color:var(--color-aksen-gelap)] bg-[color:var(--color-sorot)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--color-aksen)]" />
-          SMP · nilaiHub by dodeclass
-        </div>
-        <h1 className="text-[28px] sm:text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
-          nilaiHub
-        </h1>
-        <p className="keterangan mb-7">
-          Formatif, nilai sumatif, dan asesmen sumatif dalam satu rantai — dengan setiap
-          variabel skala terlihat, bukan tersembunyi di baris kaki.
-        </p>
-        {children}
+    <div className="min-h-dvh flex flex-col items-center justify-center px-4 py-10 sm:px-6">
+      <div className="w-full max-w-otentikasi flex flex-col items-center">
+        <Image
+          src={logoNilaiHub}
+          alt="nilaiHub"
+          loading="eager"
+          className="h-11 sm:h-12 w-auto mb-8"
+        />
+
+        <div className="w-full">{children}</div>
+
+        <p className="mikro mt-8 text-center">NILAIHUB BY DODECLASS</p>
       </div>
     </div>
-  )
+  );
 }
