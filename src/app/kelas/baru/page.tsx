@@ -14,8 +14,8 @@ export default async function HalamanKelasBaru() {
       </Link>
       <h1 className="judul mt-4">Kelas <span className="teks-gradien">baru</span></h1>
       <p className="keterangan mt-1.5 mb-6">
-        Kolom F1–F4 dan LM1–LM4 beserta ASTS/ASAS dibuatkan otomatis dengan band bawaan, jadi
-        kelas langsung siap diisi. Jumlah kolom, band, bobot, dan KKTP bisa diubah kapan saja
+        Kolom formatif dan sumatif Bab 1–Bab 4 beserta ASTS/ASAS dibuatkan otomatis dengan rentang bawaan, jadi
+        kelas langsung siap diisi. Jumlah kolom, rentang, bobot tiap bagian, dan KKTP bisa diubah kapan saja
         setelah kelas jadi.
       </p>
       <FormKelasBaru mapel={mapel ?? []} />

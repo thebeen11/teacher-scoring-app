@@ -110,14 +110,14 @@ export function InputBand({
         nilai={min}
         onUbah={(v) => onUbah(v, max)}
         className={kelas}
-        aria-label="Band minimum"
+        aria-label="Rentang minimum"
       />
       <span className="text-[color:var(--color-redup)]">–</span>
       <InputAngka
         nilai={max}
         onUbah={(v) => onUbah(min, v)}
         className={kelas}
-        aria-label="Band maksimum"
+        aria-label="Rentang maksimum"
       />
     </div>
   )

@@ -12,7 +12,7 @@ export default function Penyiapan() {
         <span className="w-1.5 h-1.5 rounded-full bg-[color:var(--color-aksen)]" />
         Penyiapan · satu langkah lagi
       </div>
-      <h1 className="text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
+      <h1 className="text-[28px] sm:text-[34px] leading-[1.15] font-semibold tracking-[-0.01em] mt-5 mb-2">
         Olah Nilai belum terhubung ke <span className="teks-gradien">Supabase</span>
       </h1>
       <p className="keterangan mb-7">
@@ -65,7 +65,7 @@ pnpm db:push`}
       <p className="keterangan mt-6">
         Perhitungannya sendiri tidak bergantung pada basis data: jalankan{' '}
         <code className="text-[12px]">pnpm test</code> untuk memverifikasi seluruh rantai
-        rumus — formatif, lingkup materi, asesmen, sampai nilai raport — atas satu kelas
+        rumus — formatif, nilai sumatif, asesmen, sampai nilai raport — atas satu kelas
         contoh berisi 30 siswa.
       </p>
     </Halaman>

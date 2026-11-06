@@ -23,6 +23,6 @@ export default function Halaman({
   children: React.ReactNode
 }) {
   return (
-    <div className={`w-full mx-auto p-6 ${LEBAR[lebar]} ${className}`}>{children}</div>
+    <div className={`w-full mx-auto p-4 sm:p-6 ${LEBAR[lebar]} ${className}`}>{children}</div>
   )
 }

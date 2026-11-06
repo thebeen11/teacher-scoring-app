@@ -52,14 +52,14 @@
 :root {
   color-scheme: light;
   /* Bayangan — satu tempat, supaya blok cetak bisa mematikannya sekaligus. */
-  --bayang-neu: 8px 8px 16px rgba(174, 174, 192, 0.4),
-    -8px -8px 16px rgba(255, 255, 255, 0.8);
+  --bayang-neu: 4px 4px 10px rgba(174, 174, 192, 0.25),
+    -4px -4px 10px rgba(255, 255, 255, 0.7);
   --bayang-neu-kecil: 4px 4px 8px rgba(174, 174, 192, 0.4),
     -4px -4px 8px rgba(255, 255, 255, 0.8);
   --bayang-neu-dalam: inset 3px 3px 6px rgba(174, 174, 192, 0.3),
     inset -3px -3px 6px rgba(255, 255, 255, 0.7);
-  --bayang-lembut: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --bayang-naik: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --bayang-lembut: 0 1px 3px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --bayang-naik: 0 4px 14px rgba(0, 0, 0, 0.07);
   --bayang-cta: 0 4px 14px rgba(34, 197, 94, 0.3);
   --bayang-cta-naik: 0 6px 20px rgba(34, 197, 94, 0.4);
 
@@ -80,6 +80,21 @@
      bukan menulis sendiri padding dan lebarnya. Jarak antarblok di dalam satu
      halaman — judul, kartu ringkas, tabel — tetap 28px (`mb-7`). */
   --ruang-kartu: 28px;
+
+  /* Dua kolom beku tabel padat (NO, NAMA). Dibaca oleh `gayaKolom` dan
+     posisi `left` sel beku di src/components/tabel.tsx. */
+  --lebar-no: 40px;
+  --lebar-nama: 220px;
+}
+
+/* Ponsel: kolom beku menyempit supaya kolom nilai masih terlihat di sebelahnya,
+   dan kartu tidak membuang sepertiga lebar layar untuk padding. */
+@media (max-width: 639px) {
+  :root {
+    --ruang-kartu: 20px;
+    --lebar-no: 32px;
+    --lebar-nama: 150px;
+  }
 }
 
 html {
@@ -206,7 +221,7 @@ a:focus-visible {
     transition: transform 0.25s, box-shadow 0.25s;
   }
   .papan-angkat:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--bayang-naik);
   }
 
@@ -222,42 +237,67 @@ a:focus-visible {
      ketiganya mustahil melenceng — itu satu-satunya cara melipat kolom tanpa
      menghitung ulang lebar di tiga tempat.
   */
+  /* Satu grid memiliki trek kolom; kepala, kelompok baris, tiap baris, dan
+     kaki mewarisinya lewat `subgrid`. Dengan begitu trek `auto` (selebar
+     isinya) tetap sejajar di semua baris — tanpa subgrid tiap baris akan
+     mengukur lebarnya sendiri-sendiri dan kolomnya melenceng. */
+  .tabel-padat,
+  .kisi-padat {
+    display: grid;
+    grid-template-columns: var(--kolom);
+  }
+  .kisi-padat > .tabel-padat,
+  .grup-padat {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+
   .tabel-padat {
     background: var(--color-papan);
-    /* Siku, bukan membulat. Sudut membulat adalah bahasa KARTU, dan tabel ini
-       justru berhenti jadi tumpukan kartu: ia satu kisi. Sudut bulat juga
-       memotong ujung baris pertama dan terakhir, dan tepi kanan berganti
-       bentuk tergantung kolom mana yang sedang terbuka — kadang membulat saat
-       semua muat, terpotong lurus begitu satu kolom bersub dibuka. */
-    border-radius: 0;
+    /* Membulat seperti kartu lain. Sengaja TANPA overflow:hidden — itu akan
+       menjadikan kartu ini sebuah scrollport, dan kepala lengket di dalamnya
+       tidak akan pernah menempel ke tepi atas layar. Jadi sudutnya tidak
+       dipotong wadah: kepala, baris terakhir, dan sel ujungnya (termasuk sel
+       beku yang melukis latarnya sendiri) membulatkan sudutnya masing-masing. */
+    border-radius: var(--r-kartu);
     box-shadow: var(--bayang-lembut);
-    /* Sengaja TANPA overflow:hidden — itu akan menjadikan kartu ini sebuah
-       scrollport, dan kepala lengket di dalamnya tidak akan pernah menempel
-       ke tepi atas layar. Sudutnya dibulatkan lewat baris pertama/terakhir. */
   }
 
   .kepala-padat {
     display: grid;
-    grid-template-columns: var(--kolom);
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     position: sticky;
     top: 0;
     z-index: 3;
     background: var(--color-kepala);
     border-bottom: 1px solid var(--color-garis);
+    border-radius: var(--r-kartu) var(--r-kartu) 0 0;
+  }
+  .kepala-padat > :first-child {
+    border-top-left-radius: var(--r-kartu);
+  }
+  .kepala-padat > :last-child {
+    border-top-right-radius: var(--r-kartu);
   }
 
-  /* Kaki maks/min. Ia HARUS ikut `--kolom` juga: memberi `display:grid` saja
-     membuat selnya jatuh ke kolom implisit selebar isinya, dan kaki melenceng
-     dari tabel di atasnya. */
+  /* Kaki maks/min. Ia HARUS jadi subgrid dari `.kisi-padat` yang sama dengan
+     tabelnya: grid sendiri akan mengukur trek `auto`-nya terpisah, dan kaki
+     melenceng dari tabel di atasnya. */
   .kaki-padat {
     display: grid;
-    grid-template-columns: var(--kolom);
-    border-radius: 0;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+  .kaki-padat > :first-child {
+    border-radius: var(--r-kartu) 0 0 var(--r-kartu);
   }
 
   .baris-padat {
     display: grid;
-    grid-template-columns: var(--kolom);
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     align-items: center;
     /* Latar wajib pekat, bukan transparan: sel beku di bawah mewarisinya, dan
        latar tembus akan membuat kolom lain terlihat menembus saat digulir. */
@@ -272,6 +312,13 @@ a:focus-visible {
   }
   .baris-padat:last-child {
     border-bottom: 0;
+    border-radius: 0 0 var(--r-kartu) var(--r-kartu);
+  }
+  .baris-padat:last-child > :first-child {
+    border-bottom-left-radius: var(--r-kartu);
+  }
+  .baris-padat:last-child > :last-child {
+    border-bottom-right-radius: var(--r-kartu);
   }
 
   .sel-padat {
@@ -279,8 +326,14 @@ a:focus-visible {
     align-items: center;
     gap: 6px;
     min-width: 0;
-    min-height: 28px;
-    padding: 3px 8px;
+    min-height: 34px;
+    padding: 4px 10px;
+  }
+
+  /* Label kepala di dalam tabel sedikit lebih besar dari label kartu. */
+  .tabel-padat .mikro,
+  .kaki-padat .mikro {
+    font-size: 11px;
   }
 
   /* Kolom yang tetap terlihat saat tabel digulir mendatar: nomor dan nama.
@@ -317,9 +370,9 @@ a:focus-visible {
     border: 1px solid var(--color-garis);
     border-radius: 0.5rem;
     background: #fff;
-    padding: 2px 6px;
+    padding: 3px 7px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 14px;
     text-align: right;
     font-variant-numeric: tabular-nums;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -357,6 +410,17 @@ a:focus-visible {
   }
   .mekar {
     animation: mekar-kanan 0.18s ease-out;
+  }
+
+  /* Laci navigasi di layar sempit — meluncur masuk dari kiri. */
+  @keyframes laci-masuk {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+  }
+  .laci {
+    animation: laci-masuk 0.2s ease-out;
   }
 
   /* Garis kolom. Tanpa ini tabel hanya tumpukan baris: mata bisa menyusuri
@@ -434,8 +498,9 @@ a:focus-visible {
   }
   /* Versi sempit untuk kepala tabel padat. */
   .band-input-padat {
-    width: 48px;
-    padding: 2px 5px;
+    width: 56px;
+    padding: 2px 6px;
+    font-size: 13px;
   }
 
   /* Kolom teks biasa — nama siswa, tahun ajaran, roster. */
@@ -547,6 +612,10 @@ a:focus-visible {
   }
   .segmen > button + button {
     border-left: 1px solid var(--color-garis);
+  }
+  .segmen > button:focus-visible {
+    outline: 2px solid var(--color-aksen-gelap);
+    outline-offset: -2px;
   }
 
   .judul {

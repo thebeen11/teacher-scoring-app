@@ -3,8 +3,11 @@ import fixture from './__fixtures__/viii-a.json'
 import {
   hitungAsesmen,
   hitungKelas,
+  hitungNA,
   hitungSiswa,
   hitungBounds,
+  kelengkapanAsesmen,
+  skorBagian,
   kelengkapanKolom,
   komponenOf,
   nilaiRaport,
@@ -42,7 +45,7 @@ function bangunKelas(): Kelas {
       id: `lm${i}`,
       jenis: 'lingkup' as const,
       urutan: i + 1,
-      label: `LM${i + 1}`,
+      label: `S${i + 1}`,
       nama: '',
       indukId: null,
       bandMin: b[0],
@@ -50,15 +53,22 @@ function bangunKelas(): Kelas {
     })),
   ]
 
-  const asesmen: Asesmen[] = (['ASTS', 'ASAS'] as const).map((jenis) => ({
-    id: jenis,
-    jenis,
-    bobotA: 2,
-    bobotB: 2,
-    bobotC: 1,
-    konstanta: 85,
-    pembagi: 2,
-  }))
+  // Workbook memakai NILAI = (85 + SKOR) / 2. Rumus itu linier, jadi rescale
+  // dengan rentang [(85 + min) / 2, (85 + maks) / 2] menghasilkan angka yang
+  // persis sama — rantai workbook tetap bisa diverifikasi lewat rumus rentang.
+  const asesmen: Asesmen[] = (['ASTS', 'ASAS'] as const).map((jenis) => {
+    const skor = fixture.siswa.map((s) => s[jenis][0] * 2 + s[jenis][1] * 2 + s[jenis][2])
+    return {
+      id: jenis,
+      jenis,
+      mode: 'bagian',
+      bobotA: 2,
+      bobotB: 2,
+      bobotC: 1,
+      bandMin: (85 + Math.min(...skor)) / 2,
+      bandMax: (85 + Math.max(...skor)) / 2,
+    }
+  })
 
   const siswa: Siswa[] = fixture.siswa.map((s, i) => ({
     id: `s${i}`,
@@ -76,8 +86,8 @@ function bangunKelas(): Kelas {
     s.formatif.forEach((v, j) => (skorKomponen[id][`f${j}`] = v))
     s.lingkup.forEach((v, j) => (skorKomponen[id][`lm${j}`] = v))
     skorAsesmen[id] = {
-      ASTS: { a: s.ASTS[0], b: s.ASTS[1], c: s.ASTS[2] },
-      ASAS: { a: s.ASAS[0], b: s.ASAS[1], c: s.ASAS[2] },
+      ASTS: { a: s.ASTS[0], b: s.ASTS[1], c: s.ASTS[2], skor: 0 },
+      ASAS: { a: s.ASAS[0], b: s.ASAS[1], c: s.ASAS[2], skor: 0 },
     }
   })
 
@@ -88,7 +98,13 @@ function bangunKelas(): Kelas {
     tahunAjaran: '2025/2026',
     semester: 1,
     kktp: fixture.kktp,
-    bobot: fixture.bobot,
+    // Workbook: proses : asesmen = 60 : 40, dibagi rata ke dua bagian tiap sisi.
+    bobot: {
+      formatif: fixture.bobot / 2,
+      sumatif: fixture.bobot / 2,
+      tengah: (100 - fixture.bobot) / 2,
+      akhir: (100 - fixture.bobot) / 2,
+    },
     naBandMin: fixture.naBand[0],
     naBandMax: fixture.naBand[1],
     sumberMinMaks: 'kelas',
@@ -132,25 +148,72 @@ describe('hitungAsesmen', () => {
   const asts: Asesmen = {
     id: 'ASTS',
     jenis: 'ASTS',
+    mode: 'bagian',
     bobotA: 2,
     bobotB: 2,
     bobotC: 1,
-    konstanta: 85,
-    pembagi: 2,
+    bandMin: 80,
+    bandMax: 100,
   }
 
-  it('mereproduksi ASTS 1 baris 7 (ABDUL GHOFAR)', () => {
-    // (9x2) + (5x2) + 15 = 43  ->  (85 + 43) / 2 = 64
-    const h = hitungAsesmen({ a: 9, b: 5, c: 15 }, asts)
+  it('SKOR bagian direscale dari min/maks ke rentang asesmen', () => {
+    // (9x2) + (5x2) + 15 = 43; 43 di [20, 60] -> (23 x 20 / 40) + 80 = 91,5
+    const h = hitungAsesmen({ a: 9, b: 5, c: 15, skor: 0 }, asts, [20, 60])
     expect(h.total).toBe(43)
-    expect(h.nilai).toBe(64)
+    expect(h.bounds).toEqual([20, 60])
+    expect(h.nilai).toBe(91.5)
   })
 
-  it('mereproduksi ASAS 1 baris 7 (ABDUL GHOFAR)', () => {
-    // (12x2) + (8x2) + 10 = 50  ->  (85 + 50) / 2 = 67,5
-    const h = hitungAsesmen({ a: 12, b: 8, c: 10 }, asts)
-    expect(h.total).toBe(50)
-    expect(h.nilai).toBe(67.5)
+  it('SKOR tertinggi dan terendah jatuh tepat di batas rentang', () => {
+    const a = { ...asts, bandMin: 70, bandMax: 95 }
+    expect(hitungAsesmen({ a: 0, b: 0, c: 0, skor: 0 }, { ...a, mode: 'langsung' }, [0, 50]).nilai).toBe(70)
+    expect(hitungAsesmen({ a: 0, b: 0, c: 0, skor: 50 }, { ...a, mode: 'langsung' }, [0, 50]).nilai).toBe(95)
+  })
+
+  it('rentang SKOR nol jatuh ke batas bawah', () => {
+    const h = hitungAsesmen({ a: 9, b: 5, c: 15, skor: 0 }, asts, [43, 43])
+    expect(h.nilai).toBe(80)
+  })
+
+  it('mode langsung memakai SKOR yang diketik, lalu rumus nilai yang sama', () => {
+    const h = hitungAsesmen({ a: 0, b: 0, c: 0, skor: 43 }, { ...asts, mode: 'langsung' }, [20, 60])
+    expect(h.total).toBe(43)
+    expect(h.nilai).toBe(91.5)
+  })
+
+  it('skorBagian menjumlahkan bagian berbobot, sama dengan total mode bagian', () => {
+    // (9x2) + (5x2) + 15 = 43
+    expect(skorBagian({ a: 9, b: 5, c: 15, skor: 0 }, asts)).toBe(43)
+  })
+
+  it('mode bagian mengabaikan skor langsung yang tersimpan', () => {
+    const h = hitungAsesmen({ a: 9, b: 5, c: 15, skor: 88 }, asts, [20, 60])
+    expect(h.nilai).toBe(91.5)
+  })
+})
+
+describe('hitungNA — bobot empat bagian', () => {
+  const nilai = { formatif: 90, sumatif: 80, tengah: 70, akhir: 60 }
+
+  it('menimbang tiap bagian dengan bobotnya sendiri', () => {
+    // 40×90 + 30×80 + 10×70 + 20×60 = 7900  ->  79
+    expect(hitungNA({ formatif: 40, sumatif: 30, tengah: 10, akhir: 20 }, nilai)).toBe(79)
+  })
+
+  it('bagian yang tidak ada keluar, bobot sisanya dibagi ulang', () => {
+    // tanpa ASTS: (30×90 + 30×80 + 20×60) / 80 = 78,75
+    expect(
+      hitungNA({ formatif: 30, sumatif: 30, tengah: 20, akhir: 20 }, { ...nilai, tengah: null }),
+    ).toBe(78.75)
+  })
+
+  it('total ≠ 100 dibagi Σw, bukan 100', () => {
+    // (50×90 + 50×80 + 50×70 + 50×60) / 200 = 75
+    expect(hitungNA({ formatif: 50, sumatif: 50, tengah: 50, akhir: 50 }, nilai)).toBe(75)
+  })
+
+  it('semua bobot nol menghasilkan 0, bukan NaN', () => {
+    expect(hitungNA({ formatif: 0, sumatif: 0, tengah: 0, akhir: 0 }, nilai)).toBe(0)
   })
 })
 
@@ -174,6 +237,13 @@ describe('rantai penuh terhadap lembar DafNil S 1', () => {
     expect(peta.lm3).toEqual([0, 10])
   })
 
+  it('peta bounds juga memuat min/maks SKOR tiap asesmen', () => {
+    for (const jenis of ['ASTS', 'ASAS'] as const) {
+      const skor = fixture.siswa.map((s) => s[jenis][0] * 2 + s[jenis][1] * 2 + s[jenis][2])
+      expect(peta[jenis]).toEqual([Math.min(...skor), Math.max(...skor)])
+    }
+  })
+
   it.each(fixture.siswa.map((s, i) => [i, s.nama] as const))(
     'NA siswa %i (%s) sama dengan kolom Q DafNil',
     (i) => {
@@ -187,9 +257,12 @@ describe('rantai penuh terhadap lembar DafNil S 1', () => {
     expect(h.formatif.map((c) => c.konversi)).toEqual([96, 80, 80])
     expect(h.rtF).toBeCloseTo(85.333333333333329, 9)
     expect(h.lingkup.map((c) => c.konversi)).toEqual([80, 78, 78, 80])
-    expect(h.rtLM).toBe(79)
-    expect(h.asesmen.map((a) => a.nilai)).toEqual([64, 67.5])
-    expect(h.rtA).toBe(65.75)
+    expect(h.rtNS).toBe(79)
+    expect(h.asesmen[0].nilai).toBeCloseTo(64, 9)
+    expect(h.asesmen[1].nilai).toBeCloseTo(67.5, 9)
+    expect(h.rtA).toBeCloseTo(65.75, 9)
+    expect(h.rtTengah).toBeCloseTo(64, 9)
+    expect(h.rtAkhir).toBeCloseTo(67.5, 9)
     expect(h.na).toBeCloseTo(75.599999999999994, 9)
   })
 
@@ -387,5 +460,25 @@ describe('sub-formatif', () => {
     const h = hitungSiswa(kelas, kelas.siswa[0], hitungBounds(kelas))
     expect(h.formatif[0].sub.map((s) => s.mentah)).toEqual([80, 90])
     expect(h.formatif[1].sub).toEqual([])
+  })
+})
+
+describe('kelengkapanAsesmen', () => {
+  it('membaca isian sesuai mode asesmen', () => {
+    const kelas = bangunKelas()
+    const id = kelas.siswa[0].id
+    const kosong = { a: 0, b: 0, c: 0, skor: 0 }
+    const skorAsesmen = Object.fromEntries(
+      kelas.siswa.map((s) => [s.id, { ASTS: { ...kosong, a: 5 } }]),
+    )
+    skorAsesmen[id] = { ASTS: { ...kosong, skor: 80 } }
+    const bagian = { ...kelas, skorAsesmen }
+    const langsung = {
+      ...bagian,
+      asesmen: bagian.asesmen.map((a) => (a.id === 'ASTS' ? { ...a, mode: 'langsung' as const } : a)),
+    }
+    const n = kelas.siswa.length
+    expect(kelengkapanAsesmen(bagian, 'ASTS')).toBeCloseTo(((n - 1) / n) * 100, 9)
+    expect(kelengkapanAsesmen(langsung, 'ASTS')).toBeCloseTo((1 / n) * 100, 9)
   })
 })

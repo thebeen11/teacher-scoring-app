@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { buatKlienServer } from '@/lib/supabase/server'
+import type { Bobot } from '@/lib/nilai'
 
 /**
  * Aksi yang mengubah STRUKTUR (kelas, roster, kolom nilai).
@@ -15,7 +16,7 @@ import { buatKlienServer } from '@/lib/supabase/server'
 export type HasilAksi = { galat: string } | undefined
 
 // Nilai bawaan diambil dari workbook VIII A: band formatif 80–100 seragam,
-// band lingkup materi berbeda-beda tiap kolom.
+// band nilai sumatif berbeda-beda tiap kolom.
 const BAND_FORMATIF: [number, number][] = [
   [80, 100],
   [80, 100],
@@ -97,6 +98,7 @@ export async function buatKelas(_prev: HasilAksi, formData: FormData): Promise<H
       jenis: 'formatif',
       urutan: i + 1,
       label: `F${i + 1}`,
+      nama: `Bab ${i + 1}`,
       band_min: b[0],
       band_max: b[1],
     })),
@@ -105,6 +107,7 @@ export async function buatKelas(_prev: HasilAksi, formData: FormData): Promise<H
       jenis: 'lingkup',
       urutan: i + 1,
       label: `LM${i + 1}`,
+      nama: `Bab ${i + 1}`,
       band_min: b[0],
       band_max: b[1],
     })),
@@ -165,7 +168,23 @@ export async function hapusSiswa(kelasId: string, siswaId: string) {
   revalidatePath(`/kelas/${kelasId}`, 'layout')
 }
 
-export async function tambahKomponen(kelasId: string, jenis: 'formatif' | 'lingkup') {
+/** Nama bebas kolom: dipangkas dan dibatasi 60 huruf. */
+function rapikanNama(nama: string) {
+  return String(nama ?? '').trim().slice(0, 60)
+}
+
+/**
+ * Menambah satu kolom tingkat atas. Namanya wajib — layar entri meminta nama
+ * lebih dulu supaya tidak ada kolom kosong tanpa nama yang diam-diam menarik
+ * rerata turun. Mengembalikan id kolom baru agar tab-nya bisa langsung dibuka.
+ */
+export async function tambahKomponen(
+  kelasId: string,
+  jenis: 'formatif' | 'lingkup',
+  namaMentah: string,
+): Promise<string | null> {
+  const nama = rapikanNama(namaMentah)
+  if (!nama) return null
   const supabase = await buatKlienServer()
 
   // Hanya kolom tingkat atas yang bernomor F1..Fn; sub bernomor di dalam induk.
@@ -182,16 +201,22 @@ export async function tambahKomponen(kelasId: string, jenis: 'formatif' | 'lingk
   const awalan = jenis === 'formatif' ? 'F' : 'LM'
   const band = jenis === 'formatif' ? [80, 100] : [80, 100]
 
-  await supabase.from('komponen').insert({
-    kelas_id: kelasId,
-    jenis,
-    urutan,
-    label: `${awalan}${urutan}`,
-    band_min: band[0],
-    band_max: band[1],
-  })
+  const { data: baru } = await supabase
+    .from('komponen')
+    .insert({
+      kelas_id: kelasId,
+      jenis,
+      urutan,
+      label: `${awalan}${urutan}`,
+      nama,
+      band_min: band[0],
+      band_max: band[1],
+    })
+    .select('id')
+    .single()
 
   revalidatePath(`/kelas/${kelasId}`, 'layout')
+  return baru?.id ?? null
 }
 
 /**
@@ -201,7 +226,13 @@ export async function tambahKomponen(kelasId: string, jenis: 'formatif' | 'lingk
  * (lihat skorKolom di lib/nilai.ts). Band tetap milik induk, jadi sub sengaja
  * dibiarkan memakai band bawaan yang tidak dipakai siapa pun.
  */
-export async function tambahSubKomponen(kelasId: string, indukId: string) {
+export async function tambahSubKomponen(
+  kelasId: string,
+  indukId: string,
+  namaMentah: string,
+): Promise<string | null> {
+  const nama = rapikanNama(namaMentah)
+  if (!nama) return null
   const supabase = await buatKlienServer()
 
   const { data: induk } = await supabase
@@ -210,7 +241,7 @@ export async function tambahSubKomponen(kelasId: string, indukId: string) {
     .eq('id', indukId)
     .maybeSingle()
 
-  if (!induk || induk.kelas_id !== kelasId || induk.induk_id !== null) return
+  if (!induk || induk.kelas_id !== kelasId || induk.induk_id !== null) return null
 
   const { data } = await supabase
     .from('komponen')
@@ -221,25 +252,28 @@ export async function tambahSubKomponen(kelasId: string, indukId: string) {
 
   const urutan = (data?.[0]?.urutan ?? 0) + 1
 
-  await supabase.from('komponen').insert({
-    kelas_id: kelasId,
-    jenis: induk.jenis,
-    induk_id: indukId,
-    urutan,
-    label: `${induk.label}.${urutan}`,
-  })
+  const { data: baru } = await supabase
+    .from('komponen')
+    .insert({
+      kelas_id: kelasId,
+      jenis: induk.jenis,
+      induk_id: indukId,
+      urutan,
+      label: `${induk.label}.${urutan}`,
+      nama,
+    })
+    .select('id')
+    .single()
 
   revalidatePath(`/kelas/${kelasId}`, 'layout')
+  return baru?.id ?? null
 }
 
-/** Nama bebas kolom. Kode di `label` tidak pernah ikut berubah. */
-export async function ubahNamaKomponen(
-  kelasId: string,
-  komponenId: string,
-  formData: FormData,
-) {
+/** Nama bebas kolom. Kode di `label` tidak pernah ikut berubah; nama kosong
+ *  membuat layar kembali menampilkan kodenya. */
+export async function ubahNamaKomponen(kelasId: string, komponenId: string, namaMentah: string) {
   const supabase = await buatKlienServer()
-  const nama = String(formData.get('nama') ?? '').trim().slice(0, 60)
+  const nama = rapikanNama(namaMentah)
 
   await supabase.from('komponen').update({ nama }).eq('id', komponenId)
   revalidatePath(`/kelas/${kelasId}`, 'layout')
@@ -270,6 +304,40 @@ export async function hapusKomponen(kelasId: string, komponenId: string) {
 
   await supabase.from('komponen').delete().eq('id', komponenId)
   revalidatePath(`/kelas/${kelasId}`, 'layout')
+}
+
+/**
+ * Salin KKTP + bobot ke kelas lain milik guru. Nilainya dikirim dari peramban
+ * (bukan dibaca dari baris sumber) supaya ketikan yang belum tersimpan ikut.
+ * RLS membatasi pembaruan ke kelas milik pengguna sendiri.
+ */
+export async function terapkanPengaturan(
+  kelasIds: string[],
+  p: { kktp: number; bobot: Bobot },
+): Promise<HasilAksi> {
+  if (!Array.isArray(kelasIds) || kelasIds.length === 0) {
+    return { galat: 'Pilih minimal satu kelas.' }
+  }
+  const angka = [p.kktp, p.bobot.formatif, p.bobot.sumatif, p.bobot.tengah, p.bobot.akhir]
+  if (angka.some((v) => typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 100)) {
+    return { galat: 'KKTP dan bobot harus berupa angka 0–100.' }
+  }
+
+  const supabase = await buatKlienServer()
+  const { error } = await supabase
+    .from('kelas')
+    .update({
+      kktp: p.kktp,
+      bobot_formatif: p.bobot.formatif,
+      bobot_sumatif: p.bobot.sumatif,
+      bobot_tengah: p.bobot.tengah,
+      bobot_akhir: p.bobot.akhir,
+    })
+    .in('id', kelasIds)
+
+  if (error) return { galat: 'Gagal menerapkan pengaturan. Coba lagi.' }
+
+  revalidatePath('/kelas', 'layout')
 }
 
 export async function hapusKelas(kelasId: string) {

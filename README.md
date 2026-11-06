@@ -2,7 +2,7 @@
 
 Aplikasi olah nilai untuk guru — pengganti workbook `OLAH NILAI.xlsx`.
 
-Tiga lapis entri (**formatif**, **lingkup materi**, **asesmen sumatif**) bermuara ke
+Tiga lapis entri (**formatif**, **nilai sumatif**, **asesmen sumatif**) bermuara ke
 satu **daftar nilai** yang seluruhnya turunan. Yang membedakannya dari spreadsheet:
 setiap variabel rescale — min/maks kelas, band tujuan per kolom, bobot proses : asesmen,
 KKTP — ditampilkan di tempat ia berpengaruh, bukan disembunyikan di baris kaki blok.
@@ -79,9 +79,9 @@ secara bawaan — tanpa itu binari CLI tidak terunduh dan `pnpm lint` gagal.
 ## Rantai perhitungan
 
 ```
-skor mentah  --rescale per kolom-->  nilai konversi  --rerata-->  RT F, RT LM
+skor mentah  --rescale per kolom-->  nilai konversi  --rerata-->  RT F, RT S
 butir A/B/C  --(A·wa + B·wb + C·wc)-->  SKOR  --(k + SKOR)/p-->  nilai asesmen
-RT F, RT LM, RT AS  --bobot-->  NA  --rescale ke band-->  NILAI RAPORT
+RT F, RT S, RT AS  --bobot-->  NA  --rescale ke band-->  NILAI RAPORT
 ```
 
 Rescale-nya rumus yang di workbook tertulis

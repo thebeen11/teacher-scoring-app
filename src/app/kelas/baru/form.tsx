@@ -23,7 +23,7 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
   const jumlahNama = roster.split('\n').filter((b) => b.trim()).length
 
   return (
-    <form action={action} className="papan p-7 flex flex-col gap-5">
+    <form action={action} className="papan p-5 sm:p-7 flex flex-col gap-5">
       <div>
         <div className="mikro mb-2">MATA PELAJARAN</div>
         {mapel.length > 0 && (
@@ -69,12 +69,11 @@ export default function FormKelasBaru({ mapel }: { mapel: { id: string; nama: st
         )}
         <p className="keterangan mt-2 text-[11px]">
           Kelas dengan mata pelajaran dan semester yang sama saling terhubung: dasbornya
-          menampilkan semua kartu kelas, dan mode min/maks “Semua kelas” memakai rentang
-          gabungan mereka.
+          menampilkan semua kartu kelas.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <label className="flex flex-col gap-1.5">
           <span className="mikro">NAMA KELAS</span>
           <input name="nama" placeholder="VIII A" className={inputKelas} required />

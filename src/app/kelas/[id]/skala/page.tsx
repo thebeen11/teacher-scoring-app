@@ -1,23 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { useKelas } from "@/lib/store";
-import { komponenOf } from "@/lib/nilai";
+import { komponenOf, totalBobot, type Bobot } from "@/lib/nilai";
 import { n } from "@/lib/format";
 import { InputAngka, InputBand } from "@/components/kendali";
-import PetaSkala from "@/components/peta-skala";
 import Halaman from "@/components/halaman";
+import DialogTerapkan from "@/components/terapkan-pengaturan";
+
+const BAGIAN = [
+  { kunci: "formatif", label: "Formatif" },
+  { kunci: "sumatif", label: "Sumatif" },
+  { kunci: "tengah", label: "Asesmen Tengah Semester" },
+  { kunci: "akhir", label: "Asesmen Akhir Semester" },
+] as const satisfies readonly { kunci: keyof Bobot; label: string }[];
 
 /**
  * Skala & KKTP — satu papan untuk seluruh variabel yang membentuk nilai akhir:
- * band tujuan tiap kolom, band NA → raport, bobot proses : asesmen, KKTP, dan
- * sumber min/maks. Setiap perubahan di sini langsung merambat ke layar entri,
+ * band tujuan tiap kolom, band NA → raport, bobot formatif : sumatif : ASTS :
+ * ASAS/ASAT (total 100%), dan KKTP — yang bisa disalin ke kelas lain. Setiap perubahan di sini langsung merambat ke layar entri,
  * Daftar Nilai, dan dasbor.
  */
 export default function HalamanSkala() {
-  const { kelas, grup, setBand, setPengaturan } = useKelas();
+  const { kelas, setBand, setPengaturan } = useKelas();
+  const [dialog, setDialog] = useState(false);
 
-  const sumberLabel =
-    kelas.sumberMinMaks === "kelas" ? "min/maks kelas" : "min/maks angkatan";
+  const total = totalBobot(kelas.bobot);
+  const pasBobot = total === 100;
+
+  const sumberLabel = "min/maks kelas";
 
   const barisSkala = [
     ...komponenOf(kelas, "formatif").map((k) => ({
@@ -32,7 +43,7 @@ export default function HalamanSkala() {
     ...komponenOf(kelas, "lingkup").map((k) => ({
       id: k.id,
       tipe: `Lingkup ${k.label}${k.nama ? ` · ${k.nama}` : ""}`,
-      rumus: "sama, band berbeda tiap lingkup",
+      rumus: "sama, rentang berbeda tiap lingkup",
       sumber: sumberLabel,
       min: k.bandMin,
       max: k.bandMax,
@@ -42,115 +53,122 @@ export default function HalamanSkala() {
 
   return (
     <Halaman lebar="sempit">
-      <div className="judul">
-        Skala &amp; <span className="teks-gradien">KKTP</span>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="judul">
+          Skala &amp; <span className="teks-gradien">KKTP</span>
+        </div>
+        <button
+          className="tombol whitespace-nowrap shadow-none hover:shadow-none hover:translate-y-0"
+          onClick={() => setDialog(true)}
+        >
+          Terapkan ke kelas lain
+        </button>
       </div>
 
-      {/* --------------------------------------------------- tabel skala -- */}
-      <div className="papan p-0 overflow-hidden">
-        <div className="flex px-4 bg-[color:var(--color-kepala)] border-b border-[color:var(--color-garis)] mikro">
-          <div className="w-[150px] flex-none p-2.5">JENIS NILAI</div>
-          <div className="flex-1 min-w-0 p-2.5">RUMUS</div>
-          <div className="w-[150px] flex-none p-2.5">SUMBER MIN/MAKS</div>
-          <div className="w-[140px] flex-none p-2.5 text-right">
-            BAND TUJUAN
-          </div>
-        </div>
+      {/* ------------------------------------------------- bobot / KKTP -- */}
+      <div className="papan p-6 mt-4 sm:mt-7">
+        <div>
+          <div className="mikro">BOBOT NILAI AKHIR</div>
 
-        {barisSkala.map((s) => (
-          <div
-            key={s.id}
-            className="flex items-center px-4 border-b border-[color:var(--color-garis)]"
+          {/* Sudut membulat ada di pembungkus: tabel border-collapse tidak bisa
+              diberi radius. `border-hidden` menyembunyikan tepi luar tabel
+              supaya tidak dobel dengan garis pembungkus. */}
+          <div className="mt-3 overflow-x-auto rounded-[var(--r-kartu)] border border-[color:var(--color-garis)] bg-[color:var(--color-papan)]">
+            <table className="w-full border-collapse border-hidden text-[13px]">
+              <thead>
+                <tr className="bg-[color:var(--color-kepala)]">
+                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-left w-px whitespace-nowrap mikro">
+                    NO
+                  </th>
+                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-left mikro">
+                    KOMPONEN NILAI
+                  </th>
+                  <th className="border border-[color:var(--color-garis)] px-3 py-2 text-right w-px whitespace-nowrap mikro">
+                    BOBOT (%)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {BAGIAN.map((g, i) => (
+                  <tr
+                    key={g.kunci}
+                    className="even:bg-[color:var(--color-belang)]"
+                  >
+                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5 angka">
+                      {i + 1}
+                    </td>
+                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5 font-semibold">
+                      {g.label}
+                    </td>
+                    <td className="border border-[color:var(--color-garis)] px-3 py-1.5">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <InputAngka
+                          nilai={kelas.bobot[g.kunci]}
+                          onUbah={(v) =>
+                            setPengaturan({
+                              bobot: {
+                                [g.kunci]: Math.min(
+                                  100,
+                                  Math.max(0, Math.round(v)),
+                                ),
+                              },
+                            })
+                          }
+                          max={100}
+                          step={5}
+                          className="sel-input-padat w-[64px]"
+                          aria-label={`Bobot ${g.label}`}
+                        />
+                        <span className="text-[12px] font-semibold text-[color:var(--color-redup)]">
+                          %
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr
+                  style={{
+                    background: pasBobot
+                      ? "var(--color-sorot)"
+                      : "var(--color-basuh)",
+                    color: pasBobot
+                      ? "var(--color-aksen-gelap)"
+                      : "var(--color-bahaya)",
+                  }}
+                >
+                  <th
+                    colSpan={2}
+                    className="border border-[color:var(--color-garis)] px-3 py-2 text-left mikro"
+                    style={{ color: "inherit" }}
+                  >
+                    TOTAL
+                    {!pasBobot &&
+                      ` · ${total < 100 ? "KURANG" : "LEBIH"} ${Math.abs(100 - total)}%`}
+                  </th>
+                  <td
+                    className="border border-[color:var(--color-garis)] px-3 py-2 text-right text-[15px] font-extrabold angka"
+                    aria-live="polite"
+                  >
+                    {total}%
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <p
+            className="keterangan mt-3 text-[11px]"
+            style={pasBobot ? undefined : { color: "var(--color-bahaya)" }}
           >
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
-              {s.tipe}
-            </div>
-            <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
-              {s.rumus}
-            </div>
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
-              {s.sumber}
-            </div>
-            <div className="w-[140px] flex-none px-2.5 py-1.5 flex items-center justify-end">
-              <InputBand min={s.min} max={s.max} onUbah={s.ubah} />
-            </div>
-          </div>
-        ))}
-
-        {kelas.asesmen.map((a) => (
-          <div
-            key={a.id}
-            className="flex items-center px-4 border-b border-[color:var(--color-garis)]"
-          >
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
-              {a.jenis}
-            </div>
-            <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
-              (A×{a.bobotA})+(B×{a.bobotB})+(C×{a.bobotC}) = skor, lalu (
-              {n(a.konstanta, 0)} + skor) ÷ {n(a.pembagi, 0)}
-            </div>
-            <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
-              bobot butir, tanpa min/maks
-            </div>
-            <div className="w-[140px] flex-none px-2.5 py-[11px] text-[11px] text-right text-[color:var(--color-samar)] angka">
-              {n(a.konstanta / a.pembagi, 1)} – …
-            </div>
-          </div>
-        ))}
-
-        <div className="flex items-center px-4 pb-1.5">
-          <div className="w-[150px] flex-none px-2.5 py-[11px] text-[12px] font-bold">
-            Nilai Raport
-          </div>
-          <div className="flex-1 min-w-0 px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)] angka">
-            NA direscale ke band, lalu dibulatkan
-          </div>
-          <div className="w-[150px] flex-none px-2.5 py-[11px] text-[11px] font-medium text-[color:var(--color-redup)]">
-            {kelas.sumberMinMaks === "kelas"
-              ? "NA min/maks kelas"
-              : "NA min/maks angkatan"}
-          </div>
-          <div className="w-[140px] flex-none px-2.5 py-1.5 flex items-center justify-end">
-            <InputBand
-              min={kelas.naBandMin}
-              max={kelas.naBandMax}
-              onUbah={(mn, mx) =>
-                setPengaturan({ naBandMin: mn, naBandMax: mx })
-              }
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ------------------------------------------ bobot / KKTP / sumber -- */}
-      <div className="grid grid-cols-3 gap-7 mt-7">
-        <div className="papan-neu p-6">
-          <div className="mikro">BOBOT PROSES : ASESMEN</div>
-          <div className="flex items-baseline gap-1.5 mt-2.5">
-            <span className="text-[30px] font-extrabold angka">
-              {kelas.bobot}
-            </span>
-            <span className="text-[14px] font-semibold text-[color:var(--color-redup)] angka">
-              : {100 - kelas.bobot}
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={kelas.bobot}
-            onChange={(e) => setPengaturan({ bobot: Number(e.target.value) })}
-            className="w-full mt-3 accent-[color:var(--color-aksen)]"
-            aria-label="Bobot proses terhadap asesmen"
-          />
-          <p className="keterangan mt-1.5 text-[11px]">
-            Formatif dan lingkup materi dirata-rata dulu, baru ditimbang
-            terhadap asesmen sumatif.
+            {pasBobot
+              ? "NA = rerata tiap bagian dikali bobotnya. Bagian yang belum ada di kelas ini (mis. tanpa ASTS) tidak ikut, bobot sisanya dibagi ulang."
+              : "Total bobot harus 100%. Sampai genap, NA dihitung dengan membagi jumlah bobot yang ada."}
           </p>
         </div>
 
-        <div className="papan-neu p-6">
+        <div className="mt-5 pt-5 border-t border-[color:var(--color-garis)]">
           <div className="mikro">KKTP</div>
           <InputAngka
             nilai={kelas.kktp}
@@ -163,38 +181,9 @@ export default function HalamanSkala() {
             dan muncul di dasbor.
           </p>
         </div>
-
-        <div className="papan-neu p-6">
-          <div className="mikro">SUMBER MIN/MAKS</div>
-          <div className="segmen mt-2.5">
-            {(["kelas", "sekolah"] as const).map((s) => {
-              const on = kelas.sumberMinMaks === s;
-              return (
-                <button
-                  key={s}
-                  onClick={() => setPengaturan({ sumberMinMaks: s })}
-                  className="flex-1"
-                  style={{
-                    background: on ? "var(--color-aksen)" : "transparent",
-                    color: on ? "#ffffff" : "var(--color-redup)",
-                  }}
-                >
-                  {s === "kelas" ? "Kelas ini" : "Semua kelas"}
-                </button>
-              );
-            })}
-          </div>
-          <p className="keterangan mt-2.5 text-[11px]">
-            Pakai rentang kelas sendiri, atau rentang seluruh angkatan (
-            {grup.length} kelas) supaya antar kelas sebanding.
-          </p>
-        </div>
       </div>
 
-      {/* ------------------------------------------------------ peta 1b -- */}
-      <div className="mt-7">
-        <PetaSkala />
-      </div>
+      {dialog && <DialogTerapkan onTutup={() => setDialog(false)} />}
     </Halaman>
   );
 }
