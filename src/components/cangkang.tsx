@@ -32,7 +32,7 @@ const NAV: ItemNav[] = [
     label: "Nilai Formatif",
     ruas: "formatif",
     ikon: "formatif",
-    kelompok: "NILAI AKADEMIK",
+    kelompok: "NILAI AKADEMIS",
   },
   { label: "Nilai Sumatif", ruas: "lingkup", ikon: "lingkup" },
   {
