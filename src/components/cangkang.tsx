@@ -17,7 +17,6 @@ import Halaman from "@/components/halaman";
 import type { RingkasanKelas } from "@/lib/data";
 import { keluar } from "@/app/(auth)/actions";
 import IkonNav, { type NamaIkon } from "@/components/ikon-nav";
-import { Avatar, type Pengguna } from "@/components/menu-akun";
 
 type ItemNav = {
   label: string;
@@ -33,7 +32,7 @@ const NAV: ItemNav[] = [
     label: "Nilai Formatif",
     ruas: "formatif",
     ikon: "formatif",
-    kelompok: "ENTRI",
+    kelompok: "NILAI AKADEMIK",
   },
   { label: "Nilai Sumatif", ruas: "lingkup", ikon: "lingkup" },
   {
@@ -123,8 +122,8 @@ function ButirNav({
       aria-current={aktif ? "page" : undefined}
       className={`flex items-center gap-2.5 mr-2 rounded-[var(--r-kendali)] font-semibold no-underline transition-colors ${
         sub
-          ? "ml-6 px-3 py-[8px] text-[0.75rem]"
-          : "ml-2 px-3 py-[10px] text-[0.7812rem]"
+          ? "ml-6 px-3 py-[8px] text-[0.875rem]"
+          : "ml-2 px-3 py-[10px] text-[0.9062rem]"
       }`}
       style={{
         background: aktif ? "var(--color-aksen)" : "transparent",
@@ -154,7 +153,7 @@ function ButirNav({
 }
 
 const KELAS_BUTIR =
-  "flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline";
+  "flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.9062rem] font-semibold no-underline";
 
 /**
  * Menu melayang di samping pemicunya — keluar dari rail ke kanan. Dirender
@@ -264,28 +263,24 @@ function PanahSamping({ buka }: { buka: boolean }) {
 }
 
 /**
- * Kaki rail: kelas aktif (membuka pemilih kelas) dan kartu pengguna (membuka
- * menu akun). Pindah di dalam grup yang sama mempertahankan layar yang sedang
+ * Kaki rail: kelas aktif, membuka menu berisi pemilih kelas dan aksi akun. Pindah di dalam grup yang sama mempertahankan layar yang sedang
  * dibuka; pindah ke mapel lain mendarat di dasbor.
  */
 function KakiPanel({
   mapel,
-  pengguna,
   semuaKelas,
   ruasAktif,
   onPilih,
 }: {
   mapel: string;
-  pengguna: Pengguna;
   semuaKelas: RingkasanKelas[];
   ruasAktif: string;
   onPilih?: () => void;
 }) {
   const { kelas, grup } = useKelas();
-  const [menu, setMenu] = useState<"kelas" | "akun" | null>(null);
-  const pemicuKelas = useRef<HTMLButtonElement>(null);
-  const pemicuAkun = useRef<HTMLButtonElement>(null);
-  const tutup = useCallback(() => setMenu(null), []);
+  const [buka, setBuka] = useState(false);
+  const pemicu = useRef<HTMLButtonElement>(null);
+  const tutup = useCallback(() => setBuka(false), []);
 
   // Kelompokkan per mapel + semester + tahun, urutan pertama kali muncul.
   const kelompok = new Map<string, RingkasanKelas[]>();
@@ -296,47 +291,45 @@ function KakiPanel({
   }
 
   const pilih = () => {
-    setMenu(null);
+    setBuka(false);
     onPilih?.();
   };
-
-  const alih = (m: "kelas" | "akun") => setMenu((x) => (x === m ? null : m));
 
   return (
     <div className="relative flex-none border-t border-[color:var(--color-garis)] px-3 pt-3 pb-3">
       <LencanaSimpan />
 
       <button
-        ref={pemicuKelas}
+        ref={pemicu}
         type="button"
-        onClick={() => alih("kelas")}
+        onClick={() => setBuka((x) => !x)}
         aria-haspopup="menu"
-        aria-expanded={menu === "kelas"}
-        className="w-full flex items-center gap-2 px-2.5 py-2 mb-1 rounded-[var(--r-kendali)] text-left border-0 bg-transparent cursor-pointer transition-colors hover:bg-[color:var(--color-sorot)]"
+        aria-expanded={buka}
+        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-[var(--r-kendali)] text-left border-0 bg-transparent cursor-pointer transition-colors hover:bg-[color:var(--color-sorot)]"
         style={{
-          background: menu === "kelas" ? "var(--color-sorot)" : undefined,
+          background: buka ? "var(--color-sorot)" : undefined,
         }}
       >
         <span className="min-w-0 flex-1">
-          <span className="block text-[0.875rem] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
+          <span className="block text-[1rem] font-semibold leading-[1.25] font-[family-name:var(--font-judul)] text-[color:var(--color-tinta)]">
             {mapel} · Kelas {kelas.nama}
           </span>
           <span className="block mikro mt-1">
             SMT {kelas.semester} · {kelas.tahunAjaran} · KKTP {kelas.kktp}
           </span>
         </span>
-        <PanahSamping buka={menu === "kelas"} />
+        <PanahSamping buka={buka} />
       </button>
 
       <MenuSamping
-        pemicu={pemicuKelas}
-        buka={menu === "kelas"}
+        pemicu={pemicu}
+        buka={buka}
         onTutup={tutup}
         label="Pindah kelas"
       >
         {[...kelompok].map(([judul, daftar]) => (
           <div key={judul} className="pb-1">
-            <div className="px-3 pt-2 pb-1 text-[0.5938rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
+            <div className="px-3 pt-2 pb-1 text-[0.7188rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
               {judul.toUpperCase()}
             </div>
             {daftar.map((k) => {
@@ -357,7 +350,7 @@ function KakiPanel({
                 >
                   <span className="flex-1 truncate">{k.nama}</span>
                   <span
-                    className="text-[0.625rem] font-medium angka"
+                    className="text-[0.75rem] font-medium angka"
                     style={{
                       color: aktif
                         ? "rgba(255,255,255,0.8)"
@@ -392,42 +385,8 @@ function KakiPanel({
             Kelas baru
           </Link>
         </div>
-      </MenuSamping>
 
-      <button
-        ref={pemicuAkun}
-        type="button"
-        onClick={() => alih("akun")}
-        aria-haspopup="menu"
-        aria-expanded={menu === "akun"}
-        className="w-full flex items-center gap-2.5 px-2.5 py-2 justify-start text-left"
-      >
-        <Avatar pengguna={pengguna} />
-        <span className="min-w-0 flex-1">
-          <span className="block text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
-            {pengguna.nama || pengguna.email || "Guru"}
-          </span>
-        </span>
-        <PanahSamping buka={menu === "akun"} />
-      </button>
-
-      <MenuSamping
-        pemicu={pemicuAkun}
-        buka={menu === "akun"}
-        onTutup={tutup}
-        label="Akun"
-      >
-        <div className="px-3 pt-2 pb-2.5">
-          <div className="text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
-            {pengguna.nama || "Guru"}
-          </div>
-          {pengguna.email && (
-            <div className="mt-0.5 text-[0.6875rem] truncate text-[color:var(--color-samar)]">
-              {pengguna.email}
-            </div>
-          )}
-        </div>
-        <div className="pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
+        <div className="mt-1 pt-1 border-t border-[color:var(--color-garis)] flex flex-col">
           <Link
             href="/akun"
             role="menuitem"
@@ -453,14 +412,13 @@ function KakiPanel({
 }
 
 /**
- * Isi rail navigasi: logo, daftar layar, dan kaki berisi kelas aktif serta
- * pengguna. Digambar di dua tempat — rail tetap di layar lebar dan laci geser
+ * Isi rail navigasi: logo, daftar layar, dan kaki berisi kelas aktif.
+ * Digambar di dua tempat — rail tetap di layar lebar dan laci geser
  * di bawah `lg` — jadi isinya ditulis sekali di sini.
  */
 function PanelNav({
   mapel,
   sekolah,
-  pengguna,
   semuaKelas,
   ruasAktif,
   subAktif,
@@ -468,7 +426,6 @@ function PanelNav({
 }: {
   mapel: string;
   sekolah: string;
-  pengguna: Pengguna;
   semuaKelas: RingkasanKelas[];
   ruasAktif: string;
   subAktif?: string;
@@ -495,7 +452,7 @@ function PanelNav({
         {NAV.map((item) => (
           <div key={item.ruas}>
             {item.kelompok && (
-              <div className="px-5 pt-4 pb-1.5 text-[0.5938rem] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
+              <div className="px-5 pt-4 pb-1.5 text-[0.7188rem] font-bold tracking-[0.12em] text-[color:var(--color-samar)]">
                 {item.kelompok}
               </div>
             )}
@@ -536,7 +493,6 @@ function PanelNav({
 
       <KakiPanel
         mapel={mapel}
-        pengguna={pengguna}
         semuaKelas={semuaKelas}
         ruasAktif={subAktif ? `${ruasAktif}/${subAktif}` : ruasAktif}
         onPilih={onPilih}
@@ -548,13 +504,11 @@ function PanelNav({
 export default function Cangkang({
   mapel,
   sekolah,
-  pengguna,
   semuaKelas,
   children,
 }: {
   mapel: string;
   sekolah: string;
-  pengguna: Pengguna;
   semuaKelas: RingkasanKelas[];
   children: React.ReactNode;
 }) {
@@ -573,7 +527,7 @@ export default function Cangkang({
     return () => window.removeEventListener("keydown", tutup);
   }, [laci]);
 
-  const panel = { mapel, sekolah, pengguna, semuaKelas, ruasAktif, subAktif };
+  const panel = { mapel, sekolah, semuaKelas, ruasAktif, subAktif };
 
   return (
     <div className="flex h-dvh overflow-hidden bg-[color:var(--color-kertas)]">
@@ -618,7 +572,7 @@ export default function Cangkang({
               <span className="block w-4 h-[2px] rounded-full bg-[color:var(--color-tinta)]" />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="text-[0.9375rem] font-semibold leading-[1.2] truncate font-[family-name:var(--font-judul)]">
+              <div className="text-[1.0625rem] font-semibold leading-[1.2] truncate font-[family-name:var(--font-judul)]">
                 {mapel}
               </div>
               <div className="mikro mt-0.5 truncate">

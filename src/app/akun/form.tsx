@@ -18,7 +18,7 @@ function Pesan({ hasil }: { hasil: HasilAkun }) {
     return (
       <p
         role="alert"
-        className="text-[0.75rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3"
+        className="text-[0.875rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3"
       >
         {hasil.galat}
       </p>
@@ -27,7 +27,7 @@ function Pesan({ hasil }: { hasil: HasilAkun }) {
     return (
       <p
         role="status"
-        className="text-[0.75rem] font-semibold text-[color:var(--color-aksen-gelap)] bg-[color:var(--color-sorot)] rounded-[var(--r-kendali)] px-4 py-3"
+        className="text-[0.875rem] font-semibold text-[color:var(--color-aksen-gelap)] bg-[color:var(--color-sorot)] rounded-[var(--r-kendali)] px-4 py-3"
       >
         {hasil.sukses}
       </p>
@@ -35,7 +35,7 @@ function Pesan({ hasil }: { hasil: HasilAkun }) {
   return null
 }
 
-const catatan = 'text-[0.6875rem] text-[color:var(--color-redup)]'
+const catatan = 'text-[0.8125rem] text-[color:var(--color-redup)]'
 
 export function FormProfil({ email, nama }: { email: string; nama: string }) {
   const [hasil, action] = useActionState<HasilAkun, FormData>(ubahNama, undefined)

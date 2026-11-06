@@ -50,11 +50,11 @@ export default function FormDaftar() {
           required
           className={kelasInput}
         />
-        <span className="text-[0.6875rem] text-[color:var(--color-redup)]">Minimal 8 karakter.</span>
+        <span className="text-[0.8125rem] text-[color:var(--color-redup)]">Minimal 8 karakter.</span>
       </label>
 
       {state?.galat ? (
-        <p className="text-[0.75rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
+        <p className="text-[0.875rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
           {state.galat}
         </p>
       ) : null}

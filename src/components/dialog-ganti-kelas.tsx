@@ -36,7 +36,20 @@ export default function DialogGantiKelas({ onTutup }: { onTutup: () => void }) {
   }
 
   return (
-    <Dialog judul="Ganti kelas" onTutup={onTutup} lebar="max-w-[30rem]">
+    <Dialog
+      judul="Ganti kelas"
+      onTutup={onTutup}
+      lebar="max-w-[30rem]"
+      kaki={
+        <Link
+          href="/kelas/baru"
+          onClick={onTutup}
+          className="tombol no-underline"
+        >
+          Tambah kelas
+        </Link>
+      }
+    >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <div id="label-saring-mapel" className="mikro mb-1.5">
@@ -77,7 +90,7 @@ export default function DialogGantiKelas({ onTutup }: { onTutup: () => void }) {
         ) : (
           [...kelompok].map(([judul, daftar]) => (
             <div key={judul} className="pb-2">
-              <div className="px-3 pt-2 pb-1 text-[0.5938rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
+              <div className="px-3 pt-2 pb-1 text-[0.7188rem] font-bold tracking-[0.1em] text-[color:var(--color-samar)] truncate">
                 {judul.toUpperCase()}
               </div>
               {daftar.map((k) => {
@@ -88,7 +101,7 @@ export default function DialogGantiKelas({ onTutup }: { onTutup: () => void }) {
                     href={`/kelas/${k.id}/dasbor`}
                     onClick={onTutup}
                     aria-current={aktif ? "true" : undefined}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-[var(--r-kecil)] text-[0.8125rem] font-semibold no-underline transition-colors hover:bg-[color:var(--color-sorot)]"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-[var(--r-kecil)] text-[0.9375rem] font-semibold no-underline transition-colors hover:bg-[color:var(--color-sorot)]"
                     style={{
                       background: aktif ? "var(--color-aksen)" : undefined,
                       color: aktif ? "#ffffff" : "var(--color-tinta)",
@@ -106,7 +119,7 @@ export default function DialogGantiKelas({ onTutup }: { onTutup: () => void }) {
                       </span>
                     )}
                     <span
-                      className="text-[0.625rem] font-medium angka"
+                      className="text-[0.75rem] font-medium angka"
                       style={{
                         color: aktif
                           ? "rgba(255,255,255,0.8)"

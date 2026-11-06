@@ -104,7 +104,7 @@ export default function KepalaHalaman({
                 {s.nilai}
               </div>
               {s.sub && (
-                <div className="text-[0.6562rem] font-medium mt-0.5 text-[color:var(--color-redup)] truncate angka">
+                <div className="text-[0.7812rem] font-medium mt-0.5 text-[color:var(--color-redup)] truncate angka">
                   {s.sub}
                 </div>
               )}

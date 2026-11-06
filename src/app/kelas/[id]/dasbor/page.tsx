@@ -58,14 +58,14 @@ export default function HalamanDasbor() {
           : "F",
         formatif.map((k) => k.id),
       ),
-      nama: "Formatif harian",
+      nama: "Nilai Formatif",
     },
     {
       ...ringkasKolom(
         lingkup.length ? `${lingkup[0].label}–${lingkup.at(-1)!.label}` : "S",
         lingkup.map((k) => k.id),
       ),
-      nama: "Nilai sumatif",
+      nama: "Nilai Sumatif",
     },
     ...kelas.asesmen.map((a) => {
       const p = kelengkapanAsesmen(kelas, a.id);
@@ -97,14 +97,12 @@ export default function HalamanDasbor() {
         }}
       >
         <div className="flex items-center gap-2">
-          <div className="text-[1.375rem] font-semibold leading-none font-[family-name:var(--font-judul)]">
-            {k.nama}
-          </div>
+          <h1 className="judul text-[1.75rem] leading-none">{k.nama}</h1>
           {mapel && <div className="mikro">{mapel.toUpperCase()}</div>}
-          <div className="mikro angka">{k.siswa} SISWA</div>
+
           <button
             type="button"
-            className="tombol-garis ml-auto py-1.5 px-3"
+            className="tombol ml-auto"
             onClick={() => setGantiBuka(true)}
           >
             Ganti kelas
@@ -114,6 +112,12 @@ export default function HalamanDasbor() {
 
         <div className="flex gap-[22px] mt-3.5">
           <div>
+            <div className="mikro">JUMLAH SISWA</div>
+            <div className="text-[1.25rem] font-bold mt-[3px] angka">
+              {k.siswa}
+            </div>
+          </div>
+          <div>
             <div className="mikro">RERATA RAPORT</div>
             <div className="text-[1.25rem] font-bold mt-[3px] angka">
               {k.rerata}
@@ -121,7 +125,12 @@ export default function HalamanDasbor() {
           </div>
           <div>
             <div className="mikro">TUNTAS</div>
-            <div className="text-[1.25rem] font-bold mt-[3px] angka">
+            <div
+              className="text-[1.25rem] font-bold mt-[3px] angka"
+              style={{
+                color: k.tuntas ? "var(--color-lulus-pekat)" : "var(--color-tinta)",
+              }}
+            >
               {k.tuntas}
             </div>
           </div>
@@ -156,7 +165,7 @@ export default function HalamanDasbor() {
             {alur.map((a) => {
               const lengkap = a.pct >= 100;
               const warna = lengkap
-                ? "var(--color-aksen-gelap)"
+                ? "var(--color-lulus-pekat)"
                 : "var(--color-bahaya)";
               return (
                 <div
@@ -174,18 +183,18 @@ export default function HalamanDasbor() {
 
                   <div
                     className="text-[1.75rem] font-bold leading-none mt-3 angka"
-                    style={{ color: lengkap ? "var(--color-tinta)" : warna }}
+                    style={{ color: warna }}
                   >
                     {Math.round(a.pct)}
-                    <span className="text-[0.875rem] font-semibold ml-0.5 text-[color:var(--color-redup)]">
+                    <span className="text-[1rem] font-semibold ml-0.5 text-[color:var(--color-redup)]">
                       %
                     </span>
                   </div>
 
-                  <div className="text-[0.75rem] font-semibold leading-[1.35] mt-2">
+                  <div className="text-[0.875rem] font-semibold leading-[1.35] mt-2">
                     {a.nama}
                   </div>
-                  <div className="text-[0.6875rem] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 angka">
+                  <div className="text-[0.8125rem] leading-[1.4] text-[color:var(--color-redup)] mt-0.5 angka">
                     {a.status}
                   </div>
 
@@ -202,13 +211,13 @@ export default function HalamanDasbor() {
           <div className="mt-5 pt-4 border-t border-[color:var(--color-garis)] flex gap-x-7 gap-y-4 flex-wrap">
             <div>
               <div className="mikro">NA TERENDAH</div>
-              <div className="text-[1.125rem] font-bold mt-[3px] angka">
+              <div className="text-[1.125rem] font-bold mt-[3px] angka text-[color:var(--color-bahaya)]">
                 {n(naMin)}
               </div>
             </div>
             <div>
               <div className="mikro">NA TERTINGGI</div>
-              <div className="text-[1.125rem] font-bold mt-[3px] angka">
+              <div className="text-[1.125rem] font-bold mt-[3px] angka text-[color:var(--color-lulus-pekat)]">
                 {n(naMax)}
               </div>
             </div>
@@ -239,12 +248,12 @@ export default function HalamanDasbor() {
                   onClick={() =>
                     router.push(`/kelas/${kelas.id}/siswa?siswa=${b.siswa.id}`)
                   }
-                  className="w-full flex items-center gap-2.5 px-3 py-[10px] mb-1 rounded-[var(--r-kecil)] border-0 bg-transparent text-[0.75rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
+                  className="w-full flex items-center gap-2.5 px-3 py-[10px] mb-1 rounded-[var(--r-kecil)] border-0 bg-transparent text-[0.875rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
                 >
                   <span className="flex-1 min-w-0 truncate">
                     {b.siswa.nama}
                   </span>
-                  <span className="text-[0.8125rem] font-bold text-[color:var(--color-bahaya)] angka">
+                  <span className="text-[0.9375rem] font-bold text-[color:var(--color-bahaya)] angka">
                     {b.raport}
                   </span>
                 </button>
@@ -273,7 +282,7 @@ export default function HalamanDasbor() {
           {hasil.baris.length === 0 && (
             <div className="baris-padat">
               <div
-                className="sel-padat text-[0.8125rem] text-[color:var(--color-redup)]"
+                className="sel-padat text-[0.9375rem] text-[color:var(--color-redup)]"
                 style={{ gridColumn: "1 / -1" }}
               >
                 Belum ada data nilai.
@@ -293,7 +302,7 @@ export default function HalamanDasbor() {
                 className="sel-padat sekat-padat justify-end text-[1.1875rem] font-extrabold angka"
                 style={{
                   color: b.tuntas
-                    ? "var(--color-tinta)"
+                    ? "var(--color-lulus-pekat)"
                     : "var(--color-bahaya)",
                 }}
               >

@@ -16,6 +16,7 @@ import {
   TombolAktifKelas,
   TombolHapusKelas,
   TombolTambahSiswa,
+  TombolUbahKelas,
 } from "@/components/aksi-kelola";
 
 export default async function HalamanKelola({
@@ -26,7 +27,7 @@ export default async function HalamanKelola({
   const { id } = await params;
   const supabase = await buatKlienServer();
 
-  const [{ data: kelas }, { data: siswa }] = await Promise.all([
+  const [{ data: kelas }, { data: siswa }, { data: mapel }] = await Promise.all([
     supabase
       .from("kelas")
       .select("*")
@@ -37,6 +38,7 @@ export default async function HalamanKelola({
       .select("id, no_urut, nama, jk")
       .eq("kelas_id", id)
       .order("no_urut"),
+    supabase.from("mapel").select("id, nama").order("nama"),
   ]);
 
   const nama: string = kelas?.nama ?? "";
@@ -50,6 +52,16 @@ export default async function HalamanKelola({
         aksi={
           <>
             <TombolTambahSiswa kelasId={id} />
+            <TombolUbahKelas
+              kelasId={id}
+              mapel={mapel ?? []}
+              kelas={{
+                nama,
+                mapelId: kelas?.mapel_id ?? "",
+                tahunAjaran: kelas?.tahun_ajaran ?? "",
+                semester: kelas?.semester ?? 1,
+              }}
+            />
             <TombolAktifKelas kelasId={id} nama={nama} aktif={aktif} />
             <TombolHapusKelas kelasId={id} nama={nama} />
           </>
@@ -58,7 +70,7 @@ export default async function HalamanKelola({
 
       {!aktif && (
         <div
-          className="mb-4 px-4 py-3 rounded-[var(--r-kartu)] text-[0.75rem]"
+          className="mb-4 px-4 py-3 rounded-[var(--r-kartu)] text-[0.875rem]"
           style={{ background: "var(--color-sorot)", color: "var(--color-aksen-gelap)" }}
           role="status"
         >
@@ -89,7 +101,7 @@ export default async function HalamanKelola({
           {(siswa ?? []).length === 0 && (
             <div className="baris-padat">
               <div
-                className="sel-padat text-[0.8125rem] text-[color:var(--color-redup)]"
+                className="sel-padat text-[0.9375rem] text-[color:var(--color-redup)]"
                 style={{ gridColumn: "1 / -1" }}
               >
                 Belum ada siswa.
@@ -103,7 +115,7 @@ export default async function HalamanKelola({
               className="baris-padat"
             >
               <div
-                className="sel-padat beku sekat-sub text-[0.8125rem] font-semibold text-[color:var(--color-samar)] angka"
+                className="sel-padat beku sekat-sub text-[0.9375rem] font-semibold text-[color:var(--color-samar)] angka"
                 style={{ left: 0 }}
               >
                 {s.no_urut}
@@ -116,7 +128,7 @@ export default async function HalamanKelola({
                   name="nama"
                   defaultValue={s.nama}
                   aria-label={`Nama siswa nomor ${s.no_urut}`}
-                  className="isian w-full min-w-0 px-3 py-1.5 text-[0.875rem] font-semibold"
+                  className="isian w-full min-w-0 px-3 py-1.5 text-[1rem] font-semibold"
                 />
               </div>
               <div className="sel-padat sekat-padat">
@@ -125,7 +137,7 @@ export default async function HalamanKelola({
                   defaultValue={s.jk ?? ""}
                   kirimOtomatis
                   aria-label={`Jenis kelamin ${s.nama}`}
-                  className="isian px-3 py-1.5 text-[0.8125rem] min-w-[4rem]"
+                  className="isian px-3 py-1.5 text-[0.9375rem] min-w-[4rem]"
                   opsi={OPSI_JK}
                 />
               </div>
@@ -140,7 +152,7 @@ export default async function HalamanKelola({
                       dihapus dari kelas ini. Tidak bisa dibatalkan.
                     </>
                   }
-                  className="text-[0.75rem] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
+                  className="text-[0.875rem] font-semibold px-3 py-1.5 rounded-[var(--r-kecil)] border-0 bg-transparent text-[color:var(--color-bahaya)] cursor-pointer transition-colors hover:bg-[color:var(--color-basuh)]"
                 />
               </div>
             </FormSwaSimpan>

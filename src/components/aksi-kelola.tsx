@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { aturAktifKelas, hapusKelas, tambahSiswa } from "@/app/kelas/actions";
+import { useId, useState, useTransition } from "react";
+import { aturAktifKelas, hapusKelas, tambahSiswa, ubahKelas } from "@/app/kelas/actions";
+import IsianKelas from "./isian-kelas";
 import Dialog, { KELAS_TOMBOL_BAHAYA } from "./dialog";
 import { IkonSampah } from "./tombol-hapus";
 
 /**
- * Tiga aksi tingkat kelas di kepala layar Kelola Kelas: tambah siswa,
+ * Aksi tingkat kelas di kepala layar Kelola Kelas: ubah kelas, tambah siswa,
  * nonaktifkan/aktifkan, dan hapus kelas. Masing-masing membuka dialognya
  * sendiri; tidak ada yang langsung mengubah data dengan satu klik.
  */
@@ -38,6 +39,13 @@ const jalurTambah = (
     <line x1="22" x2="16" y1="11" y2="11" />
   </>
 );
+// pencil
+const jalurUbah = (
+  <>
+    <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+    <path d="m15 5 4 4" />
+  </>
+);
 // archive
 const jalurArsip = (
   <>
@@ -64,9 +72,97 @@ const TOMBOL_GARIS = "tombol-garis inline-flex items-center gap-1.5 whitespace-n
 function Galat({ teks }: { teks: string | null }) {
   if (!teks) return null;
   return (
-    <p className="keterangan mt-3 text-[0.6875rem]" style={{ color: "var(--color-bahaya)" }} role="alert">
+    <p className="keterangan mt-3 text-[0.8125rem]" style={{ color: "var(--color-bahaya)" }} role="alert">
       {teks}
     </p>
+  );
+}
+
+/* ------------------------------------------------------------- ubah kelas -- */
+
+export function TombolUbahKelas({
+  kelasId,
+  kelas,
+  mapel,
+}: {
+  kelasId: string;
+  kelas: { nama: string; mapelId: string; tahunAjaran: string; semester: number };
+  mapel: { id: string; nama: string }[];
+}) {
+  const [buka, setBuka] = useState(false);
+  const [semester, setSemester] = useState(kelas.semester);
+  const [galat, setGalat] = useState<string | null>(null);
+  const [sibuk, mulai] = useTransition();
+  const idForm = useId();
+
+  const tutup = () => {
+    setBuka(false);
+    setGalat(null);
+    setSemester(kelas.semester);
+  };
+
+  const simpan = (fd: FormData) =>
+    mulai(async () => {
+      setGalat(null);
+      const hasil = await ubahKelas(kelasId, fd);
+      if (hasil?.galat) {
+        setGalat(hasil.galat);
+        return;
+      }
+      setBuka(false);
+    });
+
+  const akhir = (s: number) => (s === 1 ? "ASAS" : "ASAT");
+
+  return (
+    <>
+      <button type="button" className={TOMBOL_GARIS} onClick={() => setBuka(true)}>
+        <Ikon>{jalurUbah}</Ikon>
+        Ubah kelas
+      </button>
+
+      {buka && (
+        <Dialog
+          ikon={<Ikon className="w-4 h-4">{jalurUbah}</Ikon>}
+          judul="Ubah kelas"
+          keterangan="Siswa, kolom, dan nilai tidak berubah."
+          lebar="max-w-[36rem]"
+          sibuk={sibuk}
+          onTutup={tutup}
+          kaki={
+            <>
+              <button type="button" className="tombol-garis" onClick={tutup} disabled={sibuk}>
+                Batal
+              </button>
+              <button type="submit" form={idForm} className={TOMBOL_UTAMA} disabled={sibuk}>
+                {sibuk ? "Menyimpan…" : "Simpan"}
+              </button>
+            </>
+          }
+        >
+          <form
+            id={idForm}
+            className="flex flex-col gap-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              simpan(new FormData(e.currentTarget));
+            }}
+          >
+            <IsianKelas
+              mapel={mapel}
+              awal={kelas}
+              onSemester={setSemester}
+            />
+            {semester !== kelas.semester && (
+              <p className="keterangan text-[0.8125rem] text-[color:var(--color-redup)]">
+                {akhir(kelas.semester)} akan menjadi {akhir(semester)}; nilai yang sudah diisi tetap tersimpan.
+              </p>
+            )}
+          </form>
+          <Galat teks={galat} />
+        </Dialog>
+      )}
+    </>
   );
 }
 
@@ -127,7 +223,7 @@ export function TombolTambahSiswa({ kelasId }: { kelasId: string }) {
             onChange={(e) => setRoster(e.target.value)}
             placeholder={"Satu nama per baris — boleh disalin langsung dari Excel."}
             aria-label="Daftar nama siswa"
-            className="isian w-full text-[0.75rem] leading-[1.6]"
+            className="isian w-full text-[0.875rem] leading-[1.6]"
           />
         </Dialog>
       )}
@@ -275,7 +371,7 @@ export function TombolHapusKelas({ kelasId, nama }: { kelasId: string; nama: str
           }
         >
           <label className="block">
-            <span className="text-[0.75rem] text-[color:var(--color-redup)]">
+            <span className="text-[0.875rem] text-[color:var(--color-redup)]">
               Ketik <strong className="text-[color:var(--color-tinta)] select-all">{nama}</strong> untuk
               mengonfirmasi.
             </span>
@@ -290,7 +386,7 @@ export function TombolHapusKelas({ kelasId, nama }: { kelasId: string; nama: str
               spellCheck={false}
               placeholder={nama}
               aria-label={`Ketik ${nama} untuk mengonfirmasi`}
-              className="isian w-full mt-2 text-[0.8125rem]"
+              className="isian w-full mt-2 text-[0.9375rem]"
             />
           </label>
           <Galat teks={galat} />

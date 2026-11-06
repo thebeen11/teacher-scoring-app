@@ -124,7 +124,7 @@ export default function HalamanSiswa() {
           <button
             key={r.siswa.id}
             onClick={() => setTerpilih(i)}
-            className="w-full flex gap-2 px-3 py-[9px] rounded-[var(--r-kecil)] border-0 text-[0.7188rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-kepala)]"
+            className="w-full flex gap-2 px-3 py-[9px] rounded-[var(--r-kecil)] border-0 text-[0.8438rem] font-medium text-left cursor-pointer transition-colors hover:bg-[color:var(--color-kepala)]"
             style={{
               background: i === terpilih ? "var(--color-sorot)" : "transparent",
             }}
@@ -136,7 +136,7 @@ export default function HalamanSiswa() {
             <span
               className="font-bold angka"
               style={{
-                color: r.tuntas ? "var(--color-tinta)" : "var(--color-bahaya)",
+                color: r.tuntas ? "var(--color-lulus-pekat)" : "var(--color-bahaya)",
               }}
             >
               {r.raport}
@@ -163,7 +163,7 @@ export default function HalamanSiswa() {
                 className="text-[2.875rem] font-extrabold leading-none tracking-[-0.02em] angka"
                 style={{
                   color: b.tuntas
-                    ? "var(--color-tinta)"
+                    ? "var(--color-lulus-pekat)"
                     : "var(--color-bahaya)",
                 }}
               >
@@ -172,7 +172,7 @@ export default function HalamanSiswa() {
             </div>
             <div className="text-right">
               <div className="mikro">STATUS</div>
-              <ChipStatus tuntas={b.tuntas} className="mt-2 text-[0.6875rem]" />
+              <ChipStatus tuntas={b.tuntas} className="mt-2 text-[0.8125rem]" />
             </div>
           </div>
         </div>
@@ -188,13 +188,13 @@ export default function HalamanSiswa() {
               key={t.kode}
               className="grid grid-cols-[1fr_auto] md:grid-cols-[120px_200px_minmax(0,1fr)_120px] items-center px-1.5 py-2 md:py-0 border-b border-[color:var(--color-garis)]"
             >
-              <div className="px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[0.8125rem] font-extrabold sekat">
+              <div className="px-3 md:px-[18px] pt-1.5 md:py-3.5 text-[0.9375rem] font-extrabold sekat">
                 {t.kode}
               </div>
-              <div className="order-3 md:order-none col-span-2 md:col-span-1 px-3 md:px-[18px] md:py-3.5 text-[0.7188rem] leading-[1.4] text-[color:var(--color-redup)]">
+              <div className="order-3 md:order-none col-span-2 md:col-span-1 px-3 md:px-[18px] md:py-3.5 text-[0.8438rem] leading-[1.4] text-[color:var(--color-redup)]">
                 {t.label}
               </div>
-              <div className="order-4 md:order-none col-span-2 md:col-span-1 min-w-0 px-3 md:px-[18px] pt-1 pb-1.5 md:py-3.5 text-[0.7188rem] font-medium angka break-words">
+              <div className="order-4 md:order-none col-span-2 md:col-span-1 min-w-0 px-3 md:px-[18px] pt-1 pb-1.5 md:py-3.5 text-[0.8438rem] font-medium angka break-words">
                 {t.detail}
               </div>
               <div

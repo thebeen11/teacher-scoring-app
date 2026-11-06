@@ -212,14 +212,14 @@ a:focus-visible {
   /* Label mikro huruf besar — dipakai di kepala tabel dan kepala kartu. */
   .mikro {
     font-weight: 700;
-    font-size: 0.5938rem;
+    font-size: 0.7188rem;
     letter-spacing: 0.1em;
     color: var(--color-redup);
     font-variant-numeric: tabular-nums;
   }
   .mikro-lebar {
     font-weight: 700;
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     letter-spacing: 0.12em;
     color: var(--color-redup);
   }
@@ -395,7 +395,11 @@ a:focus-visible {
   /* Label kepala di dalam tabel sedikit lebih besar dari label kartu. */
   .tabel-padat .mikro,
   .kaki-padat .mikro {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
+  }
+  /* Judul kepala tabel: semibold, lebih ringan dari label kartu. */
+  .kepala-padat .mikro {
+    font-weight: 600;
   }
 
   /* Kolom yang tetap terlihat saat tabel digulir mendatar: nomor dan nama.
@@ -434,7 +438,7 @@ a:focus-visible {
     background: #fff;
     padding: 0.1875rem 0.4375rem;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -540,7 +544,7 @@ a:focus-visible {
     background: #fff;
     padding: 0.375rem 0.5rem;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -561,7 +565,7 @@ a:focus-visible {
     background: #fff;
     padding: 0.25rem 0.375rem;
     font-weight: 600;
-    font-size: 0.6875rem;
+    font-size: 0.8125rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -574,14 +578,14 @@ a:focus-visible {
   .band-input-padat {
     width: 3.5rem;
     padding: 0.125rem 0.375rem;
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
   }
   /* Versi besar, setinggi `.tombol` (40px) di kartu atas:
      9 + 20 + 9 padding/baris + 2 border. */
   .band-input-besar {
     width: 4rem;
     padding: 0.5625rem 0.75rem;
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     line-height: 1.25rem;
     border-radius: var(--r-kendali);
   }
@@ -592,7 +596,7 @@ a:focus-visible {
     border-radius: var(--r-kendali);
     background: #fff;
     padding: 0.6875rem 0.875rem;
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     color: var(--color-tinta);
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -661,7 +665,7 @@ a:focus-visible {
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
     border-radius: var(--r-kecil);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 500;
     color: var(--color-tinta-terang);
     cursor: pointer;
@@ -720,7 +724,7 @@ a:focus-visible {
     border-radius: var(--r-kendali);
     padding: 0.6875rem 1.375rem;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     cursor: pointer;
     background: var(--color-aksen);
     color: #fff;
@@ -750,7 +754,7 @@ a:focus-visible {
     background: #fff;
     padding: 0.625rem 1.25rem;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     cursor: pointer;
     color: var(--color-tinta);
     display: inline-flex;
@@ -772,7 +776,7 @@ a:focus-visible {
     color: var(--color-tinta);
     padding: 0.625rem 1.125rem;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     cursor: pointer;
     box-shadow: var(--bayang-neu-kecil);
     display: inline-flex;
@@ -802,7 +806,7 @@ a:focus-visible {
     border: 0;
     padding: 0.625rem 1.125rem;
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
   }
@@ -823,7 +827,7 @@ a:focus-visible {
   }
 
   .keterangan {
-    font-size: 0.7812rem;
+    font-size: 0.9062rem;
     line-height: 1.6;
     color: var(--color-redup);
     text-wrap: pretty;
@@ -843,7 +847,7 @@ a:focus-visible {
     border-radius: 9999px;
     padding: 0.25rem 0.6875rem;
     font-weight: 600;
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     letter-spacing: 0.06em;
   }
 

@@ -74,10 +74,10 @@ export default function TombolUnduh({ jenis }: { jenis: JenisEkspor }) {
   const kosong = lembarUntuk(kelas, hasil, jenis) === null;
 
   const butir =
-    "disabled:cursor-not-allowed disabled:opacity-40 w-full text-left px-3 py-2 text-[0.75rem] font-semibold border-0 bg-transparent cursor-pointer rounded-[var(--r-kecil)] transition-colors hover:bg-[color:var(--color-kepala)]";
+    "disabled:cursor-not-allowed disabled:opacity-40 w-full text-left px-3 py-2 text-[0.875rem] font-semibold border-0 bg-transparent cursor-pointer rounded-[var(--r-kecil)] transition-colors hover:bg-[color:var(--color-kepala)]";
 
   const keterangan =
-    "block mt-0.5 text-[0.6562rem] font-medium leading-snug text-[color:var(--color-redup)]";
+    "block mt-0.5 text-[0.7812rem] font-medium leading-snug text-[color:var(--color-redup)]";
 
   return (
     <div ref={akar} className="relative tanpa-cetak">
@@ -92,7 +92,7 @@ export default function TombolUnduh({ jenis }: { jenis: JenisEkspor }) {
         {sibuk ? "Menyiapkan…" : "Unduh ▾"}
       </button>
       {galat && (
-        <div className="absolute right-0 top-full mt-1 whitespace-nowrap text-[0.6875rem] font-semibold text-[color:var(--color-bahaya)]">
+        <div className="absolute right-0 top-full mt-1 whitespace-nowrap text-[0.8125rem] font-semibold text-[color:var(--color-bahaya)]">
           Gagal membuat berkas
         </div>
       )}

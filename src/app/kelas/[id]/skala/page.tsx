@@ -55,11 +55,7 @@ export default function HalamanSkala() {
   return (
     <Halaman lebar="sempit">
       <KepalaHalaman
-        judul={
-          <>
-            Skala &amp; KKTP
-          </>
-        }
+        judul={<>Skala &amp; KKTP</>}
         aksi={
           <button
             className="tombol whitespace-nowrap shadow-none hover:shadow-none hover:translate-y-0"
@@ -79,7 +75,7 @@ export default function HalamanSkala() {
               diberi radius. `border-hidden` menyembunyikan tepi luar tabel
               supaya tidak dobel dengan garis pembungkus. */}
           <div className="mt-3 overflow-x-auto rounded-[var(--r-kartu)] border border-[color:var(--color-garis)] bg-[color:var(--color-papan)]">
-            <table className="w-full border-collapse border-hidden text-[0.8125rem]">
+            <table className="w-full border-collapse border-hidden text-[0.9375rem]">
               <thead>
                 <tr className="bg-[color:var(--color-kepala)]">
                   <th className="border border-[color:var(--color-garis)] px-4 py-3 text-left w-px whitespace-nowrap mikro">
@@ -124,7 +120,7 @@ export default function HalamanSkala() {
                           className="sel-input-padat w-[4rem]"
                           aria-label={`Bobot ${g.label}`}
                         />
-                        <span className="text-[0.75rem] font-semibold text-[color:var(--color-redup)]">
+                        <span className="text-[0.875rem] font-semibold text-[color:var(--color-redup)]">
                           %
                         </span>
                       </div>
@@ -136,10 +132,10 @@ export default function HalamanSkala() {
                 <tr
                   style={{
                     background: pasBobot
-                      ? "var(--color-sorot)"
+                      ? "var(--color-lulus)"
                       : "var(--color-basuh)",
                     color: pasBobot
-                      ? "var(--color-aksen-gelap)"
+                      ? "var(--color-lulus-pekat)"
                       : "var(--color-bahaya)",
                   }}
                 >
@@ -153,7 +149,7 @@ export default function HalamanSkala() {
                       ` · ${total < 100 ? "KURANG" : "LEBIH"} ${Math.abs(100 - total)}%`}
                   </th>
                   <td
-                    className="border border-[color:var(--color-garis)] px-4 py-3 text-right text-[0.9375rem] font-extrabold angka"
+                    className="border border-[color:var(--color-garis)] px-4 py-3 text-right text-[1.0625rem] font-extrabold angka"
                     aria-live="polite"
                   >
                     {total}%
@@ -162,15 +158,6 @@ export default function HalamanSkala() {
               </tfoot>
             </table>
           </div>
-
-          <p
-            className="keterangan mt-3 text-[0.6875rem]"
-            style={pasBobot ? undefined : { color: "var(--color-bahaya)" }}
-          >
-            {pasBobot
-              ? "NA = rerata tiap bagian dikali bobotnya. Bagian yang belum ada di kelas ini (mis. tanpa ASTS) tidak ikut, bobot sisanya dibagi ulang."
-              : "Total bobot harus 100%. Sampai genap, NA dihitung dengan membagi jumlah bobot yang ada."}
-          </p>
         </div>
 
         <div className="mt-5 pt-5 border-t border-[color:var(--color-garis)]">
@@ -181,10 +168,6 @@ export default function HalamanSkala() {
             className="sel-input w-24 mt-2.5 px-3 py-2.5 text-[1.5rem] font-extrabold angka"
             aria-label="KKTP"
           />
-          <p className="keterangan mt-2.5 text-[0.6875rem]">
-            Batas ketuntasan. Nilai di bawahnya ditandai merah di Daftar Nilai
-            dan muncul di dasbor.
-          </p>
         </div>
       </div>
 

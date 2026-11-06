@@ -175,7 +175,7 @@ function KartuKelas({ k }: { k: RingkasanKelas }) {
         <div className="mikro angka">{k.jumlahSiswa} SISWA</div>
         {!k.aktif && (
           <span
-            className="tag ml-auto text-[0.625rem]"
+            className="tag ml-auto text-[0.75rem]"
             style={{
               background: "var(--color-sorot)",
               color: "var(--color-redup)",
@@ -185,7 +185,7 @@ function KartuKelas({ k }: { k: RingkasanKelas }) {
           </span>
         )}
       </div>
-      <div className="text-[0.75rem] text-[color:var(--color-redup)] mt-3">
+      <div className="text-[0.875rem] text-[color:var(--color-redup)] mt-3">
         {k.mapel}
       </div>
       <div className="mikro mt-1.5">

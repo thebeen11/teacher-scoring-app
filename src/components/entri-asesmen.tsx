@@ -56,11 +56,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
     return (
       <Halaman lebar="fokus">
         <KepalaHalaman
-          judul={
-            <>
-              Asesmen {JUDUL[slot]}
-            </>
-          }
+          judul={<>Asesmen {JUDUL[slot]}</>}
           aksi={<TombolUnduh jenis={slot} />}
         />
         <div className="papan p-6">
@@ -92,10 +88,10 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
   const kepalaNilai = (
     <>
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-[0.7812rem] font-semibold text-[color:var(--color-redup)]">
+        <span className="text-[0.9062rem] font-semibold text-[color:var(--color-redup)]">
           NILAI
         </span>
-        <span className="ml-auto flex-none whitespace-nowrap text-[0.6562rem] font-medium text-[color:var(--color-redup)] angka">
+        <span className="ml-auto flex-none whitespace-nowrap text-[0.7812rem] font-medium text-[color:var(--color-redup)] angka">
           maks {nAuto(bd[1])} · min {nAuto(bd[0])}
         </span>
       </div>
@@ -114,11 +110,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
   return (
     <Halaman>
       <KepalaHalaman
-        judul={
-          <>
-            Asesmen {JUDUL[slot]}
-          </>
-        }
+        judul={<>Asesmen {JUDUL[slot]}</>}
         aksi={
           <>
             {/* Mode entri disimpan per asesmen per kelas. Isian mode lain tidak
@@ -200,11 +192,11 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
                       />
                     </div>
                     <div
-                      className="sel-padat justify-end text-[0.9375rem] font-extrabold angka"
+                      className="sel-padat justify-end text-[1rem] font-extrabold angka"
                       style={{
                         color:
                           h.nilai >= 70
-                            ? "var(--color-tinta)"
+                            ? "var(--color-lulus-pekat)"
                             : "var(--color-bahaya)",
                       }}
                     >
@@ -235,7 +227,7 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
               {LABEL.map((k, i) => (
                 <div
                   key={k}
-                  className={`px-2 pt-1.5 pb-1 mikro text-[0.6562rem] tracking-[0.06em] ${
+                  className={`px-2 pt-1.5 pb-1 mikro text-[0.7188rem] text-center tracking-[0.06em] ${
                     i === 2 ? "sekat-padat" : "sekat-sub"
                   }`}
                   style={{ gridColumn: 3 + i, gridRow: 2 }}
@@ -294,21 +286,21 @@ export default function EntriAsesmen({ slot }: { slot: SlotAsesmen }) {
                           aria-label={`${NAMA_BAGIAN[k]} ${baris.siswa.nama}`}
                         />
                         <Panah />
-                        <span className="text-[0.875rem] font-bold angka">
+                        <span className="text-[0.9375rem] font-bold angka">
                           {h.butir[k] * bobotDari(asesmen, k)}
                         </span>
                       </div>
                     ))}
 
-                    <div className="sel-padat sekat-padat justify-end text-[0.875rem] font-semibold angka">
+                    <div className="sel-padat sekat-padat justify-end text-[0.9375rem] font-semibold angka">
                       {n(h.total, 0)}
                     </div>
                     <div
-                      className="sel-padat justify-end text-[0.9375rem] font-extrabold angka"
+                      className="sel-padat justify-end text-[1rem] font-extrabold angka"
                       style={{
                         color:
                           h.nilai >= 70
-                            ? "var(--color-tinta)"
+                            ? "var(--color-lulus-pekat)"
                             : "var(--color-bahaya)",
                       }}
                     >

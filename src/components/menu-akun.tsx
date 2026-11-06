@@ -29,7 +29,7 @@ export function Avatar({
   return (
     <span
       aria-hidden
-      className={`kotak-ikon flex-none rounded-full bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)] text-[0.75rem] font-bold text-white ${className}`}
+      className={`kotak-ikon flex-none rounded-full bg-gradient-to-br from-[color:var(--color-langit)] to-[color:var(--color-daun)] text-[0.875rem] font-bold text-white ${className}`}
     >
       {inisial(pengguna)}
     </span>
@@ -37,7 +37,7 @@ export function Avatar({
 }
 
 const BUTIR =
-  "flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.7812rem] font-semibold no-underline";
+  "flex items-center gap-2 px-3 py-2 rounded-[var(--r-kendali)] text-[0.9062rem] font-semibold no-underline";
 
 /** Pemicu avatar + nama di kepala beranda, membuka menu akun ke bawah. */
 export default function MenuAkun({ pengguna }: { pengguna: Pengguna }) {
@@ -76,7 +76,7 @@ export default function MenuAkun({ pengguna }: { pengguna: Pengguna }) {
         style={{ background: buka ? "var(--color-sorot)" : undefined }}
       >
         <Avatar pengguna={pengguna} />
-        <span className="hidden sm:block min-w-0 max-w-[14rem] truncate text-[0.7812rem] font-semibold text-[color:var(--color-tinta)]">
+        <span className="hidden sm:block min-w-0 max-w-[14rem] truncate text-[0.9062rem] font-semibold text-[color:var(--color-tinta)]">
           {pengguna.nama || pengguna.email || "Guru"}
         </span>
         <svg
@@ -101,11 +101,11 @@ export default function MenuAkun({ pengguna }: { pengguna: Pengguna }) {
           className="menu-samping absolute right-0 top-full mt-2 w-64"
         >
           <div className="px-3 pt-2 pb-2.5">
-            <div className="text-[0.7812rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
+            <div className="text-[0.9062rem] font-semibold leading-tight truncate text-[color:var(--color-tinta)]">
               {pengguna.nama || "Guru"}
             </div>
             {pengguna.email && (
-              <div className="mt-0.5 text-[0.6875rem] truncate text-[color:var(--color-samar)]">
+              <div className="mt-0.5 text-[0.8125rem] truncate text-[color:var(--color-samar)]">
                 {pengguna.email}
               </div>
             )}

@@ -50,6 +50,25 @@ function uraikanRoster(teks: string) {
     .filter((s) => s.nama.length > 0)
 }
 
+type KlienServer = Awaited<ReturnType<typeof buatKlienServer>>
+
+/** Id mapel terpilih, atau buat mapel baru bila guru mengetik nama baru. */
+async function pastikanMapel(
+  supabase: KlienServer,
+  guruId: string,
+  mapelId: string,
+  mapelBaru: string,
+): Promise<{ id: string } | { galat: string }> {
+  if (mapelId) return { id: mapelId }
+  const { data, error } = await supabase
+    .from('mapel')
+    .insert({ guru_id: guruId, nama: mapelBaru })
+    .select('id')
+    .single()
+  if (error || !data) return { galat: `Gagal membuat mata pelajaran: ${error?.message}` }
+  return { id: data.id }
+}
+
 export async function buatKelas(_prev: HasilAksi, formData: FormData): Promise<HasilAksi> {
   const supabase = await buatKlienServer()
   const {
@@ -67,16 +86,9 @@ export async function buatKelas(_prev: HasilAksi, formData: FormData): Promise<H
   if (!nama) return { galat: 'Nama kelas harus diisi.' }
   if (!mapelId && !mapelBaru) return { galat: 'Pilih mata pelajaran atau isi yang baru.' }
 
-  let idMapel = mapelId
-  if (!idMapel) {
-    const { data, error } = await supabase
-      .from('mapel')
-      .insert({ guru_id: user.id, nama: mapelBaru })
-      .select('id')
-      .single()
-    if (error || !data) return { galat: `Gagal membuat mata pelajaran: ${error?.message}` }
-    idMapel = data.id
-  }
+  const mapel = await pastikanMapel(supabase, user.id, mapelId, mapelBaru)
+  if ('galat' in mapel) return mapel
+  const idMapel = mapel.id
 
   const { data: kelas, error: galatKelas } = await supabase
     .from('kelas')
@@ -338,6 +350,68 @@ export async function terapkanPengaturan(
   if (error) return { galat: 'Gagal menerapkan pengaturan. Coba lagi.' }
 
   revalidatePath('/kelas', 'layout')
+}
+
+/**
+ * Mengubah identitas kelas (mapel, nama, tahun ajaran, semester) tanpa
+ * menyentuh siswa, kolom, maupun nilai.
+ *
+ * Asesmen akhir mengikuti semester: ASAS di semester 1, ASAT di semester 2.
+ * Bila semester berganti, baris asesmennya cukup diganti jenisnya sehingga
+ * nilai yang sudah diketik tetap menempel. Mapel lama yang tidak lagi dipakai
+ * kelas mana pun dihapus supaya tidak muncul lagi di pilihan.
+ */
+export async function ubahKelas(kelasId: string, formData: FormData): Promise<HasilAksi> {
+  const supabase = await buatKlienServer()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { galat: 'Sesi berakhir. Silakan masuk lagi.' }
+
+  const mapelId = String(formData.get('mapel_id') ?? '').trim()
+  const mapelBaru = String(formData.get('mapel_baru') ?? '').trim()
+  const nama = String(formData.get('nama') ?? '').trim()
+  const tahun = String(formData.get('tahun_ajaran') ?? '').trim() || '2025/2026'
+  const semester = Number(formData.get('semester') ?? 1)
+
+  if (!nama) return { galat: 'Nama kelas harus diisi.' }
+  if (!mapelId && !mapelBaru) return { galat: 'Pilih mata pelajaran atau isi yang baru.' }
+  if (semester !== 1 && semester !== 2) return { galat: 'Semester harus 1 atau 2.' }
+
+  const { data: lama } = await supabase
+    .from('kelas')
+    .select('mapel_id, semester')
+    .eq('id', kelasId)
+    .maybeSingle()
+  if (!lama) return { galat: 'Kelas tidak ditemukan.' }
+
+  const mapel = await pastikanMapel(supabase, user.id, mapelId, mapelBaru)
+  if ('galat' in mapel) return mapel
+
+  const { error } = await supabase
+    .from('kelas')
+    .update({ mapel_id: mapel.id, nama, tahun_ajaran: tahun, semester })
+    .eq('id', kelasId)
+  if (error) return { galat: 'Gagal menyimpan perubahan kelas. Coba lagi.' }
+
+  if (lama.semester !== semester) {
+    const akhir = (s: number) => (s === 1 ? 'ASAS' : 'ASAT')
+    await supabase
+      .from('asesmen')
+      .update({ jenis: akhir(semester) })
+      .eq('kelas_id', kelasId)
+      .eq('jenis', akhir(lama.semester))
+  }
+
+  if (lama.mapel_id !== mapel.id) {
+    const { count } = await supabase
+      .from('kelas')
+      .select('id', { count: 'exact', head: true })
+      .eq('mapel_id', lama.mapel_id)
+    if (count === 0) await supabase.from('mapel').delete().eq('id', lama.mapel_id)
+  }
+
+  revalidatePath('/', 'layout')
 }
 
 /**

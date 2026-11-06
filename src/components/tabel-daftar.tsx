@@ -42,7 +42,7 @@ type Kolom = {
 
 type Urut = { kunci: string; arah: 'naik' | 'turun' } | null
 
-const REDUP = 'text-[0.8438rem] text-[color:var(--color-redup)] angka'
+const REDUP = 'text-[0.9062rem] text-[color:var(--color-redup)] angka'
 
 export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boolean }) {
   const { kelas, hasil } = useKelas()
@@ -88,7 +88,7 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       lebar: 'auto',
       lebarCetak: 'w-[5.25rem] flex-none',
       isi: (b) => n(b.na),
-      kelas: 'text-[0.875rem] font-bold angka',
+      kelas: 'text-[0.9375rem] font-bold angka',
     },
     {
       kunci: 'raport',
@@ -97,7 +97,7 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       lebarCetak: 'w-[5.75rem] flex-none',
       isi: (b) => b.raport,
       kelas: 'text-[1.1875rem] font-extrabold angka',
-      gaya: (b) => ({ color: b.tuntas ? 'var(--color-tinta)' : 'var(--color-bahaya)' }),
+      gaya: (b) => ({ color: b.tuntas ? 'var(--color-lulus-pekat)' : 'var(--color-bahaya)' }),
     },
     {
       kunci: 'status',
@@ -112,7 +112,7 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
       lebar: 'auto',
       lebarCetak: 'w-24 flex-none',
       isi: (b) => b.peringkat,
-      kelas: 'text-[0.875rem] font-bold angka',
+      kelas: 'text-[0.9375rem] font-bold angka',
       urut: (b) => b.peringkat,
     },
   ]
@@ -224,11 +224,11 @@ function Cetak({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
 
       {baris.map((b) => (
         <div key={b.siswa.id} className="baris-cetak">
-          <div className="w-11 flex-none px-2.5 py-[11px] text-[0.7188rem] font-semibold text-[color:var(--color-samar)] angka">
+          <div className="w-11 flex-none px-2.5 py-[11px] text-[0.7812rem] font-semibold text-[color:var(--color-samar)] angka">
             {b.siswa.noUrut}
           </div>
           <div
-            className="flex-1 min-w-[11.25rem] px-2.5 py-[11px] text-[0.7812rem] font-semibold sekat truncate"
+            className="flex-1 min-w-[11.25rem] px-2.5 py-[11px] text-[0.8438rem] font-semibold sekat truncate"
             title={b.siswa.nama}
           >
             {b.siswa.nama}

@@ -113,7 +113,7 @@ export function InputBand({
   return (
     <div className={`flex items-center ${besar ? 'gap-2' : 'gap-[5px]'}`}>
       {label && (
-        <span className={besar ? 'mikro' : 'mikro text-[0.5625rem] tracking-[0.06em]'}>{label}</span>
+        <span className={besar ? 'mikro' : 'mikro text-[0.6875rem] tracking-[0.06em]'}>{label}</span>
       )}
       <InputAngka
         nilai={min}

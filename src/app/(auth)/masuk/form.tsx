@@ -43,7 +43,7 @@ export default function FormMasuk({ lanjut }: { lanjut: string }) {
       </label>
 
       {state?.galat ? (
-        <p className="text-[0.75rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
+        <p className="text-[0.875rem] font-semibold text-[color:var(--color-bahaya-pekat)] bg-[color:var(--color-basuh)] rounded-[var(--r-kendali)] px-4 py-3">
           {state.galat}
         </p>
       ) : null}

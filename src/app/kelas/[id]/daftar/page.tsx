@@ -19,7 +19,7 @@ export default function HalamanDaftar() {
     {
       label: "TERTINGGI",
       nilai: ada ? n(naMax) : "–",
-      warna: "var(--color-aksen-gelap)",
+      warna: "var(--color-lulus-pekat)",
       sub: ada ? `raport ${Math.max(...raport)}` : "belum ada siswa",
     },
     {
@@ -32,7 +32,7 @@ export default function HalamanDaftar() {
       label: "TUNTAS",
       nilai: hasil.jumlahTuntas,
       sub: `dari ${total} siswa`,
-      warna: "var(--color-aksen-gelap)",
+      warna: "var(--color-lulus-pekat)",
     },
     {
       label: "BELUM TUNTAS",
