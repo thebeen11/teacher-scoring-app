@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useKelas } from '@/lib/store'
 import type { BarisNilai } from '@/lib/nilai'
 import { n } from '@/lib/format'
@@ -34,7 +35,11 @@ type Kolom = {
   /** Kelas tambahan untuk sel isi. */
   kelas?: string
   gaya?: (b: BarisNilai) => React.CSSProperties | undefined
+  /** Kunci urut; bila ada, kepala kolom ini bisa diklik di layar. */
+  urut?: (b: BarisNilai) => number
 }
+
+type Urut = { kunci: string; arah: 'naik' | 'turun' } | null
 
 const REDUP = 'text-[13.5px] text-[color:var(--color-redup)] angka'
 
@@ -110,6 +115,15 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
         </span>
       ),
     },
+    {
+      kunci: 'peringkat',
+      label: 'PERINGKAT',
+      lebar: 'auto',
+      lebarCetak: 'w-24 flex-none',
+      isi: (b) => b.peringkat,
+      kelas: 'text-[14px] font-bold angka',
+      urut: (b) => b.peringkat,
+    },
   ]
 
   if (untukCetak) return <Cetak kolom={kolom} baris={hasil.baris} />
@@ -123,23 +137,59 @@ export default function TabelDaftar({ untukCetak = false }: { untukCetak?: boole
 function Layar({ kolom, baris }: { kolom: Kolom[]; baris: BarisNilai[] }) {
   const gaya = gayaKolom(...kolom.map((k) => k.lebar))
   const rata = (k: Kolom) => (k.kunci === 'status' ? '' : ' justify-end')
+  const [urut, setUrut] = useState<Urut>(null)
+
+  // Klik berputar: naik → turun → kembali ke urutan NO.
+  const ganti = (kunci: string) =>
+    setUrut((u) =>
+      u?.kunci !== kunci ? { kunci, arah: 'naik' } : u.arah === 'naik' ? { kunci, arah: 'turun' } : null,
+    )
+
+  const kunciUrut = kolom.find((k) => k.kunci === urut?.kunci)?.urut
+  const terurut =
+    urut && kunciUrut
+      ? baris.slice().sort((x, y) => {
+          const d = kunciUrut(x) - kunciUrut(y)
+          return (urut.arah === 'naik' ? d : -d) || x.siswa.noUrut - y.siswa.noUrut
+        })
+      : baris
 
   return (
     <div className="tabel-padat min-w-fit" style={gaya}>
       <div className="kepala-padat">
         <KepalaBeku />
-        {kolom.map((k) => (
-          <div
-            key={k.kunci}
-            className={`sel-padat mikro${rata(k)}${k.sekat ? ' sekat-padat' : ''}`}
-          >
-            {k.label}
-          </div>
-        ))}
+        {kolom.map((k) => {
+          const aktif = urut?.kunci === k.kunci ? urut.arah : null
+          return (
+            <div
+              key={k.kunci}
+              className={`sel-padat mikro${rata(k)}${k.sekat ? ' sekat-padat' : ''}`}
+              aria-sort={
+                k.urut ? (aktif === 'naik' ? 'ascending' : aktif === 'turun' ? 'descending' : 'none') : undefined
+              }
+            >
+              {k.urut ? (
+                <button
+                  type="button"
+                  className="mikro inline-flex items-center gap-1 cursor-pointer hover:text-[color:var(--color-tinta)]"
+                  onClick={() => ganti(k.kunci)}
+                  title={`Urutkan menurut ${k.label.toLowerCase()}`}
+                >
+                  {k.label}
+                  <span className={aktif ? '' : 'opacity-40'}>
+                    {aktif === 'naik' ? '↑' : aktif === 'turun' ? '↓' : '↕'}
+                  </span>
+                </button>
+              ) : (
+                k.label
+              )}
+            </div>
+          )
+        })}
       </div>
 
       <div className="grup-padat">
-        {baris.map((b) => (
+        {terurut.map((b) => (
           <div key={b.siswa.id} className="baris-padat">
             <SelBeku no={b.siswa.noUrut} nama={b.siswa.nama} />
             {kolom.map((k) => (

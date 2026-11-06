@@ -381,6 +381,8 @@ export function hitungSiswa(kelas: Kelas, siswa: Siswa, peta: PetaBounds): Hasil
 export type BarisNilai = HasilSiswa & {
   raport: number
   tuntas: boolean
+  /** 1 = NA tertinggi sekelas; NA sama berbagi peringkat (1, 2, 2, 4). */
+  peringkat: number
 }
 
 export type HasilKelas = {
@@ -412,6 +414,19 @@ export function nilaiRaport(na: number, rentang: Rentang, kelas: Kelas): number 
   return Math.round(resc(na, rentang[0], rentang[1], kelas.naBandMin, kelas.naBandMax))
 }
 
+/**
+ * Peringkat tiap NA, sejajar indeks masukan. NA tertinggi = 1, dan NA yang
+ * sama berbagi peringkat lalu melompati sisanya (1, 2, 2, 4).
+ *
+ * Dibandingkan pada satu desimal — presisi yang tampil di layar. Dua siswa yang
+ * sama-sama terbaca 84,3 tidak boleh berbeda peringkat karena pecahan yang tak
+ * terlihat siapa pun.
+ */
+export function peringkatNA(na: number[]): number[] {
+  const bulat = na.map((x) => Math.round(x * 10))
+  return bulat.map((x) => 1 + bulat.filter((y) => y > x).length)
+}
+
 export function hitungKelas(kelas: Kelas, grup: Kelas[] = [kelas]): HasilKelas {
   const peta = hitungBounds(kelas, grup)
   const hasil = kelas.siswa
@@ -427,9 +442,10 @@ export function hitungKelas(kelas: Kelas, grup: Kelas[] = [kelas]): HasilKelas {
         ? [0, 0]
         : [Math.min(...hasil.map((h) => h.na)), Math.max(...hasil.map((h) => h.na))]
 
-  const baris: BarisNilai[] = hasil.map((h) => {
+  const peringkat = peringkatNA(hasil.map((h) => h.na))
+  const baris: BarisNilai[] = hasil.map((h, i) => {
     const raport = nilaiRaport(h.na, rentang, kelas)
-    return { ...h, raport, tuntas: raport >= kelas.kktp }
+    return { ...h, raport, tuntas: raport >= kelas.kktp, peringkat: peringkat[i] }
   })
 
   const jumlahTuntas = baris.filter((b) => b.tuntas).length
