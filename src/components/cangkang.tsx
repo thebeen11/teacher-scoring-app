@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import logoNilaiHub from "../../public/logo-nilaihub.png";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useKelas } from "@/lib/store";
 import Halaman from "@/components/halaman";
 import type { RingkasanKelas } from "@/lib/data";
@@ -111,8 +111,10 @@ function ButirNav({
   induk = false,
   sub = false,
   onPilih,
+  buka,
 }: {
-  href: string;
+  /** Tanpa `href`, butir jadi tombol buka/tutup sub-menu (lihat `buka`). */
+  href?: string;
   label: string;
   ikon: NamaIkon;
   aktif: boolean;
@@ -121,27 +123,25 @@ function ButirNav({
   /** Butir sub-menu: menjorok dan sedikit lebih kecil. */
   sub?: boolean;
   onPilih?: () => void;
+  /** Mode tombol: sub-menu sedang terbuka. */
+  buka?: boolean;
 }) {
-  return (
-    <Link
-      href={href}
-      onClick={onPilih}
-      aria-current={aktif ? "page" : undefined}
-      className={`flex items-center gap-2.5 mr-2 rounded-[var(--r-kendali)] font-semibold no-underline transition-colors ${
-        sub
-          ? "ml-6 px-3 py-[8px] text-[0.875rem]"
-          : "ml-2 px-3 py-[10px] text-[0.9062rem]"
-      }`}
-      style={{
-        background: aktif ? "var(--color-aksen)" : "transparent",
-        color: aktif
-          ? "#ffffff"
-          : induk
-            ? "var(--color-tinta)"
-            : "var(--color-redup)",
-        boxShadow: aktif ? "var(--bayang-cta)" : "none",
-      }}
-    >
+  const kelas = `flex items-center gap-2.5 mr-2 rounded-[var(--r-kendali)] font-semibold no-underline transition-colors ${
+    sub
+      ? "ml-6 px-3 py-[8px] text-[0.875rem]"
+      : "ml-2 px-3 py-[10px] text-[0.9062rem]"
+  }`;
+  const gaya: React.CSSProperties = {
+    background: aktif ? "var(--color-aksen)" : "transparent",
+    color: aktif
+      ? "#ffffff"
+      : induk
+        ? "var(--color-tinta)"
+        : "var(--color-redup)",
+    boxShadow: aktif ? "var(--bayang-cta)" : "none",
+  };
+  const isi = (
+    <>
       <span
         className="flex-none flex"
         style={{
@@ -155,6 +155,48 @@ function ButirNav({
         <IkonNav nama={ikon} ukuran={sub ? 14 : 16} />
       </span>
       {label}
+    </>
+  );
+
+  if (href === undefined)
+    return (
+      <button
+        type="button"
+        onClick={onPilih}
+        aria-expanded={buka}
+        aria-current={aktif ? "page" : undefined}
+        className={`${kelas} w-[calc(100%-1rem)] text-left cursor-pointer`}
+        style={gaya}
+      >
+        {isi}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          className="ml-auto w-3.5 h-3.5 flex-none transition-transform"
+          style={{
+            transform: buka ? "rotate(90deg)" : "none",
+            color: aktif ? "#ffffff" : "var(--color-samar)",
+          }}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+      </button>
+    );
+
+  return (
+    <Link
+      href={href}
+      onClick={onPilih}
+      aria-current={aktif ? "page" : undefined}
+      className={kelas}
+      style={gaya}
+    >
+      {isi}
     </Link>
   );
 }
@@ -439,6 +481,17 @@ function PanelNav({
   onPilih?: () => void;
 }) {
   const { kelas } = useKelas();
+  const router = useRouter();
+
+  // Sub-menu (Asesmen Sumatif) tertutup secara bawaan, dan selalu kembali
+  // tertutup begitu layar aktif bukan bagian dari sub-menu itu. Disetel saat
+  // render (bukan efek) supaya tidak berkedip terbuka sesaat setelah pindah.
+  const [bukaRuas, setBukaRuas] = useState<string | null>(null);
+  const [ruasLalu, setRuasLalu] = useState(ruasAktif);
+  if (ruasLalu !== ruasAktif) {
+    setRuasLalu(ruasAktif);
+    if (bukaRuas !== ruasAktif) setBukaRuas(null);
+  }
 
   return (
     <>
@@ -466,24 +519,39 @@ function PanelNav({
             {item.anak ? (
               <>
                 <ButirNav
-                  href={`/kelas/${kelas.id}/${item.ruas}/${item.anak[0].ruas}`}
                   label={item.label}
                   ikon={item.ikon}
-                  aktif={false}
+                  buka={bukaRuas === item.ruas}
+                  // Tertutup di layarnya sendiri: induk memikul kapsul aktif,
+                  // supaya posisi tetap terlihat walau sub-butirnya tersembunyi.
+                  aktif={ruasAktif === item.ruas && bukaRuas !== item.ruas}
                   induk={ruasAktif === item.ruas}
-                  onPilih={onPilih}
+                  onPilih={() => {
+                    if (bukaRuas === item.ruas) return setBukaRuas(null);
+                    setBukaRuas(item.ruas);
+                    // Dari layar lain: buka sekaligus langsung ke sub-butir
+                    // pertama. Di layarnya sendiri cukup dibuka — jangan
+                    // memindahkan guru dari sub-butir yang sedang dipakai.
+                    if (ruasAktif !== item.ruas) {
+                      router.push(
+                        `/kelas/${kelas.id}/${item.ruas}/${item.anak![0].ruas}`,
+                      );
+                      onPilih?.();
+                    }
+                  }}
                 />
-                {item.anak.map((anak) => (
-                  <ButirNav
-                    key={anak.ruas}
-                    href={`/kelas/${kelas.id}/${item.ruas}/${anak.ruas}`}
-                    label={anak.label}
-                    ikon={anak.ikon}
-                    aktif={ruasAktif === item.ruas && subAktif === anak.ruas}
-                    sub
-                    onPilih={onPilih}
-                  />
-                ))}
+                {bukaRuas === item.ruas &&
+                  item.anak.map((anak) => (
+                    <ButirNav
+                      key={anak.ruas}
+                      href={`/kelas/${kelas.id}/${item.ruas}/${anak.ruas}`}
+                      label={anak.label}
+                      ikon={anak.ikon}
+                      aktif={ruasAktif === item.ruas && subAktif === anak.ruas}
+                      sub
+                      onPilih={onPilih}
+                    />
+                  ))}
               </>
             ) : (
               <ButirNav
