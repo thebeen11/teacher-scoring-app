@@ -318,9 +318,21 @@ input[type='number']::-webkit-outer-spin-button {
     position: sticky;
     top: var(--atas-lengket, 0px);
     z-index: 3;
-    background: var(--color-kepala);
-    border-bottom: 1px solid var(--color-garis);
+    /* Warna utama, bukan abu: kepala tabel jadi jangkar visual halaman. Isi
+       kepala mewarnai dirinya lewat token (`.mikro`, `--color-redup`, sekat
+       `--color-garis`), jadi token itu diterangkan untuk subpohon ini saja —
+       tidak perlu menyentuh tiap tabel. */
+    background: var(--color-aksen);
+    --color-tinta: #ffffff;
+    --color-redup: rgba(255, 255, 255, 0.78);
+    --color-samar: rgba(255, 255, 255, 0.55);
+    --color-garis: rgba(255, 255, 255, 0.16);
+    --color-sorot: rgba(255, 255, 255, 0.1);
     border-radius: var(--r-kartu) var(--r-kartu) 0 0;
+  }
+  /* Kotak ketik di kepala (RENTANG) tetap putih bertinta biru laut. */
+  .kepala-padat :is(input, select) {
+    color: var(--color-aksen);
   }
   .kepala-padat > :first-child {
     border-top-left-radius: var(--r-kartu);
@@ -345,7 +357,7 @@ input[type='number']::-webkit-outer-spin-button {
     background: var(--color-kertas);
   }
   .kepala-tutup .kepala-padat::after {
-    background: var(--color-kepala);
+    background: var(--color-aksen);
     border-radius: var(--r-kartu) var(--r-kartu) 0 0;
   }
 
@@ -986,6 +998,11 @@ input[type='number']::-webkit-outer-spin-button {
   .kepala-padat {
     background: #fff;
     border-bottom: 1.5px solid #000;
+    /* Kembalikan token gelap yang diterangkan untuk kepala biru laut di layar. */
+    --color-tinta: #173b55;
+    --color-redup: #62788a;
+    --color-samar: #a3b2bd;
+    --color-garis: #e3e8dc;
   }
   .baris-padat,
   .baris-padat:nth-child(even),
