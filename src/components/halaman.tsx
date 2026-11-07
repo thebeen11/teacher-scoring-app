@@ -11,6 +11,10 @@ const LEBAR = {
   penuh: 'max-w-halaman', // tabel dan dasbor — butuh seluruh ruang yang ada
   sempit: 'max-w-sempit', // pengaturan dan formulir panjang
   fokus: 'max-w-fokus', // satu kartu tunggal
+  // Tabel lebar: bingkai ikut melebar seukuran tabel (min-content-nya), tapi
+  // tidak pernah lebih sempit dari bingkai baku. Dengan begitu kepala halaman
+  // bisa lengket ke kiri sementara hanya tabel yang tergulir mendatar.
+  tabel: 'w-min min-w-[min(100%,var(--container-halaman))]',
 } as const
 
 export default function Halaman({
@@ -23,6 +27,6 @@ export default function Halaman({
   children: React.ReactNode
 }) {
   return (
-    <div className={`w-full mx-auto p-4 sm:p-6 ${LEBAR[lebar]} ${className}`}>{children}</div>
+    <div className={`${lebar === 'tabel' ? '' : 'w-full '}mx-auto p-4 sm:p-6 ${LEBAR[lebar]} ${className}`}>{children}</div>
   )
 }

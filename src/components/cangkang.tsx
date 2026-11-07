@@ -589,7 +589,7 @@ export default function Cangkang({
             <LencanaSimpan />
           </header>
 
-          <div className="flex-1 min-h-0 overflow-auto">
+          <div className="@container flex-1 min-h-0 overflow-auto">
             {kelas.siswa.length === 0 && ruasAktif !== "kelola" ? (
               <RosterKosong kelasId={kelas.id} />
             ) : (

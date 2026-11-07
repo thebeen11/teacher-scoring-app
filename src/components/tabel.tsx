@@ -12,6 +12,10 @@
 // Lebarnya tinggal di globals.css (`--lebar-no`, `--lebar-nama`) supaya bisa
 // menyempit di layar ponsel lewat media query tanpa menyentuh JS.
 const LEBAR_NO = 'var(--lebar-no)'
+// Tepi kiri kolom beku. Kosong (0) di kebanyakan tabel; `.beku-bertepi`
+// mengisinya dengan sisipan halaman supaya kolom beku diam di tempat semula.
+const KIRI = 'var(--beku-kiri, 0px)'
+const KIRI_NAMA = `calc(${KIRI} + ${LEBAR_NO})`
 const LEBAR_NAMA = 'var(--lebar-nama)'
 
 /**
@@ -50,13 +54,13 @@ export function KepalaBeku({ duaBaris = false }: { duaBaris?: boolean }) {
     <>
       <div
         className="sel-padat beku sekat-sub mikro"
-        style={{ gridColumn: 1, gridRow: baris, left: 0 }}
+        style={{ gridColumn: 1, gridRow: baris, left: KIRI }}
       >
         NO
       </div>
       <div
         className="sel-padat beku beku-tepi mikro"
-        style={{ gridColumn: 2, gridRow: baris, left: LEBAR_NO }}
+        style={{ gridColumn: 2, gridRow: baris, left: KIRI_NAMA }}
       >
         NAMA PESERTA DIDIK
       </div>
@@ -83,14 +87,14 @@ export function SelBeku({
     <>
       <div
         className="sel-padat beku sekat-sub text-[0.875rem] font-semibold text-[color:var(--color-samar)] angka"
-        style={{ left: 0 }}
+        style={{ left: KIRI }}
       >
         {no}
       </div>
       {onKlik ? (
         <button
           className="sel-padat sel-lipat beku beku-tepi text-[0.9375rem] font-semibold"
-          style={{ left: LEBAR_NO }}
+          style={{ left: KIRI_NAMA }}
           onClick={onKlik}
           title={nama}
         >
@@ -99,7 +103,7 @@ export function SelBeku({
       ) : (
         <div
           className="sel-padat beku beku-tepi text-[0.9375rem] font-semibold"
-          style={{ left: LEBAR_NO }}
+          style={{ left: KIRI_NAMA }}
           title={nama}
         >
           <span className="truncate">{nama}</span>

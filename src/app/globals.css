@@ -208,6 +208,17 @@ a:focus-visible {
   letter-spacing: 0.01em;
 }
 
+/* Kotak angka tanpa panah naik/turun — nilai diketik, bukan diklik. */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @layer components {
   /* Label mikro huruf besar — dipakai di kepala tabel dan kepala kartu. */
   .mikro {
@@ -413,6 +424,65 @@ a:focus-visible {
   }
   .kepala-padat .beku {
     z-index: 4;
+  }
+  /* Tabel lebar yang digulir sendiri sementara kepala halaman diam (TabelPadat):
+     kolom beku menempel di sisipan `Halaman` (p-4 / sm:p-6), bukan di tepi
+     wadah gulir — persis di tempatnya sebelum digulir. */
+  .beku-bertepi {
+    --beku-kiri: 1rem;
+  }
+  @media (min-width: 640px) {
+    .beku-bertepi {
+      --beku-kiri: 1.5rem;
+    }
+  }
+  /* Saat tergulir, sel beku pertama tiap baris menutup sela kirinya dengan
+     warna halaman, supaya kolom yang lewat tidak terlihat di sana. Lapisan
+     ber-z negatif tetap di bawah isi sel; sel tersebut konteks tumpuknya
+     sendiri (sticky + z-index), jadi lapisan ini tidak keluar ke baris lain.
+     Hanya menyala saat tergulir supaya bayangan lembut kartu utuh saat diam. */
+  .beku-bertepi[data-geser] .beku:first-child::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: calc(-1 * var(--beku-kiri));
+    width: var(--beku-kiri);
+    z-index: -1;
+    pointer-events: none;
+    background: var(--color-kertas);
+  }
+  /* Sel sudut: lapisan melebar sejauh jari-jari sudut ke dalam sel dan
+     mewarnai area di luar lengkungnya, supaya sudut tabel tetap membulat. */
+  .beku-bertepi[data-geser] .kepala-padat > .beku:first-child::before,
+  .beku-bertepi[data-geser] .baris-padat:last-child > .beku:first-child::before,
+  .beku-bertepi[data-geser] .kaki-padat > .beku:first-child::before {
+    --lengkung: var(--color-kertas) var(--r-kartu);
+    top: 0;
+    bottom: 0;
+    width: calc(var(--beku-kiri) + var(--r-kartu));
+    background: linear-gradient(var(--color-kertas), var(--color-kertas)) 0 0 /
+      var(--beku-kiri) 100% no-repeat;
+  }
+  .beku-bertepi[data-geser] .kepala-padat > .beku:first-child::before {
+    background:
+      radial-gradient(circle at 100% 100%, transparent calc(var(--r-kartu) - 0.5px), var(--lengkung))
+        100% 0 / var(--r-kartu) var(--r-kartu) no-repeat,
+      linear-gradient(var(--color-kertas), var(--color-kertas)) 0 0 / var(--beku-kiri) 100% no-repeat;
+  }
+  .beku-bertepi[data-geser] .baris-padat:last-child > .beku:first-child::before {
+    background:
+      radial-gradient(circle at 100% 0, transparent calc(var(--r-kartu) - 0.5px), var(--lengkung))
+        100% 100% / var(--r-kartu) var(--r-kartu) no-repeat,
+      linear-gradient(var(--color-kertas), var(--color-kertas)) 0 0 / var(--beku-kiri) 100% no-repeat;
+  }
+  .beku-bertepi[data-geser] .kaki-padat > .beku:first-child::before {
+    background:
+      radial-gradient(circle at 100% 100%, transparent calc(var(--r-kartu) - 0.5px), var(--lengkung))
+        100% 0 / var(--r-kartu) var(--r-kartu) no-repeat,
+      radial-gradient(circle at 100% 0, transparent calc(var(--r-kartu) - 0.5px), var(--lengkung))
+        100% 100% / var(--r-kartu) var(--r-kartu) no-repeat,
+      linear-gradient(var(--color-kertas), var(--color-kertas)) 0 0 / var(--beku-kiri) 100% no-repeat;
   }
   /* Garis batas beku, digambar sendiri supaya tidak ikut hilang saat sel
      bergeser di atas kolom lain. */

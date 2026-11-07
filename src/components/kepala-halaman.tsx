@@ -38,6 +38,7 @@ export default function KepalaHalaman({
   statistik,
   bawah,
   lengket = true,
+  bekuMendatar = false,
 }: {
   judul: React.ReactNode;
   keterangan?: React.ReactNode;
@@ -46,6 +47,10 @@ export default function KepalaHalaman({
   /** Baris kedua bebas (mis. tab kolom) — dipakai bila tanpa `statistik`. */
   bawah?: React.ReactNode;
   lengket?: boolean;
+  /** Tetap di tempat saat halaman digulir mendatar (tabel lebar). Lebarnya
+   *  dikunci ke lebar tampak wadah gulir (`100cqw`, wadah `@container` di
+   *  Cangkang) supaya tidak ikut melebar seukuran tabel. */
+  bekuMendatar?: boolean;
 }) {
   const akar = useRef<HTMLDivElement>(null);
 
@@ -53,8 +58,15 @@ export default function KepalaHalaman({
     const el = akar.current;
     const induk = el?.parentElement;
     if (!lengket || !el || !induk) return;
+    // Dibulatkan ke bawah, bukan `offsetHeight` (yang membulatkan ke atas):
+    // tinggi pecahan menyisakan celah sub-piksel tempat baris tergulir
+    // mengintip di atas kepala tabel. Ke bawah, kepala tabel terselip di
+    // bawah kartu ini (z lebih tinggi) dan celahnya tertutup.
     const ukur = () =>
-      induk.style.setProperty("--atas-lengket", `${el.offsetHeight}px`);
+      induk.style.setProperty(
+        "--atas-lengket",
+        `${Math.floor(el.getBoundingClientRect().height)}px`,
+      );
     ukur();
     induk.classList.add("kepala-tutup");
     const ro = new ResizeObserver(ukur);
@@ -120,7 +132,9 @@ export default function KepalaHalaman({
   return (
     <div
       ref={akar}
-      className="sticky top-0 z-20 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 sm:pb-6 bg-[color:var(--color-kertas)]"
+      className={`sticky top-0 z-20 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 px-4 sm:px-6 pt-4 sm:pt-6 pb-4 sm:pb-6 bg-[color:var(--color-kertas)] ${
+        bekuMendatar ? "left-0 w-[min(100cqw,var(--container-halaman))]" : ""
+      }`}
     >
       {kartu}
     </div>

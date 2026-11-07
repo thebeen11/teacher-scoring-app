@@ -101,6 +101,25 @@ export default function TabelPadat({
       ?.focus();
   }, [tab]);
 
+  // Kolom beku diam di tepi bingkai, bukan di tepi layar. Saat tabel digulir
+  // mendatar, `data-geser` menyalakan penutup tepi (lihat `.beku-bertepi`)
+  // supaya kolom yang lewat tidak terlihat di sela kiri kolom beku.
+  const kisi = useRef<HTMLDivElement>(null);
+  const adaKolom = kolom.length > 0;
+  useEffect(() => {
+    const el = kisi.current;
+    if (!el) return;
+    let gulir: HTMLElement | null = el.parentElement;
+    while (gulir && !/auto|scroll/.test(getComputedStyle(gulir).overflowX))
+      gulir = gulir.parentElement;
+    if (!gulir) return;
+    const wadah = gulir;
+    const cek = () => el.toggleAttribute("data-geser", wadah.scrollLeft > 0);
+    cek();
+    wadah.addEventListener("scroll", cek, { passive: true });
+    return () => wadah.removeEventListener("scroll", cek);
+  }, [adaKolom]);
+
   const pilih = (id: string, siswaId?: string) => {
     menuju.current = siswaId ?? null;
     setTabPilih(id);
@@ -312,6 +331,7 @@ export default function TabelPadat({
       judul={judul}
       aksi={<TombolUnduh jenis={jenis} />}
       bawah={barTab}
+      bekuMendatar
     />
   );
 
@@ -549,11 +569,11 @@ export default function TabelPadat({
   }
 
   return (
-    <Halaman>
+    <Halaman lebar="tabel">
       {kepalaHalaman}
 
       {/* Tabel dan kakinya berbagi satu grid supaya trek `auto` sejajar. */}
-      <div className="kisi-padat min-w-min" style={gaya}>
+      <div ref={kisi} className="kisi-padat beku-bertepi min-w-min" style={gaya}>
         <div role="tabpanel" className="tabel-padat">
           {/* ------------------------------------------------ kepala kolom -- */}
           <div className="kepala-padat">
@@ -571,7 +591,7 @@ export default function TabelPadat({
           <div className="papan-neu kaki-padat p-0 mt-3">
             <div
               className="sel-padat beku beku-tepi mikro"
-              style={{ gridColumn: "1 / 3", left: 0 }}
+              style={{ gridColumn: "1 / 3", left: "var(--beku-kiri, 0px)" }}
             >
               MAKS / MIN KELAS
             </div>
