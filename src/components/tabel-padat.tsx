@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useKelas } from "@/lib/store";
 import {
   komponenOf,
@@ -48,6 +48,65 @@ import {
  */
 
 const RINGKASAN = "ringkasan";
+
+/** Jumlah slot bab (termasuk "…") paling banyak di bilah tab. */
+const SLOT_MAKS = 7;
+
+const rentang = (dari: number, ke: number) =>
+  Array.from({ length: ke - dari }, (_, i) => dari + i);
+
+/**
+ * Indeks bab yang tabnya tampil, bergaya paginasi, dalam paling banyak `slot`
+ * slot: semua bila muat; bila tidak, bab pertama dan terakhir tetap tampil,
+ * bab aktif dan tetangganya di tengah, dan celahnya diringkas jadi "…". Saat
+ * sangat sempit (slot < 5) hanya jendela di sekitar bab aktif dengan "…" di
+ * sisinya. `aktif` = -1 saat Ringkasan terbuka (jendela di awal).
+ */
+function tabTerlihat(
+  aktif: number,
+  jumlah: number,
+  slot: number,
+): (number | "…")[] {
+  if (jumlah <= slot) return rentang(0, jumlah);
+  const a = Math.max(aktif, 0);
+  if (slot < 5) {
+    const w = Math.max(1, slot - 2);
+    const awal = Math.min(Math.max(a - Math.floor((w - 1) / 2), 0), jumlah - w);
+    return [
+      ...(awal > 0 ? (["…"] as const) : []),
+      ...rentang(awal, awal + w),
+      ...(awal + w < jumlah ? (["…"] as const) : []),
+    ];
+  }
+  const m = slot - 4;
+  const awal = Math.min(
+    Math.max(a - Math.floor((m - 1) / 2), 1),
+    jumlah - 1 - m,
+  );
+  const akhir = awal + m - 1;
+  if (awal <= 2) return [...rentang(0, slot - 2), "…", jumlah - 1];
+  if (akhir >= jumlah - 3)
+    return [0, "…", ...rentang(jumlah - (slot - 2), jumlah)];
+  return [0, "…", ...rentang(awal, akhir + 1), "…", jumlah - 1];
+}
+
+function Chevron({ arah }: { arah: "kiri" | "kanan" }) {
+  return (
+    <svg
+      aria-hidden
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={arah === "kiri" ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"} />
+    </svg>
+  );
+}
 
 // Semua kolom nilai minimal selebar isinya; sisa lebar jatuh ke NAMA (maks. separuh
 // tabel), dan saat kolom banyak NAMA kembali ke `--lebar-nama`. Lihat `gayaKolom`.
@@ -128,6 +187,54 @@ export default function TabelPadat({
   const labelRT = jenis === "formatif" ? "RT F" : "RT S";
   const daftarTab = [RINGKASAN, ...kolom.map((k) => k.id)];
 
+  // Bilah tab bergaya paginasi: hanya jendela bab di sekitar tab aktif yang
+  // tampil, celahnya diringkas jadi "…", supaya bilah tidak melewati separuh
+  // kartu. Jendelanya dihitung langsung dari `tab`, jadi ikut ke mana pun tab
+  // berpindah (keyboard, panah, bab baru, klik sel di Ringkasan).
+  // Jumlah slotnya diukur: mulai dari SLOT_MAKS, dikurangi selama bilah
+  // masih meluap, dan diukur ulang setiap kali tab, nama bab, atau lebar
+  // kartu berubah.
+  const iTab = daftarTab.indexOf(tab);
+  const bilah = useRef<HTMLDivElement>(null);
+  const [lebarKartu, setLebarKartu] = useState(0);
+  useEffect(() => {
+    const wadah = bilah.current?.parentElement;
+    if (!wadah) return;
+    const ro = new ResizeObserver(([e]) =>
+      setLebarKartu(Math.round(e.contentRect.width)),
+    );
+    ro.observe(wadah);
+    return () => ro.disconnect();
+  }, [adaKolom]);
+  const kunciUkur = [
+    tab,
+    lebarKartu,
+    sunting?.mode ?? "",
+    ...kolom.map((k) => k.nama || k.label),
+  ].join("|");
+  const [ukur, setUkur] = useState({ kunci: "", slot: SLOT_MAKS });
+  const slot = ukur.kunci === kunciUkur ? ukur.slot : SLOT_MAKS;
+  useLayoutEffect(() => {
+    const el = bilah.current;
+    if (el && slot > 1 && el.scrollWidth > el.clientWidth + 1)
+      setUkur({ kunci: kunciUkur, slot: slot - 1 });
+  }, [slot, kunciUkur]);
+
+  const slotBab = tabTerlihat(iTab - 1, kolom.length, slot);
+  const tabTampil: (string | { dari: number; ke: number })[] = [
+    RINGKASAN,
+    ...slotBab.map((s, i) => {
+      if (s !== "…") return kolom[s].id;
+      const sebelum = slotBab[i - 1];
+      const sesudah = slotBab[i + 1];
+      return {
+        dari: typeof sebelum === "number" ? sebelum + 1 : 0,
+        ke: typeof sesudah === "number" ? sesudah - 1 : kolom.length - 1,
+      };
+    }),
+  ];
+  const namaBab = (i: number) => kolom[i].nama || kolom[i].label;
+
   // ←/→ berpindah tab, Home/End ke ujung — pola tablist WAI-ARIA.
   const padaTabKey = (e: React.KeyboardEvent) => {
     const i = daftarTab.indexOf(tab);
@@ -140,9 +247,12 @@ export default function TabelPadat({
     if (j < 0) return;
     e.preventDefault();
     pilih(daftarTab[j]);
-    document
-      .querySelector<HTMLButtonElement>(`[data-tab="${daftarTab[j]}"]`)
-      ?.focus();
+    // Tab tujuan bisa saja baru masuk jendela setelah render berikutnya.
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLButtonElement>(`[data-tab="${daftarTab[j]}"]`)
+        ?.focus(),
+    );
   };
 
   // ---------------------------------------------------- sunting kolom --
@@ -184,12 +294,40 @@ export default function TabelPadat({
   const barTab = (
     <div className="flex flex-wrap items-center gap-3 min-w-0">
       <div
+        ref={bilah}
         role="tablist"
         aria-label={`Kolom ${judul}`}
-        className="segmen min-w-0 max-w-full overflow-x-auto"
+        className="segmen min-w-0 max-w-full md:max-w-[50%] overflow-x-auto"
         onKeyDown={padaTabKey}
       >
-        {daftarTab.map((id) => {
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Tab sebelumnya"
+          disabled={iTab <= 0}
+          onClick={() => pilih(daftarTab[iTab - 1])}
+          className="segmen-ikon"
+        >
+          <Chevron arah="kiri" />
+        </button>
+        {tabTampil.map((id) => {
+          if (typeof id !== "string") {
+            // "…" membuka bab di tengah rentang yang tersembunyi.
+            const tengah = Math.floor((id.dari + id.ke) / 2);
+            return (
+              <button
+                key={`celah-${id.dari}`}
+                type="button"
+                tabIndex={-1}
+                title={`${namaBab(id.dari)} – ${namaBab(id.ke)}`}
+                aria-label={`Buka ${namaBab(tengah)}`}
+                onClick={() => pilih(kolom[tengah].id)}
+                className="segmen-ikon"
+              >
+                …
+              </button>
+            );
+          }
           const k = kolom.find((x) => x.id === id);
           const jumlahSub = k ? subOf(kelas, k.id).length : 0;
           const aktif = id === tab;
@@ -222,14 +360,20 @@ export default function TabelPadat({
                 onDoubleClick={
                   k ? () => setSunting({ mode: "ubah", id: k.id }) : undefined
                 }
-                title={k ? "Klik dua kali untuk mengganti nama" : undefined}
+                title={
+                  k
+                    ? `${k.nama || k.label} — klik dua kali untuk mengganti nama`
+                    : undefined
+                }
                 className={`flex flex-none items-center gap-1.5 whitespace-nowrap ${k && aktif ? "pr-1.5" : ""}`}
                 style={{
                   background: aktif ? "var(--color-aksen)" : "transparent",
                   color: aktif ? "#ffffff" : "var(--color-redup)",
                 }}
               >
-                {k ? k.nama || k.label : "Ringkasan"}
+                <span className="max-w-[8rem] truncate">
+                  {k ? k.nama || k.label : "Ringkasan"}
+                </span>
                 {jumlahSub > 0 && (
                   <span
                     className={`flex-none text-[0.6562rem] font-bold tracking-[0.06em] rounded-full px-1.5 py-px angka ${
@@ -254,6 +398,16 @@ export default function TabelPadat({
             </Fragment>
           );
         })}
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="Tab berikutnya"
+          disabled={iTab >= daftarTab.length - 1}
+          onClick={() => pilih(daftarTab[iTab + 1])}
+          className="segmen-ikon"
+        >
+          <Chevron arah="kanan" />
+        </button>
 
         {sunting?.mode === "tambah" ? (
           <div className="flex flex-none items-center px-2 py-1.5 border-l border-[color:var(--color-garis)]">
